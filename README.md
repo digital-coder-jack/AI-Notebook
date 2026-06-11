@@ -1,74 +1,78 @@
+<div align="center">
+
 # 🌌 Study Sphere AI
 
-![Study Sphere AI](assets/Study%20Sphere%20AI.png)
+[![Study Sphere AI](assets/Study%20Sphere%20AI.png#gh-light-mode-only)](assets/Study%20Sphere%20AI.png)
+[![Study Sphere AI](assets/Study%20Sphere%20AI.png#gh-dark-mode-only)](assets/Study%20Sphere%20AI.png)
 
-### 🎓 Your Intelligent Learning Companion
+### ✨ Your Intelligent Learning Companion
 
-Learn smarter. Explore deeper. Grow faster.
+**Learn smarter. Explore deeper. Grow faster.**
 
----
-
-🤖 AI Powered • 📚 Educational Focused • ⚡ Fast • 🌍 Accessible
-
----
-
-## ✨ About
-
-**Study Sphere AI** is an intelligent educational assistant built to make learning more engaging, accessible, and personalized.
-
-Whether you're a school student, college learner, or technology enthusiast, Study Sphere helps you discover knowledge, understand concepts, and explore new subjects with the power of AI.
+<p>
+  <strong>🤖 AI Powered</strong> •
+  <strong>📚 Educational Focused</strong> •
+  <strong>⚡ Fast</strong> •
+  <strong>🌍 Accessible</strong>
+</p>
 
 ---
 
-## 🚀 Features
+</div>
 
-### 🤖 AI Study Assistant
+## 📖 About
 
-Get instant explanations, summaries, and answers to your questions.
-
-### 📚 Knowledge Hub
-
-Store and manage educational content for quick access.
-
-### 💡 Smart Learning
-
-Receive clear, student-friendly explanations across multiple subjects.
-
-### 🖥️ Technology Learning
-
-Explore programming, AI, machine learning, web development, and more.
-
-### ⚡ Fast Responses
-
-Designed for a smooth and efficient learning experience.
+**Study Sphere AI** is an intelligent educational assistant built to make learning more engaging, accessible, and personalized. Whether you're a school student, college learner, or technology enthusiast, Study Sphere helps you discover knowledge, understand concepts, and explore new subjects with the power of AI.
 
 ---
 
-## 🎯 What Can Study Sphere Help With?
+## 🚀 Key Features
 
-* Mathematics
-* Physics
-* Chemistry
-* Biology
-* Computer Science
-* Programming
-* Artificial Intelligence
-* Machine Learning
-* General Knowledge
-* Exam Preparation
-* Academic Concepts
+<table>
+  <tr>
+    <td>
+      <h3>🤖 AI Study Assistant</h3>
+      <p>Get instant explanations, summaries, and answers to your questions</p>
+    </td>
+    <td>
+      <h3>📚 Knowledge Hub</h3>
+      <p>Store and manage educational content for quick access</p>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <h3>💡 Smart Learning</h3>
+      <p>Receive clear, student-friendly explanations across multiple subjects</p>
+    </td>
+    <td>
+      <h3>⚡ Lightning Fast</h3>
+      <p>Designed for a smooth and efficient learning experience</p>
+    </td>
+  </tr>
+</table>
 
-And much more...
+---
 
+## 🎯 Subject Coverage
+
+<div align="center">
+
+| Category | Topics |
+|----------|--------|
+| **Sciences** | Physics • Chemistry • Biology • Mathematics |
+| **Technology** | Computer Science • Programming • AI • Machine Learning |
+| **Academic** | Exam Preparation • General Knowledge • Concepts |
+
+</div>
+
+---
 
 ## 📂 Project Structure
 
-```text
+```
 Study Sphere Bot/
-│
 ├── api/
 │   └── main.py
-│
 ├── requirements.txt
 ├── vercel.json
 ├── README.md
@@ -77,77 +81,117 @@ Study Sphere Bot/
 
 ---
 
-## 🤖 Available Commands
+## 🎮 Available Commands
 
-| Command   | Description             |
-| --------- | ----------------------- |
-| `/start`  | Start the bot           |
-| `/help`   | View help information   |
-| `/add`    | Add new knowledge       |
-| `/list`   | View stored knowledge   |
+<div align="center">
+
+| Command | Purpose |
+|---------|---------|
+| `/start` | Launch the bot and begin learning |
+| `/help` | Access comprehensive help information |
+| `/add` | Add new knowledge to your database |
+| `/list` | View all your stored knowledge |
 | `/delete` | Remove stored knowledge |
+
+</div>
 
 ---
 
 ## 🧠 How It Works
 
-```text
-User Question
-      │
-      ▼
-Knowledge Search
-      │
- ┌────┴────┐
- │         │
-Found    Not Found
- │         │
- ▼         ▼
-Answer   AI Response
- │         │
- └────┬────┘
-      ▼
- User Receives Answer
+<div align="center">
+
+```
+┌─────────────────┐
+│  User Question  │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────────┐
+│ Knowledge Search    │
+└────┬────────────┬───┘
+     │            │
+  ✅ Found    ❌ Not Found
+     │            │
+     ▼            ▼
+  ┌────────┐  ┌──────────┐
+  │ Answer │  │ AI Query │
+  └────┬───┘  └────┬─────┘
+       │           │
+       └─────┬─────┘
+             ▼
+    ✨ User Gets Answer ✨
 ```
 
----
-
-## 🌟 Vision
-
-Study Sphere aims to create a unified learning ecosystem where education meets artificial intelligence.
-
-Our goal is to help learners:
-
-* Learn independently
-* Explore new fields
-* Build valuable skills
-* Access quality educational assistance anytime
+</div>
 
 ---
 
-## 🗺️ Roadmap
+## 🌟 Our Vision
 
-* [ ] Telegram Mini App
-* [ ] Student Dashboard
-* [ ] Interactive Quizzes
-* [ ] Progress Tracking
-* [ ] Course Library
-* [ ] AI Tutor System
-* [ ] Learning Analytics
-* [ ] Community Features
-* [ ] Mobile Application
+<blockquote>
+  <strong>Study Sphere aims to create a unified learning ecosystem where education meets artificial intelligence.</strong>
+</blockquote>
 
----
+We're committed to helping learners:
 
-## 👨‍💻 Creator
-
-### Jack
-
-Building the future of intelligent education.
+- 🎓 Learn independently and at their own pace
+- 🔍 Explore new fields and subjects
+- 💪 Build valuable skills for the future
+- 🌐 Access quality educational assistance anytime, anywhere
 
 ---
 
-# 🌌 Study Sphere AI
+## 🗺️ Upcoming Features
 
-### Learn • Explore • Grow
+<div align="center">
 
-⭐ If you like this project, consider giving it a star.
+```
+Phase 1          Phase 2              Phase 3
+─────────────    ──────────────────   ──────────────
+✨ Telegram      📊 Student           🎓 AI Tutor
+  Mini App         Dashboard          📈 Analytics
+               🎯 Quizzes            👥 Community
+               📈 Progress            📱 Mobile App
+                  Tracking
+               📚 Course
+                  Library
+```
+
+</div>
+
+---
+
+## 👨‍💻 Created By
+
+<div align="center">
+
+### 🔧 Jack
+
+**Building the future of intelligent education**
+
+---
+
+### Support & Contribute
+
+⭐ If you love this project, give it a star!
+
+<p>
+  <a href="https://github.com/digital-coder-jack/Study-Sphere-AI">
+    <img src="https://img.shields.io/github/stars/digital-coder-jack/Study-Sphere-AI?style=social" alt="GitHub Stars">
+  </a>
+</p>
+
+</div>
+
+---
+
+<div align="center">
+
+### 🌌 Study Sphere AI
+
+**Learn • Explore • Grow**
+
+*Making education smarter, one question at a time.*
+
+</div>
