@@ -1,0 +1,13 @@
+# --- Study Sphere Bot dependencies ---
+
+# Telegram bot framework (v21+ as required)
+python-telegram-bot==21.10
+
+# Web framework that receives the Telegram webhook on Vercel
+fastapi==0.115.8
+
+# ASGI server (used for local development; Vercel provides its own runtime)
+uvicorn==0.34.0
+
+# Async HTTP client used to call the Groq API
+httpx==0.28.1
