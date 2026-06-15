@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>AI Chat · Study Sphere AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/chat.css" />
+</head>
+<body>
+  <div id="toast-wrap"></div>
+  <div class="chat-overlay" id="chatOverlay"></div>
+
+  <div class="chat-layout">
+    <!-- Conversation sidebar -->
+    <aside class="chat-side" id="chatSide">
+      <div class="chat-side-head">
+        <a class="brand" href="/dashboard"><span class="logo">🌌</span><span>Study<span class="grad-text">Sphere</span></span></a>
+        <button class="btn block" id="newChatBtn"><i class="fas fa-plus"></i> New chat</button>
+      </div>
+      <div class="chat-list" id="chatList"></div>
+      <div class="chat-side-foot">
+        <a href="/dashboard"><i class="fas fa-gauge-high"></i> Dashboard</a>
+        <a href="/tools"><i class="fas fa-toolbox"></i> Tools</a>
+      </div>
+    </aside>
+
+    <!-- Chat main -->
+    <section class="chat-main">
+      <div class="chat-top">
+        <div class="title">
+          <button class="icon-btn chat-burger" id="chatBurger"><i class="fas fa-bars"></i></button>
+          <i class="fas fa-robot" style="color:var(--accent)"></i>
+          <b id="chatTitle">Study Sphere AI</b>
+        </div>
+        <div class="actions">
+          <button class="icon-btn" id="downloadBtn" title="Download chat"><i class="fas fa-download"></i></button>
+          <button class="icon-btn" id="deleteBtn" title="Delete chat"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+
+      <div class="messages" id="messages">
+        <!-- empty state or messages render here -->
+      </div>
+
+      <div class="composer">
+        <div class="composer-inner">
+          <textarea id="input" rows="1" placeholder="Ask anything… (Shift+Enter for a new line)"></textarea>
+          <button class="send-btn" id="sendBtn" title="Send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <p class="hint">Study Sphere AI uses Groq · llama-3.3-70b-versatile. Answers may contain mistakes — verify important info.</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.9/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/chat.js"></script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Study Sphere AI — Your Intelligent Learning Companion</title>
+  <meta name="description" content="Study Sphere AI: an AI-powered study assistant with chat, notes, quizzes, flashcards, study planner and more. Learn smarter, explore deeper, grow faster." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="particles-js"></div>
+  <div id="toast-wrap"></div>
+
+  <!-- Navbar -->
+  <header class="nav">
+    <div class="container">
+      <a class="brand" href="/">
+        <span class="logo">🌌</span>
+        <span>Study<span class="grad-text">Sphere</span></span>
+      </a>
+      <nav class="nav-links" id="navLinks">
+        <a class="link" href="#features">Features</a>
+        <a class="link" href="#how">How it works</a>
+        <a class="link" href="#testimonials">Reviews</a>
+        <a class="link" href="#faq">FAQ</a>
+        <a class="link" href="/login">Log in</a>
+        <a class="btn" href="/signup">Get started <i class="fas fa-arrow-right"></i></a>
+      </nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <span class="badge" data-aos="fade-down"><i class="fas fa-bolt"></i> Powered by Groq · llama-3.3-70b</span>
+      <h1 data-aos="fade-up">Learn smarter with your<br /><span class="grad-text">AI study companion</span></h1>
+      <div class="typed-wrap"><span id="typed"></span><span class="typed-cursor">&nbsp;</span></div>
+      <p class="lead" data-aos="fade-up" data-aos-delay="100">
+        Chat with an AI tutor, generate notes &amp; quizzes, build flashcards, plan your
+        study weeks, and summarise documents — all in one beautiful workspace.
+      </p>
+      <div class="hero-cta" data-aos="fade-up" data-aos-delay="200">
+        <a class="btn" href="/signup"><i class="fas fa-rocket"></i> Start learning free</a>
+        <a class="btn ghost" href="#features"><i class="fas fa-play"></i> Explore features</a>
+      </div>
+
+      <div class="hero-stats" data-aos="fade-up" data-aos-delay="300">
+        <div class="stat"><b data-count="6">0</b><span>Study tools</span></div>
+        <div class="stat"><b data-count="24">0</b><span>Hours available /7</span></div>
+        <div class="stat"><b data-count="100">0</b><span>% Free to start</span></div>
+        <div class="stat"><b data-count="70">0</b><span>Billion-param AI</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-head" data-aos="fade-up">
+        <span class="eyebrow">Everything you need</span>
+        <h2>One workspace for all your studying</h2>
+        <p>From instant answers to full study plans — Study Sphere AI brings powerful learning tools together.</p>
+      </div>
+      <div class="grid cols-3">
+        <article class="feature glass" data-aos="fade-up"><div class="icon"><i class="fas fa-comments"></i></div><h3>AI Chat Assistant</h3><p>A ChatGPT-style tutor with streaming replies, Markdown, code highlighting and full chat history.</p></article>
+        <article class="feature glass" data-aos="fade-up" data-aos-delay="80"><div class="icon"><i class="fas fa-note-sticky"></i></div><h3>Notes Generator</h3><p>Turn any topic into clean, structured study notes you can save and revisit anytime.</p></article>
+        <article class="feature glass" data-aos="fade-up" data-aos-delay="160"><div class="icon"><i class="fas fa-circle-question"></i></div><h3>Quiz Generator</h3><p>Auto-create multiple-choice quizzes with answers and explanations to test yourself.</p></article>
+        <article class="feature glass" data-aos="fade-up"><div class="icon"><i class="fas fa-layer-group"></i></div><h3>Flashcards</h3><p>Generate interactive flip-cards for fast, focused memorisation of key concepts.</p></article>
+        <article class="feature glass" data-aos="fade-up" data-aos-delay="80"><div class="icon"><i class="fas fa-calendar-days"></i></div><h3>Study Planner</h3><p>Get a personalised day-by-day plan with milestones to reach any learning goal.</p></article>
+        <article class="feature glass" data-aos="fade-up" data-aos-delay="160"><div class="icon"><i class="fas fa-file-pdf"></i></div><h3>PDF Summarizer</h3><p>Upload PDFs, DOCX or text and get instant, student-friendly summaries.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section" id="how">
+    <div class="container">
+      <div class="section-head" data-aos="fade-up">
+        <span class="eyebrow">Simple by design</span>
+        <h2>How Study Sphere works</h2>
+      </div>
+      <div class="grid cols-3">
+        <article class="feature glass float" data-aos="zoom-in"><div class="icon"><i class="fas fa-user-plus"></i></div><h3>1 · Create account</h3><p>Sign up in seconds with secure password hashing and JWT sessions.</p></article>
+        <article class="feature glass float" data-aos="zoom-in" data-aos-delay="100" style="animation-delay:-2s"><div class="icon"><i class="fas fa-wand-magic-sparkles"></i></div><h3>2 · Pick a tool</h3><p>Chat, generate notes, build quizzes or upload a document to summarise.</p></article>
+        <article class="feature glass float" data-aos="zoom-in" data-aos-delay="200" style="animation-delay:-4s"><div class="icon"><i class="fas fa-graduation-cap"></i></div><h3>3 · Learn faster</h3><p>Track your activity on the dashboard and keep everything in one place.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section" id="testimonials">
+    <div class="container">
+      <div class="section-head" data-aos="fade-up">
+        <span class="eyebrow">Loved by learners</span>
+        <h2>What students are saying</h2>
+      </div>
+      <div class="grid cols-3">
+        <article class="testimonial glass" data-aos="fade-up"><div class="stars">★★★★★</div><p>"The quiz generator is unreal. I made a full practice test for my biology exam in under a minute."</p><div class="who"><span class="avatar">A</span><div><b>Aisha K.</b><span>Pre-med student</span></div></div></article>
+        <article class="testimonial glass" data-aos="fade-up" data-aos-delay="80"><div class="stars">★★★★★</div><p>"I paste my lecture PDFs and get clean summaries instantly. It saves me hours every week."</p><div class="who"><span class="avatar">M</span><div><b>Marcus T.</b><span>CS undergraduate</span></div></div></article>
+        <article class="testimonial glass" data-aos="fade-up" data-aos-delay="160"><div class="stars">★★★★★</div><p>"The AI chat actually explains things step by step. It feels like a patient personal tutor."</p><div class="who"><span class="avatar">L</span><div><b>Lena R.</b><span>High-school senior</span></div></div></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="section-head" data-aos="fade-up">
+        <span class="eyebrow">Questions?</span>
+        <h2>Frequently asked questions</h2>
+      </div>
+      <div class="faq">
+        <div class="faq-item glass"><button class="faq-q">Is Study Sphere AI free? <i class="fas fa-chevron-down"></i></button><div class="faq-a"><p>Yes — you can create an account and use the core chat and study tools for free.</p></div></div>
+        <div class="faq-item glass"><button class="faq-q">Which AI model powers it? <i class="fas fa-chevron-down"></i></button><div class="faq-a"><p>Responses are generated by Groq's blazing-fast <code>llama-3.3-70b-versatile</code> model.</p></div></div>
+        <div class="faq-item glass"><button class="faq-q">Is there a Telegram bot too? <i class="fas fa-chevron-down"></i></button><div class="faq-a"><p>Yes! The original Study Sphere Telegram bot still works and shares the same backend and database as the web app.</p></div></div>
+        <div class="faq-item glass"><button class="faq-q">Is my data secure? <i class="fas fa-chevron-down"></i></button><div class="faq-a"><p>Passwords are salted &amp; hashed (PBKDF2) and sessions use signed JWT tokens. Your chats and notes are private to your account.</p></div></div>
+        <div class="faq-item glass"><button class="faq-q">What files can I upload? <i class="fas fa-chevron-down"></i></button><div class="faq-a"><p>PDF, DOCX and TXT files are read and summarised. Images can be stored for reference.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section">
+    <div class="container">
+      <div class="cta-band glass" data-aos="zoom-in">
+        <h2>Ready to study smarter?</h2>
+        <p>Join Study Sphere AI today and turn studying into your superpower.</p>
+        <a class="btn" href="/signup"><i class="fas fa-rocket"></i> Create your free account</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <a class="brand" href="/"><span class="logo">🌌</span><span>Study<span class="grad-text">Sphere</span> AI</span></a>
+      <p class="muted">© <span id="year"></span> Study Sphere AI · Learn • Explore • Grow</p>
+      <div class="socials">
+        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+        <a href="#" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+        <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Profile & Settings · Study Sphere AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+  <div id="particles-js"></div>
+  <div id="toast-wrap"></div>
+  <div class="side-overlay" id="sideOverlay"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" data-active="profile"></aside>
+
+    <main class="content">
+      <div class="topbar">
+        <div>
+          <h1>Profile &amp; Settings ⚙️</h1>
+          <p class="sub">Manage your account details and security.</p>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      </div>
+
+      <!-- Profile summary -->
+      <div class="panel glass" style="margin-bottom:1.4rem; display:flex; align-items:center; gap:1.2rem;">
+        <span class="avatar" id="bigAvatar" style="width:72px;height:72px;border-radius:20px;background:var(--grad);display:grid;place-items:center;font-size:1.8rem;font-weight:800;">U</span>
+        <div>
+          <h2 id="pName" style="margin:0">—</h2>
+          <p class="sub" id="pEmail">—</p>
+          <p class="sub" id="pJoined" style="font-size:.82rem;"></p>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <!-- Edit profile -->
+        <div class="settings-card glass">
+          <h3><i class="fas fa-user-pen" style="color:var(--accent)"></i> Edit profile</h3>
+          <div class="form-msg" id="profileMsg"></div>
+          <form id="profileForm">
+            <div class="field"><label>Full name</label><input id="editName" type="text" class="with-icon" style="padding-left:1rem" /></div>
+            <div class="field"><label>Email (read-only)</label><input id="editEmail" type="email" disabled style="padding-left:1rem;opacity:.7" /></div>
+            <button class="btn block" id="profileBtn"><i class="fas fa-floppy-disk"></i> Save changes</button>
+          </form>
+        </div>
+
+        <!-- Change password -->
+        <div class="settings-card glass">
+          <h3><i class="fas fa-lock" style="color:var(--accent)"></i> Change password</h3>
+          <div class="form-msg" id="pwMsg"></div>
+          <form id="pwForm">
+            <div class="field"><label>Current password</label><input id="curPw" type="password" style="padding-left:1rem" /></div>
+            <div class="field"><label>New password</label><input id="newPw" type="password" style="padding-left:1rem" /></div>
+            <button class="btn block" id="pwBtn"><i class="fas fa-key"></i> Update password</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Telegram bot info -->
+      <div class="panel glass" style="margin-top:1.4rem;">
+        <h3><i class="fab fa-telegram" style="color:var(--accent)"></i> Telegram bot</h3>
+        <p class="sub">Study Sphere also runs as a Telegram bot, sharing the same backend &amp; database. Use <code>/start</code>, <code>/add</code>, <code>/list</code> and <code>/delete</code> there to manage your personal Q&amp;A library, or just ask any question.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/profile.js"></script>
+</body>
+</html>

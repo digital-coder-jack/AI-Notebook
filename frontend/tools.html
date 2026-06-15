@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Study Tools · Study Sphere AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/tools.css" />
+</head>
+<body>
+  <div id="particles-js"></div>
+  <div id="toast-wrap"></div>
+  <div class="side-overlay" id="sideOverlay"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" data-active="notes"></aside>
+
+    <main class="content">
+      <div class="topbar">
+        <div>
+          <h1>Study Tools 🧰</h1>
+          <p class="sub">AI-powered tools to supercharge your studying.</p>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tools-tabs" id="toolsTabs">
+        <button data-tab="notes" class="active"><i class="fas fa-note-sticky"></i> Notes</button>
+        <button data-tab="quiz"><i class="fas fa-circle-question"></i> Quiz</button>
+        <button data-tab="flashcards"><i class="fas fa-layer-group"></i> Flashcards</button>
+        <button data-tab="planner"><i class="fas fa-calendar-days"></i> Planner</button>
+        <button data-tab="summarizer"><i class="fas fa-file-pdf"></i> Summarizer</button>
+        <button data-tab="homework"><i class="fas fa-pen-to-square"></i> Homework</button>
+      </div>
+
+      <!-- Notes -->
+      <section class="tool-panel active" id="panel-notes">
+        <div class="tool-card glass">
+          <h2><i class="fas fa-note-sticky"></i> Notes Generator</h2>
+          <p class="desc">Turn any topic into clean, structured study notes.</p>
+          <div class="tool-form">
+            <div class="grow"><label>Topic</label><input id="notesTopic" placeholder="e.g. The water cycle" /></div>
+            <button class="btn" id="notesBtn"><i class="fas fa-wand-magic-sparkles"></i> Generate</button>
+          </div>
+          <div class="tool-loading" id="notesLoading"><span class="spinner"></span> Generating notes…</div>
+          <div class="result" id="notesResult"></div>
+        </div>
+        <div class="tool-card glass">
+          <h2><i class="fas fa-bookmark"></i> Saved notes</h2>
+          <div class="saved-list" id="notesSaved"></div>
+        </div>
+      </section>
+
+      <!-- Quiz -->
+      <section class="tool-panel" id="panel-quiz">
+        <div class="tool-card glass">
+          <h2><i class="fas fa-circle-question"></i> Quiz Generator</h2>
+          <p class="desc">Generate a multiple-choice quiz and test yourself instantly.</p>
+          <div class="tool-form">
+            <div class="grow"><label>Topic</label><input id="quizTopic" placeholder="e.g. World War 2" /></div>
+            <div class="small"><label>Questions</label><input id="quizNum" type="number" min="1" max="15" value="5" /></div>
+            <button class="btn" id="quizBtn"><i class="fas fa-wand-magic-sparkles"></i> Generate</button>
+          </div>
+          <div class="tool-loading" id="quizLoading"><span class="spinner"></span> Building your quiz…</div>
+          <div class="quiz-score" id="quizScore"></div>
+          <div id="quizArea"></div>
+        </div>
+      </section>
+
+      <!-- Flashcards -->
+      <section class="tool-panel" id="panel-flashcards">
+        <div class="tool-card glass">
+          <h2><i class="fas fa-layer-group"></i> Flashcards</h2>
+          <p class="desc">Generate flip-cards for fast memorisation. Click a card to flip it.</p>
+          <div class="tool-form">
+            <div class="grow"><label>Topic</label><input id="flashTopic" placeholder="e.g. Spanish travel vocabulary" /></div>
+            <div class="small"><label>Cards</label><input id="flashNum" type="number" min="1" max="20" value="8" /></div>
+            <button class="btn" id="flashBtn"><i class="fas fa-wand-magic-sparkles"></i> Generate</button>
+          </div>
+          <div class="tool-loading" id="flashLoading"><span class="spinner"></span> Creating flashcards…</div>
+          <div class="flash-grid" id="flashGrid"></div>
+        </div>
+      </section>
+
+      <!-- Planner -->
+      <section class="tool-panel" id="panel-planner">
+        <div class="tool-card glass">
+          <h2><i class="fas fa-calendar-days"></i> Study Planner</h2>
+          <p class="desc">Get a personalised day-by-day study plan with milestones.</p>
+          <div class="tool-form">
+            <div class="grow"><label>Your goal</label><input id="planGoal" placeholder="e.g. Pass my calculus final" /></div>
+            <div class="small"><label>Days</label><input id="planDays" type="number" min="1" max="60" value="7" /></div>
+            <button class="btn" id="planBtn"><i class="fas fa-wand-magic-sparkles"></i> Generate</button>
+          </div>
+          <div class="tool-loading" id="planLoading"><span class="spinner"></span> Planning your study weeks…</div>
+          <div class="result" id="planResult"></div>
+        </div>
+      </section>
+
+      <!-- Summarizer -->
+      <section class="tool-panel" id="panel-summarizer">
+        <div class="tool-card glass">
+          <h2><i class="fas fa-file-pdf"></i> PDF / Document Summarizer</h2>
+          <p class="desc">Upload a PDF, DOCX or TXT file, or paste text, to get an instant summary.</p>
+
+          <div class="dropzone" id="dropzone">
+            <i class="fas fa-cloud-arrow-up"></i>
+            <div><b>Click to upload</b> or drag &amp; drop</div>
+            <small>PDF, DOCX, TXT or image · up to 8 MB</small>
+            <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.gif,.webp" hidden />
+          </div>
+          <div id="fileChipWrap"></div>
+
+          <div class="tool-form" style="margin-top:1.3rem">
+            <div class="grow"><label>Or paste text to summarise</label><textarea id="sumText" placeholder="Paste your notes, article or document text here…"></textarea></div>
+          </div>
+          <div style="margin-top:0.9rem"><button class="btn" id="sumBtn"><i class="fas fa-wand-magic-sparkles"></i> Summarise</button></div>
+          <div class="tool-loading" id="sumLoading"><span class="spinner"></span> Summarising…</div>
+          <div class="result" id="sumResult"></div>
+        </div>
+      </section>
+
+      <!-- Homework -->
+      <section class="tool-panel" id="panel-homework">
+        <div class="tool-card glass">
+          <h2><i class="fas fa-pen-to-square"></i> Homework Helper</h2>
+          <p class="desc">Get step-by-step explanations that help you actually learn.</p>
+          <div class="tool-form">
+            <div class="grow"><label>Your question</label><textarea id="hwQ" placeholder="e.g. Solve 2x + 5 = 17 and explain each step"></textarea></div>
+          </div>
+          <div style="margin-top:0.9rem"><button class="btn" id="hwBtn"><i class="fas fa-wand-magic-sparkles"></i> Get help</button></div>
+          <div class="tool-loading" id="hwLoading"><span class="spinner"></span> Thinking it through…</div>
+          <div class="result" id="hwResult"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.9/dist/purify.min.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/tools.js"></script>
+</body>
+</html>

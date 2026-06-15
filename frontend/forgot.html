@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Reset password · Study Sphere AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+  <div id="particles-js"></div>
+  <div id="toast-wrap"></div>
+  <a class="back-home" href="/login"><i class="fas fa-arrow-left"></i> Back to login</a>
+
+  <main class="auth-wrap">
+    <section class="auth-card glass">
+      <a class="brand" href="/"><span class="logo">🌌</span><span>Study<span class="grad-text">Sphere</span></span></a>
+      <h1>Reset your password</h1>
+      <p class="sub">Step 1: request a reset token · Step 2: set a new password</p>
+
+      <div class="form-msg" id="formMsg"></div>
+
+      <!-- Step 1: request token -->
+      <form id="forgotForm" novalidate>
+        <div class="field">
+          <label for="email">Email</label>
+          <div class="input-wrap">
+            <i class="fas fa-envelope lead-icon"></i>
+            <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required />
+          </div>
+        </div>
+        <button type="submit" class="btn block" id="requestBtn"><i class="fas fa-paper-plane"></i> Request reset token</button>
+      </form>
+
+      <!-- Step 2: reset with token (revealed after step 1) -->
+      <form id="resetForm" novalidate style="display:none; margin-top:1.4rem;">
+        <div class="field">
+          <label for="token">Reset token</label>
+          <div class="input-wrap">
+            <i class="fas fa-key lead-icon"></i>
+            <input type="text" id="token" name="token" placeholder="Paste your reset token" required />
+          </div>
+        </div>
+        <div class="field">
+          <label for="newPassword">New password</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock lead-icon"></i>
+            <input type="password" id="newPassword" name="newPassword" placeholder="At least 6 characters" autocomplete="new-password" required />
+            <button type="button" class="toggle-pw" data-target="newPassword"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+        <button type="submit" class="btn block" id="resetBtn"><i class="fas fa-rotate"></i> Set new password</button>
+      </form>
+
+      <p class="auth-foot">Remembered it? <a href="/login">Log in</a></p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

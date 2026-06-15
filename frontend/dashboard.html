@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Dashboard · Study Sphere AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+</head>
+<body>
+  <div id="particles-js"></div>
+  <div id="toast-wrap"></div>
+  <div class="side-overlay" id="sideOverlay"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" data-active="dashboard"></aside>
+
+    <main class="content">
+      <div class="topbar">
+        <div>
+          <h1>Welcome back, <span id="userName">there</span> 👋</h1>
+          <p class="sub">Here's your learning activity at a glance.</p>
+        </div>
+        <div style="display:flex; gap:.7rem; align-items:center;">
+          <a class="btn" href="/chat"><i class="fas fa-plus"></i> New chat</a>
+          <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <section class="stats-grid" id="statsGrid">
+        <div class="stat-card glass"><div class="ic skel" style="width:46px;height:46px"></div><b class="skel" style="height:28px;width:60%">&nbsp;</b><span class="skel" style="height:14px;width:80%">&nbsp;</span></div>
+        <div class="stat-card glass"><div class="ic skel" style="width:46px;height:46px"></div><b class="skel" style="height:28px;width:60%">&nbsp;</b><span class="skel" style="height:14px;width:80%">&nbsp;</span></div>
+        <div class="stat-card glass"><div class="ic skel" style="width:46px;height:46px"></div><b class="skel" style="height:28px;width:60%">&nbsp;</b><span class="skel" style="height:14px;width:80%">&nbsp;</span></div>
+        <div class="stat-card glass"><div class="ic skel" style="width:46px;height:46px"></div><b class="skel" style="height:28px;width:60%">&nbsp;</b><span class="skel" style="height:14px;width:80%">&nbsp;</span></div>
+      </section>
+
+      <!-- Panels -->
+      <section class="panels">
+        <div class="panel glass">
+          <h3><i class="fas fa-chart-line"></i> Daily activity (last 7 days)</h3>
+          <div class="chart-wrap"><canvas id="activityChart"></canvas></div>
+        </div>
+        <div class="panel glass">
+          <h3><i class="fas fa-clock-rotate-left"></i> Recent chats</h3>
+          <div class="recent-list" id="recentChats">
+            <div class="recent-item skel" style="height:54px"></div>
+            <div class="recent-item skel" style="height:54px"></div>
+            <div class="recent-item skel" style="height:54px"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+/* =====================================================================
+   Study Sphere AI  -  tools.css  (study tools workspace)
+   ===================================================================== */
+
+.tools-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
+.tools-tabs button {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.6rem 1.1rem; border-radius: 999px;
+  background: var(--glass); border: 1px solid var(--border); color: var(--text-dim);
+  cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;
+}
+.tools-tabs button:hover { color: var(--text); }
+.tools-tabs button.active { background: var(--grad); color: #fff; border-color: transparent; box-shadow: 0 8px 22px rgba(109,123,255,0.4); }
+
+.tool-panel { display: none; animation: fadeUp 0.35s ease; }
+.tool-panel.active { display: block; }
+
+.tool-card { padding: 1.8rem; margin-bottom: 1.4rem; }
+.tool-card h2 { display: flex; align-items: center; gap: 0.7rem; font-size: 1.3rem; margin-bottom: 0.4rem; }
+.tool-card h2 i { color: var(--accent); }
+.tool-card .desc { color: var(--text-dim); margin-bottom: 1.3rem; font-size: 0.95rem; }
+
+.tool-form { display: flex; gap: 0.7rem; flex-wrap: wrap; align-items: flex-end; }
+.tool-form .grow { flex: 1; min-width: 220px; }
+.tool-form label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-dim); }
+.tool-form input, .tool-form textarea, .tool-form select {
+  width: 100%; padding: 0.8rem 1rem; border-radius: 11px;
+  border: 1px solid var(--border); background: rgba(255,255,255,0.04);
+  color: var(--text); font-size: 0.96rem; font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.tool-form input:focus, .tool-form textarea:focus, .tool-form select:focus {
+  outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(109,123,255,0.2);
+}
+.tool-form textarea { resize: vertical; min-height: 120px; }
+.tool-form .small { max-width: 120px; }
+
+.result {
+  margin-top: 1.5rem; padding: 1.5rem; border-radius: 14px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  line-height: 1.7; display: none;
+}
+.result.show { display: block; animation: fadeUp 0.35s ease; }
+.result h1, .result h2, .result h3 { margin: 0.8rem 0 0.5rem; line-height: 1.3; }
+.result p { margin: 0 0 0.7rem; }
+.result ul, .result ol { margin: 0 0 0.8rem 1.3rem; }
+.result li { margin-bottom: 0.3rem; }
+.result table { border-collapse: collapse; width: 100%; margin: 0.5rem 0 1rem; }
+.result th, .result td { border: 1px solid var(--border); padding: 0.5rem 0.7rem; text-align: left; }
+.result th { background: rgba(255,255,255,0.05); }
+.result code { background: rgba(255,255,255,0.1); padding: 0.15rem 0.4rem; border-radius: 6px; font-size: 0.9em; }
+.result-actions { display: flex; gap: 0.6rem; margin-top: 1rem; flex-wrap: wrap; }
+
+/* loading bar */
+.tool-loading { display: none; align-items: center; gap: 0.7rem; color: var(--text-dim); margin-top: 1rem; }
+.tool-loading.show { display: flex; }
+.spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); border-top-color: var(--accent); animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Quiz ---------- */
+.quiz-q { padding: 1.2rem; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); margin-bottom: 1rem; }
+.quiz-q .q { font-weight: 600; margin-bottom: 0.9rem; }
+.quiz-opt { display: block; width: 100%; text-align: left; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--glass); color: var(--text); cursor: pointer; margin-bottom: 0.5rem; transition: all 0.18s; }
+.quiz-opt:hover { border-color: var(--primary); }
+.quiz-opt.correct { background: rgba(52,211,153,0.18); border-color: var(--success); }
+.quiz-opt.wrong { background: rgba(251,113,133,0.18); border-color: var(--danger); }
+.quiz-opt:disabled { cursor: default; }
+.quiz-explain { margin-top: 0.6rem; font-size: 0.9rem; color: var(--text-dim); padding: 0.6rem 0.8rem; border-left: 3px solid var(--accent); background: rgba(34,211,238,0.06); border-radius: 0 8px 8px 0; display: none; }
+.quiz-explain.show { display: block; }
+.quiz-score { text-align: center; padding: 1.4rem; border-radius: 14px; background: var(--grad); color: #fff; font-size: 1.2rem; font-weight: 700; margin-bottom: 1.2rem; display: none; }
+.quiz-score.show { display: block; }
+
+/* ---------- Flashcards ---------- */
+.flash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+.flashcard { perspective: 1200px; height: 180px; cursor: pointer; }
+.flashcard-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+.flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+.flashcard-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 14px; padding: 1.2rem; display: grid; place-items: center; text-align: center; border: 1px solid var(--border); }
+.flashcard-front { background: var(--glass-strong); }
+.flashcard-back { background: var(--grad); color: #fff; transform: rotateY(180deg); }
+.flashcard-face .label { position: absolute; top: 0.6rem; left: 0.8rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; }
+
+/* saved lists */
+.saved-list { display: flex; flex-direction: column; gap: 0.7rem; margin-top: 1rem; }
+.saved-item { display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1rem; border-radius: 11px; background: var(--glass); border: 1px solid var(--border); }
+.saved-item .info { overflow: hidden; }
+.saved-item .info b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.saved-item .info small { color: var(--text-dim); }
+.saved-item .row-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+
+/* file dropzone */
+.dropzone { border: 2px dashed var(--border); border-radius: 14px; padding: 2.2rem; text-align: center; color: var(--text-dim); cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+.dropzone:hover, .dropzone.drag { border-color: var(--primary); background: rgba(109,123,255,0.06); color: var(--text); }
+.dropzone i { font-size: 2.2rem; margin-bottom: 0.7rem; display: block; color: var(--accent); }
+.file-chip { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.9rem; border-radius: 999px; background: var(--glass-strong); border: 1px solid var(--border); margin-top: 1rem; }

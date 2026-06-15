@@ -1,0 +1,10 @@
+# Backend dependencies for Study Sphere AI.
+# This mirrors the root requirements.txt (Vercel uses the root one).
+fastapi==0.115.8
+uvicorn==0.34.0
+python-multipart==0.0.20
+python-telegram-bot==21.10
+httpx==0.28.1
+pydantic==2.10.6
+pypdf==5.1.0
+python-docx==1.1.2
