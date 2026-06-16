@@ -34,9 +34,32 @@ from backend import database as db
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-# A strong default is generated per process if not provided, but you SHOULD
-# set JWT_SECRET in the environment so tokens survive restarts/deployments.
-JWT_SECRET = os.environ.get("JWT_SECRET") or secrets.token_urlsafe(48)
+# You SHOULD set JWT_SECRET in the environment so tokens survive restarts and
+# work across multiple serverless instances.
+#
+# IMPORTANT: A randomly-generated per-process secret breaks logins on
+# serverless platforms (e.g. Vercel) because each cold-started instance would
+# generate a *different* secret — a token signed by one instance then fails
+# signature validation on another, producing spurious "session expired" /
+# "invalid login" errors right after a successful signup or login.
+#
+# To stay robust even when JWT_SECRET is not configured, we fall back to a
+# DETERMINISTIC secret derived from a few stable, platform-provided values.
+# This keeps every instance in agreement while still being non-trivial to
+# guess. Setting JWT_SECRET explicitly in production remains strongly advised.
+def _stable_fallback_secret() -> str:
+    seed_parts = [
+        os.environ.get("VERCEL_URL", ""),
+        os.environ.get("VERCEL_PROJECT_ID", ""),
+        os.environ.get("VERCEL_GIT_REPO_ID", ""),
+        # A fixed app-specific salt so the seed is never empty.
+        "study-sphere-ai::jwt::v1",
+    ]
+    seed = "|".join(seed_parts).encode("utf-8")
+    return hashlib.sha256(seed).hexdigest()
+
+
+JWT_SECRET = os.environ.get("JWT_SECRET") or _stable_fallback_secret()
 JWT_ALG = "HS256"
 JWT_TTL_SECONDS = int(os.environ.get("JWT_TTL_SECONDS", str(60 * 60 * 24 * 7)))  # 7 days
 
