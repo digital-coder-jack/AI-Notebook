@@ -21,7 +21,25 @@ document.addEventListener('DOMContentLoaded', () => {
   if (signupForm) signupForm.addEventListener('submit', handleSignup);
   if (forgotForm) forgotForm.addEventListener('submit', handleForgot);
   if (resetForm) resetForm.addEventListener('submit', handleReset);
+
+  document.querySelectorAll('[data-guest]').forEach((btn) => btn.addEventListener('click', handleGuest));
 });
+
+async function handleGuest(e) {
+  if (e) e.preventDefault();
+  clearMsg();
+  const btn = e ? e.currentTarget : document.querySelector('[data-guest]');
+  busy(btn, true, 'Starting…');
+  try {
+    const data = await SS.api('/api/auth/guest', { method: 'POST', auth: false });
+    SS.setSession(data.token, data.user);
+    SS.toast('Exploring as guest. Sign up anytime to save your work!');
+    setTimeout(() => (window.location.href = '/dashboard'), 500);
+  } catch (err) {
+    msg(err.message);
+    busy(btn, false);
+  }
+}
 
 function msg(text, type = 'error') {
   const box = document.getElementById('formMsg');
