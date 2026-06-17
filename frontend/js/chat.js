@@ -2,7 +2,7 @@
    Study Sphere AI  -  chat.js  (AI chat interface with streaming)
    ===================================================================== */
 
-if (!SS.requireAuth()) { /* redirected */ }
+
 
 const state = { chats: [], currentId: null, streaming: false };
 
@@ -210,6 +210,9 @@ async function deleteChat(id) {
 async function sendMessage() {
   const text = el.input.value.trim();
   if (!text || state.streaming) return;
+
+  // Track AI chat usage
+  if (window.trackAIChat) window.trackAIChat();
 
   // Make sure we have a chat.
   if (!state.currentId) {

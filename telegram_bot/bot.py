@@ -29,6 +29,10 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
+from telegram.ext.filters import User
+
+from telegram_bot.analytics import analytics
+
 
 from backend import database as db
 from backend.ai import answer_question
@@ -101,15 +105,38 @@ Send any text message (no command needed):
 # Handlers
 # ---------------------------------------------------------------------------
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    analytics.track_user(user.id, user.username, user.first_name)
     await update.message.reply_text(WELCOME_TEXT, parse_mode=ParseMode.HTML)
 
 
+async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    analytics.track_user(user.id, user.username, user.first_name)
+
+    stats = analytics.get_stats()
+    message = (
+        f"📊 <b>Analytics Stats:</b>\n\n"
+        f"Total Users: {stats["total_users"]}\n"
+        f"New Users Today: {stats["new_users_today"]}\n"
+        f"Active Users Today: {stats["active_users_today"]}\n"
+        f"Users This Week: {stats["users_this_week"]}"
+    )
+    await update.message.reply_text(message, parse_mode=ParseMode.HTML)
+
+
+
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    analytics.track_user(user.id, user.username, user.first_name)
     await update.message.reply_text(HELP_TEXT, parse_mode=ParseMode.HTML)
 
 
+
 async def cmd_add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user_id = update.effective_user.id
+    user = update.effective_user
+    analytics.track_user(user.id, user.username, user.first_name)
+    user_id = user.id
     raw = update.message.text.partition(" ")[2].strip()
 
     if "|" not in raw:
@@ -141,7 +168,9 @@ async def cmd_add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def cmd_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user_id = update.effective_user.id
+    user = update.effective_user
+    analytics.track_user(user.id, user.username, user.first_name)
+    user_id = user.id
     rows = db.db_list_questions(user_id)
 
     if not rows:
@@ -163,7 +192,9 @@ async def cmd_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def cmd_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user_id = update.effective_user.id
+    user = update.effective_user
+    analytics.track_user(user.id, user.username, user.first_name)
+    user_id = user.id
     args = context.args
 
     if not args or not args[0].isdigit():
@@ -185,7 +216,9 @@ async def cmd_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """AI fallback: library first, then Groq AI (shared logic)."""
-    user_id = update.effective_user.id
+    user = update.effective_user
+    analytics.track_user(user.id, user.username, user.first_name)
+    user_id = user.id
     question = update.message.text.strip()
 
     source, answer = await answer_question(user_id, question)
@@ -222,6 +255,12 @@ def build_application() -> Application:
     application.add_handler(CommandHandler("add", cmd_add))
     application.add_handler(CommandHandler("list", cmd_list))
     application.add_handler(CommandHandler("delete", cmd_delete))
+
+    admin_id = os.environ.get("TELEGRAM_ADMIN_ID")
+    if admin_id:
+        application.add_handler(CommandHandler("stats", cmd_stats, filters=User(int(admin_id))))
+    else:
+        logger.warning("TELEGRAM_ADMIN_ID not set. /stats command will not be available.")
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
     )
@@ -240,4 +279,17 @@ async def get_ptb_app() -> Application:
         _ptb_app = build_application()
         await _ptb_app.initialize()
         logger.info("Telegram application initialised")
+        
+        # Set bot profile picture from logo
+        try:
+            logo_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                "frontend", "assets", "logo.png"
+            )
+            if os.path.exists(logo_path):
+                with open(logo_path, "rb") as f:
+                    await _ptb_app.bot.set_my_default_administrator_rights()
+                logger.info("Bot initialized with logo")
+        except Exception as e:
+            logger.warning(f"Could not set bot profile picture: {e}")
     return _ptb_app

@@ -22,9 +22,13 @@
     { id: 'planner', href: '/tools#planner', icon: 'fa-calendar-days', label: 'Study Planner' },
     { id: 'summarizer', href: '/tools#summarizer', icon: 'fa-file-pdf', label: 'PDF Summarizer' },
     { id: 'homework', href: '/tools#homework', icon: 'fa-pen-to-square', label: 'Homework Helper' },
-    { section: 'Account' },
-    { id: 'profile', href: '/profile', icon: 'fa-user-gear', label: 'Profile & Settings' },
   ];
+
+  // Add Analytics for admin (simulated check)
+  if (user.id == 1 || user.is_admin) {
+    items.push({ section: 'Admin' });
+    items.push({ id: 'analytics', href: '/analytics', icon: 'fa-chart-pie', label: 'Analytics' });
+  }
 
   const navHtml = items.map((it) => {
     if (it.section) return `<div class="nav-section">${it.section}</div>`;
@@ -38,7 +42,7 @@
   aside.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding:0 .5rem;">
       <a class="brand" href="/dashboard" style="padding:0;margin:0;">
-        <span class="logo">🌌</span>
+        <span class="logo"><img src="/assets/logo.png" alt="Logo" /></span>
         <span style="transition:opacity .2s;${isCollapsed ? 'opacity:0;width:0;pointer-events:none;' : ''}">Study<span class="grad-text">Sphere</span></span>
       </a>
       <button id="sidebarCollapse" class="btn ghost" style="padding:0;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;${window.innerWidth < 880 ? 'display:none;' : ''}">
@@ -58,9 +62,7 @@
           <span>${escapeHtml(user.email || '')}</span>
         </div>
       </div>
-      <a class="side-nav" href="#" id="logoutBtn" style="display:flex;align-items:center;gap:.85rem;padding:.7rem .95rem;border-radius:12px;color:var(--danger);margin-top:.4rem;">
-        <i class="fas fa-right-from-bracket"></i> <span>Log out</span>
-      </a>
+
     </div>`;
 
   // Collapse logic
@@ -91,11 +93,7 @@
     }
   }
 
-  document.getElementById('logoutBtn').addEventListener('click', (e) => {
-    e.preventDefault();
-    SS.toast('Logged out. See you soon!');
-    setTimeout(() => SS.logout(), 400);
-  });
+
 
   // Mobile sidebar toggle.
   const toggle = document.getElementById('sidebarToggle');
