@@ -161,7 +161,13 @@
 @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 980px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .panels { grid-template-columns: 1fr; } .settings-grid { grid-template-columns: 1fr; } }
+@media (max-width: 980px) { 
+  .stats-grid { grid-template-columns: repeat(2, 1fr); } 
+  .panels { grid-template-columns: 1fr; } 
+  .settings-grid { grid-template-columns: 1fr; }
+  .stat-card b { font-size: 1.6rem; }
+  .topbar h1 { font-size: clamp(1.2rem, 2.5vw, 1.9rem); }
+}
 @media (max-width: 880px) {
   .sidebar { 
     position: fixed; 
@@ -173,7 +179,7 @@
   }
   .sidebar.open { transform: translateX(0); }
   .sidebar-toggle { display: grid; place-items: center; }
-  .content { width: 100%; padding-top: 5rem; }
+  .content { width: 100%; padding-top: 5rem; padding-left: 1rem; padding-right: 1rem; }
   
   .topbar {
     position: fixed;
@@ -183,10 +189,48 @@
     background: var(--nav-bg);
     backdrop-filter: blur(12px);
     z-index: 90;
-    padding: 0 1.2rem;
+    padding: 0 1rem;
     height: 64px;
     margin-bottom: 0;
   }
+  .topbar h1 { font-size: 1.4rem; }
+  .topbar .sub { font-size: 0.8rem; }
+  .stats-grid { gap: 0.8rem; }
+  .stat-card { padding: 1rem; }
+  .stat-card b { font-size: 1.4rem; }
+  .stat-card span { font-size: 0.8rem; }
+  .panel { padding: 1.2rem; }
+  .panel h3 { font-size: 1rem; margin-bottom: 0.8rem; }
+  .recent-item { padding: 0.7rem 0.8rem; }
+  .recent-item .ttl b { font-size: 0.9rem; }
+  .recent-item small { font-size: 0.75rem; }
+}
+
+@media (max-width: 480px) {
+  .content { padding: 5rem 0.8rem 2rem; }
+  .topbar { padding: 0 0.8rem; height: 56px; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .topbar h1 { font-size: 1.2rem; }
+  .topbar .sub { font-size: 0.75rem; }
+  .topbar > div:last-child { width: 100%; display: flex; justify-content: space-between; }
+  .topbar .btn { padding: 0.7rem 1rem; font-size: 0.85rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.7rem; margin-bottom: 1.2rem; }
+  .stat-card { padding: 0.9rem; }
+  .stat-card .ic { width: 40px; height: 40px; font-size: 1rem; }
+  .stat-card b { font-size: 1.2rem; }
+  .stat-card span { font-size: 0.75rem; }
+  .panels { gap: 0.8rem; }
+  .panel { padding: 1rem; }
+  .panel h3 { font-size: 0.95rem; }
+  .chart-wrap { height: 180px; }
+  .recent-item { padding: 0.6rem 0.8rem; }
+  .recent-item .ttl { gap: 0.5rem; }
+  .recent-item .ttl i { font-size: 1rem; }
+  .recent-item .ttl b { font-size: 0.85rem; }
+  .recent-item small { font-size: 0.7rem; }
+  .empty { padding: 1.5rem 0.8rem; }
+  .empty i { font-size: 1.8rem; }
+  .settings-grid { gap: 0.8rem; }
+  .settings-card { padding: 1rem; }
 }
 
 /* overlay when mobile sidebar open */

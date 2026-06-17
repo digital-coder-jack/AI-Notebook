@@ -23,10 +23,35 @@ function init() {
     });
   }
 
+  // Wire Start Learning buttons to guest login
+  document.getElementById('startLearning')?.addEventListener('click', startAsGuest);
+  document.getElementById('ctaButton')?.addEventListener('click', startAsGuest);
+
   typingEffect();
   countUp();
   faqAccordion();
   gsapHero();
+}
+
+/* ---------- Start as guest ---------- */
+async function startAsGuest(e) {
+  if (e) e.preventDefault();
+  const btn = e.currentTarget;
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...';
+  
+  try {
+    const data = await SS.api('/api/auth/guest', { method: 'POST', auth: false });
+    SS.setSession(data.token, data.user);
+    sessionStorage.setItem('ss_show_welcome', 'true');
+    SS.toast('Welcome! Let\'s start learning.');
+    setTimeout(() => (window.location.href = '/dashboard'), 500);
+  } catch (err) {
+    SS.toast(err.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
 }
 
 /* ---------- Typing text effect ---------- */
