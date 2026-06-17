@@ -119,3 +119,16 @@
   transition: color 0.2s, transform 0.2s;
 }
 .back-home:hover { color: var(--text); transform: translateX(-3px); }
+
+/* ---------- divider ("or") ---------- */
+.auth-or {
+  display: flex; align-items: center; gap: 0.9rem;
+  margin: 1.2rem 0; color: var(--text-dim); font-size: 0.82rem;
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.auth-or::before, .auth-or::after {
+  content: ""; flex: 1; height: 1px; background: var(--border);
+}
+
+/* Guest button accent */
+.btn.ghost.block i { color: var(--accent); }

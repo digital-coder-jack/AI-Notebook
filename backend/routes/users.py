@@ -7,6 +7,7 @@ Authentication & user-profile API.
 Endpoints (all prefixed with /api):
   POST /api/auth/signup           -> create account, returns JWT
   POST /api/auth/login            -> login, returns JWT
+  POST /api/auth/guest            -> create a guest account, returns JWT
   POST /api/auth/forgot-password  -> issue a reset token
   POST /api/auth/reset-password   -> set new password with reset token
   GET  /api/auth/me               -> current user profile
@@ -118,6 +119,35 @@ async def login(body: LoginIn):
     db.touch_last_login(user["id"])
     token = auth.create_access_token(user["id"], user["email"])
     return {"token": token, "user": _public_user(user)}
+
+
+@router.post("/guest")
+async def guest():
+    """
+    Create a disposable guest account and return a JWT, so visitors can try
+    the app without signing up. The account is real (persisted) but uses a
+    random email/password the guest never needs to know.
+    """
+    suffix = secrets.token_hex(5)
+    email = f"guest_{suffix}@guest.studysphere"
+    # A long random password the guest never needs to know.
+    password = secrets.token_urlsafe(24)
+    pw_hash = auth.hash_password(password)
+
+    user_id = db.create_user(f"Guest {suffix[:4].upper()}", email, pw_hash)
+    # Extremely unlikely collision; retry once with a fresh suffix.
+    if user_id is None:
+        suffix = secrets.token_hex(6)
+        email = f"guest_{suffix}@guest.studysphere"
+        user_id = db.create_user(f"Guest {suffix[:4].upper()}", email, pw_hash)
+        if user_id is None:
+            raise HTTPException(status_code=500, detail="Could not start a guest session. Please try again.")
+
+    db.touch_last_login(user_id)
+    token = auth.create_access_token(user_id, email)
+    result = _public_user(db.get_user_by_id(user_id))
+    result["is_guest"] = True
+    return {"token": token, "user": result, "guest": True}
 
 
 @router.post("/forgot-password")
