@@ -278,8 +278,6 @@ async def api_root_status() -> dict:
 @app.post("/api/webhook")
 async def telegram_webhook(request: Request) -> Response:
     """Telegram posts every update here; we hand it to python-telegram-bot."""
-    # Imported lazily so a missing/broken telegram dependency never prevents
-    # the whole API from booting — only the webhook route would be affected.
     from telegram import Update
     from telegram_bot.bot import get_ptb_app
 
@@ -293,29 +291,17 @@ async def telegram_webhook(request: Request) -> Response:
     try:
         application = await get_ptb_app()
         data = await request.json()
+
+        if not data:
+            return Response(status_code=400)
+
         update = Update.de_json(data, application.bot)
         await application.process_update(update)
+
     except Exception:
         logger.exception("Failed to process webhook update")
 
     return Response(status_code=200)
-
-
-@app.get("/api/set-webhook")
-async def set_webhook(request: Request) -> dict:
-    """One-time helper: visit after deploying to register the webhook."""
-    from telegram_bot.bot import get_ptb_app
-
-    application = await get_ptb_app()
-    host = request.headers.get("x-forwarded-host") or request.url.hostname
-    webhook_url = f"https://{host}/api/webhook"
-    ok = await application.bot.set_webhook(
-        url=webhook_url,
-        secret_token=os.environ.get("WEBHOOK_SECRET") or None,
-        drop_pending_updates=True,
-    )
-    logger.info("Webhook set to %s (ok=%s)", webhook_url, ok)
-    return {"webhook_set": ok, "url": webhook_url}
 
 
 # ===========================================================================
