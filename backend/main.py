@@ -21,6 +21,22 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
+
+# ---------------------------------------------------------------------------
+# Import-path bootstrap (makes the app resilient to the deploy "Root Directory")
+# ---------------------------------------------------------------------------
+# This module uses absolute imports rooted at the repository root
+# (`from backend import ...`, `from telegram_bot.bot import ...`). For those to
+# resolve, the REPOSITORY ROOT (the parent of this `backend/` folder) must be
+# on sys.path. We add it explicitly so the app starts correctly whether the
+# process is launched from the repo root (recommended) or from inside
+# `backend/` (e.g. if a platform sets Root Directory = backend).
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.dirname(_THIS_DIR)
+for _p in (_REPO_ROOT, _THIS_DIR):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from datetime import datetime
 from fastapi import FastAPI, Request, Response, Depends, HTTPException

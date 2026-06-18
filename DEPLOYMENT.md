@@ -164,6 +164,46 @@ Requires `TELEGRAM_BOT_TOKEN` (and optionally `WEBHOOK_SECRET`) to be set.
 
 ---
 
+## 7b. Troubleshooting: `pydantic-core` / `maturin` / `cargo` build failure on Render
+
+**Symptom (build log):**
+```
+Building wheel for pydantic-core (pyproject.toml) ... error
+maturin failed / cargo metadata failed / rust toolchain ...
+metadata-generation-failed
+(using python3.14)
+```
+
+**Cause:** Render built with **Python 3.14**, which has **no pre-built
+`pydantic-core` wheel**, so pip fell back to compiling it from **Rust** source
+(maturin/cargo) — and Render's build image has no Rust toolchain.
+
+**Fix (already applied in this repo):** force **Python 3.11**, which has wheels
+for every dependency (no compilation at all). Pinned in THREE places so Render
+cannot fall back:
+
+| File | Content |
+|------|---------|
+| `runtime.txt` | `python-3.11.9` |
+| `.python-version` | `3.11.9` |
+| `render.yaml` env | `PYTHON_VERSION = 3.11.9` (highest precedence) |
+
+If you deploy **without** the blueprint (manual service), set the env var
+manually: **Environment → Add → `PYTHON_VERSION` = `3.11.9`**, then
+**Manual Deploy → Clear build cache & deploy**.
+
+> Verified: `pip install --only-binary=:all: -r requirements.txt` succeeds —
+> i.e. **every** package installs from a wheel, with **no source/Rust builds**.
+
+**Do NOT set Render's "Root Directory" to `backend`.** Leave it **empty**
+(repo root). The code uses absolute imports (`from backend import ...`,
+`from telegram_bot...`) and starts as `backend.main:app`, which require the
+repo root. (A path-shim in `backend/main.py` plus mirrored
+`backend/requirements.txt` + `backend/runtime.txt` make it work even if the
+root dir is set to `backend`, but repo-root remains the recommended config.)
+
+---
+
 ## 8. Notes on the database
 
 - **SQLite** (users, chats, messages, notes, quizzes, uploads) — structure

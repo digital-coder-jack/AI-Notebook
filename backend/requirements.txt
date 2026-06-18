@@ -1,12 +1,20 @@
-# Backend API dependencies (kept in sync with the root requirements.txt).
-# For deployment, the ROOT requirements.txt is what platforms install.
+# =====================================================================
+#  Study Sphere AI  -  backend requirements (mirror of root requirements.txt)
+#
+#  Present so the app still installs correctly even if the deploy platform's
+#  "Root Directory" is set to `backend`. The RECOMMENDED config uses the repo
+#  root, where the top-level requirements.txt is used.
+#
+#  All versions ship pre-built wheels for CPython 3.11 -> no Rust/cargo builds.
+# =====================================================================
 fastapi==0.115.8
 uvicorn[standard]==0.34.0
 gunicorn==23.0.0
 python-multipart==0.0.20
+pydantic==2.10.6
+pydantic-core==2.27.2
 python-telegram-bot==21.10
 httpx==0.28.1
-pydantic==2.10.6
 pypdf==5.1.0
 python-docx==1.1.2
-pymongo[srv]==4.6.1
+pymongo[srv]==4.10.1

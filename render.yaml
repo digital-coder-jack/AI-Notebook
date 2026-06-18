@@ -5,6 +5,18 @@
 #  Deploy: push this repo to GitHub, then in Render:
 #    New +  ->  Blueprint  ->  pick this repo  ->  Apply.
 #  Set the secret env vars (marked sync:false) in the Render dashboard.
+#
+#  IMPORTANT — Root Directory:
+#    LEAVE THE RENDER "Root Directory" FIELD EMPTY (= repository root).
+#    This codebase uses absolute imports (`from backend import ...`,
+#    `from telegram_bot.bot import ...`) and the start command is
+#    `backend.main:app`, so it MUST build from the repo root. Setting the
+#    root directory to `backend` would break those imports.
+#
+#  Python version is forced THREE ways so Render cannot fall back to 3.14:
+#    - runtime.txt        -> python-3.11.9
+#    - .python-version    -> 3.11.9
+#    - PYTHON_VERSION env  -> 3.11.9   (below; highest precedence)
 # =====================================================================
 services:
   - type: web
@@ -13,7 +25,8 @@ services:
     plan: starter            # "free" works too, but free has no persistent disk
     region: oregon           # change if you prefer another region
     branch: main
-    buildCommand: "pip install -r requirements.txt"
+    rootDir: .               # repo root — required for `backend.main:app` imports
+    buildCommand: "python -m pip install --upgrade pip && pip install -r requirements.txt"
     startCommand: "gunicorn backend.main:app -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:$PORT --timeout 120"
     healthCheckPath: /api/health
     autoDeploy: true
@@ -30,7 +43,7 @@ services:
       - key: DB_PATH
         value: /data/study_sphere.db          # lives on the persistent disk
       - key: PYTHON_VERSION
-        value: 3.12.7
+        value: 3.11.9                          # FORCE Python 3.11 (wheels exist; no Rust build)
       - key: WEB_CONCURRENCY
         value: "2"
 

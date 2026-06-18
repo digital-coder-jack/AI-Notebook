@@ -2,7 +2,8 @@
 #  Study Sphere AI  -  Nixpacks build config (Railway / Nixpacks)
 # =====================================================================
 [phases.setup]
-nixPkgs = ["python312", "gcc"]
+# Python 3.11 so all wheels are pre-built (no Rust/cargo source builds).
+nixPkgs = ["python311", "gcc"]
 
 [phases.install]
 cmds = [
@@ -15,4 +16,5 @@ cmds = [
 cmd = "gunicorn backend.main:app -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:$PORT --timeout 120"
 
 [variables]
-PYTHON_VERSION = "3.12"
+PYTHON_VERSION = "3.11"
+NIXPACKS_PYTHON_VERSION = "3.11"

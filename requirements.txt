@@ -1,6 +1,16 @@
 # =====================================================================
 #  Study Sphere AI  -  Python dependencies (backend API)
 #  Powers BOTH the Telegram bot and the full web application backend.
+#
+#  IMPORTANT — Python version:
+#    These versions ALL ship pre-built wheels for CPython 3.11, so pip
+#    installs them WITHOUT compiling anything from source (no Rust /
+#    cargo / maturin needed). The previous Render failure
+#    (pydantic-core / maturin / cargo metadata failed) happened because
+#    Render built with Python 3.14, which has no pydantic-core wheel yet
+#    and therefore fell back to a Rust source build.
+#    The pinned Python version lives in runtime.txt and .python-version
+#    (-> python-3.11.9).
 # =====================================================================
 
 # --- Web framework + ASGI server ------------------------------------
@@ -9,22 +19,25 @@ uvicorn[standard]==0.34.0
 gunicorn==23.0.0              # production process manager (Render/Railway)
 python-multipart==0.0.20      # required by FastAPI for file uploads / forms
 
+# --- Data validation -------------------------------------------------
+# Pin pydantic AND pydantic-core so pip never resolves a source-only
+# version. pydantic-core 2.27.2 has a cp311 manylinux wheel.
+pydantic==2.10.6
+pydantic-core==2.27.2
+
 # --- Telegram bot (optional; imported lazily) -----------------------
 python-telegram-bot==21.10
 
 # --- HTTP client used to call the Groq API --------------------------
 httpx==0.28.1
 
-# --- Data validation (FastAPI request models) -----------------------
-pydantic==2.10.6
-
 # --- File text extraction for the upload feature --------------------
-pypdf==5.1.0                  # PDF text extraction
+pypdf==5.1.0                  # PDF text extraction (pure Python)
 python-docx==1.1.2            # DOCX text extraction
 
 # --- MongoDB Atlas (web analytics dashboard) ------------------------
-pymongo[srv]==4.6.1           # [srv] enables mongodb+srv:// Atlas URIs
+# 4.10.1 has pre-built wheels across CPython 3.11-3.13 (broad coverage).
+pymongo[srv]==4.10.1          # [srv] enables mongodb+srv:// Atlas URIs
 
-# NOTE: Password hashing and JWT are implemented with the Python
-# standard library (hashlib / hmac), so no extra crypto packages are
-# needed.
+# NOTE: Password hashing and JWT use only the Python standard library
+# (hashlib / hmac), so no extra crypto packages (and no Rust) are needed.
