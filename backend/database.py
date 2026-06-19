@@ -115,6 +115,7 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS users (
                 id              INTEGER PRIMARY KEY AUTOINCREMENT,
                 name            TEXT    NOT NULL,
+                username        TEXT    UNIQUE,
                 email           TEXT    NOT NULL UNIQUE,
                 password_hash   TEXT    NOT NULL,
                 telegram_id     INTEGER UNIQUE,
@@ -204,6 +205,21 @@ def init_db() -> None:
         conn.execute("CREATE INDEX IF NOT EXISTS idx_notes_user ON notes(user_id)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_quizzes_user ON quizzes(user_id)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_uploads_user ON uploads(user_id)")
+
+        # --- User Settings ------------------------------------------------
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS user_settings (
+                user_id         INTEGER PRIMARY KEY,
+                appearance      TEXT, -- JSON blob
+                dashboard       TEXT, -- JSON blob
+                notifications   TEXT, -- JSON blob
+                ai_settings     TEXT, -- JSON blob
+                updated_at      TEXT    DEFAULT (datetime('now')),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+            """
+        )
         conn.commit()
 
 
@@ -255,17 +271,30 @@ def db_find_answer(user_id: int, question: str) -> str | None:
 # USERS
 # ===========================================================================
 def create_user(name: str, email: str, password_hash: str,
-                telegram_id: int | None = None) -> int | None:
-    """Insert a new user. Returns new id, or None on duplicate email."""
+                username: str | None = None, telegram_id: int | None = None) -> int | None:
+    """Insert a new user. Returns new id, or None on duplicate email/username."""
     try:
         with closing(get_connection()) as conn:
             cur = conn.execute(
-                "INSERT INTO users (name, email, password_hash, telegram_id) "
-                "VALUES (?, ?, ?, ?)",
-                (name.strip(), email.strip().lower(), password_hash, telegram_id),
+                "INSERT INTO users (name, email, username, password_hash, telegram_id) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (name.strip(), email.strip().lower(), username, password_hash, telegram_id),
+            )
+            user_id = cur.lastrowid
+            # Initialize default settings
+            conn.execute(
+                "INSERT INTO user_settings (user_id, appearance, dashboard, notifications, ai_settings) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (
+                    user_id,
+                    json.dumps({"theme": "system", "accentColor": "#3b82f6"}),
+                    json.dumps({"compactSidebar": False, "showWelcome": True, "showStreak": True, "defaultPage": "dashboard"}),
+                    json.dumps({"email": True, "reminders": True, "dailyGoal": True}),
+                    json.dumps({"model": "gpt-4", "length": "medium", "difficulty": "intermediate"})
+                )
             )
             conn.commit()
-            return cur.lastrowid
+            return user_id
     except sqlite3.IntegrityError:
         return None
 
@@ -561,3 +590,39 @@ def get_upload(user_id: int, upload_id: int) -> sqlite3.Row | None:
             "SELECT * FROM uploads WHERE id = ? AND user_id = ? LIMIT 1",
             (upload_id, user_id),
         ).fetchone()
+
+# ===========================================================================
+# SETTINGS
+# ===========================================================================
+def get_user_settings(user_id: int) -> sqlite3.Row | None:
+    with closing(get_connection()) as conn:
+        return conn.execute(
+            "SELECT * FROM user_settings WHERE user_id = ?", (user_id,)
+        ).fetchone()
+
+def update_user_settings(user_id: int, category: str, data: dict) -> bool:
+    """Update a specific category of settings (appearance, dashboard, etc)."""
+    valid_categories = ["appearance", "dashboard", "notifications", "ai_settings"]
+    if category not in valid_categories:
+        return False
+    
+    with closing(get_connection()) as conn:
+        cur = conn.execute(
+            f"UPDATE user_settings SET {category} = ?, updated_at = ? WHERE user_id = ?",
+            (json.dumps(data), _utcnow(), user_id)
+        )
+        conn.commit()
+        return cur.rowcount > 0
+
+def get_user_by_username(username: str) -> sqlite3.Row | None:
+    with closing(get_connection()) as conn:
+        return conn.execute(
+            "SELECT * FROM users WHERE username = ? LIMIT 1",
+            (username.strip().lower(),),
+        ).fetchone()
+
+def delete_user_account(user_id: int) -> bool:
+    with closing(get_connection()) as conn:
+        cur = conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        conn.commit()
+        return cur.rowcount > 0
