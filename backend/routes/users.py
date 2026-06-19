@@ -69,15 +69,14 @@ class ChangePwIn(BaseModel):
 
 
 def _public_user(row) -> dict:
-    return {
-        "id": row["id"],
-        "name": row["name"],
-        "username": row.get("username"),
-        "email": row["email"],
-        "created_at": row["created_at"],
-        "last_login": row.get("last_login"),
-        "is_guest": row["email"].endswith("@guest.studysphere")
-    }
+   return {
+    "id": row["id"],
+    "name": row["name"],
+    "username": row["username"] if "username" in row.keys() else None,
+    "email": row["email"],
+    "created_at": row["created_at"],
+    "last_login": row["last_login"] if "last_login" in row.keys() else None,
+}
 
 
 # ---------------------------------------------------------------------------
