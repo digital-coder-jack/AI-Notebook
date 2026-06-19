@@ -36,16 +36,15 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 # Schemas
 # ---------------------------------------------------------------------------
 class SignupIn(BaseModel):
-    # Constraints are intentionally lenient here so that our route-level
-    # validation can return clean, user-friendly error messages instead of
-    # Pydantic's verbose 422 payloads.
     name: str = ""
+    username: str = ""
     email: str = ""
     password: str = ""
+    confirm_password: str = ""
 
 
 class LoginIn(BaseModel):
-    email: str
+    identifier: str # Email or Username
     password: str
 
 
@@ -60,6 +59,8 @@ class ResetIn(BaseModel):
 
 class ProfileIn(BaseModel):
     name: str = ""
+    username: str = ""
+    email: str = ""
 
 
 class ChangePwIn(BaseModel):
@@ -71,9 +72,11 @@ def _public_user(row) -> dict:
     return {
         "id": row["id"],
         "name": row["name"],
+        "username": row.get("username"),
         "email": row["email"],
         "created_at": row["created_at"],
-        "last_login": row["last_login"] if "last_login" in row.keys() else None,
+        "last_login": row.get("last_login"),
+        "is_guest": row["email"].endswith("@guest.studysphere")
     }
 
 
@@ -83,22 +86,31 @@ def _public_user(row) -> dict:
 @router.post("/signup")
 async def signup(body: SignupIn):
     name = (body.name or "").strip()
+    username = (body.username or "").strip().lower()
     email = (body.email or "").strip().lower()
     password = body.password or ""
+    confirm_password = body.confirm_password or ""
 
     if not name:
         raise HTTPException(status_code=400, detail="Please enter your name.")
+    if not username:
+        raise HTTPException(status_code=400, detail="Please enter a username.")
     if not EMAIL_RE.match(email):
         raise HTTPException(status_code=400, detail="Please enter a valid email address.")
     if len(password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+    if password != confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match.")
+    
     if db.get_user_by_email(email):
         raise HTTPException(status_code=409, detail="An account with this email already exists.")
+    if db.get_user_by_username(username):
+        raise HTTPException(status_code=409, detail="Username is already taken.")
 
     pw_hash = auth.hash_password(password)
-    user_id = db.create_user(name, email, pw_hash)
+    user_id = db.create_user(name, email, pw_hash, username=username)
     if user_id is None:
-        raise HTTPException(status_code=409, detail="An account with this email already exists.")
+        raise HTTPException(status_code=409, detail="Could not create account.")
 
     db.touch_last_login(user_id)
     token = auth.create_access_token(user_id, email)
@@ -108,14 +120,18 @@ async def signup(body: SignupIn):
 
 @router.post("/login")
 async def login(body: LoginIn):
-    email = (body.email or "").strip().lower()
+    identifier = (body.identifier or "").strip().lower()
     password = body.password or ""
-    if not email or not password:
-        raise HTTPException(status_code=400, detail="Please enter your email and password.")
+    if not identifier or not password:
+        raise HTTPException(status_code=400, detail="Please enter your email/username and password.")
 
-    user = db.get_user_by_email(email)
+    user = db.get_user_by_email(identifier)
+    if not user:
+        user = db.get_user_by_username(identifier)
+        
     if user is None or not auth.verify_password(password, user["password_hash"]):
-        raise HTTPException(status_code=401, detail="Invalid email or password.")
+        raise HTTPException(status_code=401, detail="Invalid credentials.")
+        
     db.touch_last_login(user["id"])
     token = auth.create_access_token(user["id"], user["email"])
     return {"token": token, "user": _public_user(user)}
@@ -211,3 +227,43 @@ async def change_password(body: ChangePwIn, user=Depends(auth.current_user)):
         raise HTTPException(status_code=401, detail="Current password is incorrect.")
     db.update_user_password(user["id"], auth.hash_password(body.new_password))
     return {"message": "Password updated successfully."}
+
+# ---------------------------------------------------------------------------
+# Settings Routes
+# ---------------------------------------------------------------------------
+class SettingsUpdateIn(BaseModel):
+    category: str
+    data: dict
+
+@router.get("/settings")
+async def get_settings(user=Depends(auth.current_user)):
+    row = db.get_user_settings(user["id"])
+    if not row:
+        # Fallback if somehow not initialized
+        return {
+            "appearance": {"theme": "system", "accentColor": "#3b82f6"},
+            "dashboard": {"compactSidebar": False, "showWelcome": True, "showStreak": True, "defaultPage": "dashboard"},
+            "notifications": {"email": True, "reminders": True, "dailyGoal": True},
+            "ai_settings": {"model": "gpt-4", "length": "medium", "difficulty": "intermediate"}
+        }
+    
+    import json
+    return {
+        "appearance": json.loads(row["appearance"]),
+        "dashboard": json.loads(row["dashboard"]),
+        "notifications": json.loads(row["notifications"]),
+        "ai_settings": json.loads(row["ai_settings"])
+    }
+
+@router.put("/settings")
+async def update_settings(body: SettingsUpdateIn, user=Depends(auth.current_user)):
+    success = db.update_user_settings(user["id"], body.category, body.data)
+    if not success:
+        raise HTTPException(status_code=400, detail="Failed to update settings.")
+    return {"message": "Settings updated successfully."}
+
+@router.delete("/account")
+async def delete_account(user=Depends(auth.current_user)):
+    # Guest accounts are already disposable, but we allow deleting real ones too
+    db.delete_user_account(user["id"])
+    return {"message": "Account deleted successfully."}

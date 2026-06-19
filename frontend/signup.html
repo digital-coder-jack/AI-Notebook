@@ -49,6 +49,13 @@
           </div>
         </div>
         <div class="field">
+          <label for="username">Username</label>
+          <div class="input-wrap">
+            <i class="fas fa-at lead-icon"></i>
+            <input type="text" id="username" name="username" placeholder="janedoe" required />
+          </div>
+        </div>
+        <div class="field">
           <label for="email">Email</label>
           <div class="input-wrap">
             <i class="fas fa-envelope lead-icon"></i>
@@ -63,6 +70,14 @@
             <button type="button" class="toggle-pw" data-target="password"><i class="fas fa-eye"></i></button>
           </div>
           <div class="pw-strength"><span id="pwBar"></span></div>
+        </div>
+        <div class="field">
+          <label for="confirm_password">Confirm Password</label>
+          <div class="input-wrap">
+            <i class="fas fa-shield-halved lead-icon"></i>
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="••••••••" required />
+            <button type="button" class="toggle-pw" data-target="confirm_password"><i class="fas fa-eye"></i></button>
+          </div>
         </div>
         <button type="submit" class="btn block" id="submitBtn"><i class="fas fa-user-plus"></i> Create account</button>
       </form>

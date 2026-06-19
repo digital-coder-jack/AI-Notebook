@@ -100,13 +100,13 @@ async function handleLogin(e) {
   e.preventDefault();
   clearMsg();
   const btn = document.getElementById('submitBtn');
-  const email = document.getElementById('email').value.trim();
+  const identifier = document.getElementById('identifier').value.trim();
   const password = document.getElementById('password').value;
-  if (!email || !password) return msg('Please enter your email and password.');
+  if (!identifier || !password) return msg('Please enter your email/username and password.');
 
   busy(btn, true, 'Logging in…');
   try {
-    const data = await SS.api('/api/auth/login', { method: 'POST', auth: false, body: { email, password } });
+    const data = await SS.api('/api/auth/login', { method: 'POST', auth: false, body: { identifier, password } });
     SS.setSession(data.token, data.user);
     sessionStorage.setItem('ss_show_welcome', 'true');
     SS.toast('Welcome back, ' + data.user.name + '!');
@@ -122,14 +122,18 @@ async function handleSignup(e) {
   clearMsg();
   const btn = document.getElementById('submitBtn');
   const name = document.getElementById('name').value.trim();
+  const username = document.getElementById('username').value.trim();
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
-  if (!name || !email || !password) return msg('Please fill in all fields.');
+  const confirm_password = document.getElementById('confirm_password').value;
+
+  if (!name || !username || !email || !password || !confirm_password) return msg('Please fill in all fields.');
   if (password.length < 6) return msg('Password must be at least 6 characters.');
+  if (password !== confirm_password) return msg('Passwords do not match.');
 
   busy(btn, true, 'Creating account…');
   try {
-    const data = await SS.api('/api/auth/signup', { method: 'POST', auth: false, body: { name, email, password } });
+    const data = await SS.api('/api/auth/signup', { method: 'POST', auth: false, body: { name, username, email, password, confirm_password } });
     SS.setSession(data.token, data.user);
     sessionStorage.setItem('ss_show_welcome', 'true');
     SS.toast('Account created! Welcome, ' + data.user.name + '.');

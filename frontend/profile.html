@@ -12,18 +12,155 @@
       } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
     })();
   </script>
-  <title>Profile & Settings · Study Sphere AI</title>
+  <title>Settings · Study Sphere AI</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/dashboard.css" />
-  <link rel="stylesheet" href="/css/auth.css" />
   
   <!-- Vercel Speed Insights -->
   <script type="module">
     import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights@2.0.0/dist/index.mjs';
     injectSpeedInsights();
   </script>
+  <style>
+    .settings-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.8rem;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+    .tab-btn {
+      padding: 0.8rem 1.2rem;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .settings-panel {
+      display: none;
+    }
+    .settings-panel.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .settings-card.danger {
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: rgba(239, 68, 68, 0.05);
+    }
+    .btn.danger {
+      background: #ef4444;
+      color: white;
+    }
+    .btn.danger:hover {
+      background: #dc2626;
+      box-shadow: 0 8px 22px rgba(239, 68, 68, 0.4);
+    }
+    .theme-options, .color-picker {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      margin-top: 0.8rem;
+    }
+    .theme-opt, .color-opt {
+      padding: 0.8rem 1.2rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--glass);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+    .theme-opt:hover, .color-opt:hover {
+      border-color: var(--accent);
+    }
+    .theme-opt.active, .color-opt.active {
+      border-color: var(--accent);
+      background: var(--grad);
+      color: white;
+      box-shadow: 0 8px 22px rgba(109, 123, 255, 0.4);
+    }
+    .color-opt {
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      border-radius: 50%;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .checkbox-label input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .field select {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--glass);
+      color: var(--text);
+      font-family: inherit;
+      margin-top: 0.5rem;
+    }
+    .field select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-wrap i {
+      position: absolute;
+      left: 0.8rem;
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+    .input-wrap input {
+      padding-left: 2.8rem;
+    }
+    .toggle-pw {
+      position: absolute;
+      right: 0.8rem;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.4rem;
+    }
+    .toggle-pw:hover {
+      color: var(--text);
+    }
+  </style>
 </head>
 <body>
   <div id="particles-js"></div>
@@ -36,50 +173,219 @@
     <main class="content">
       <div class="topbar">
         <div>
-          <h1>Profile &amp; Settings ⚙️</h1>
-          <p class="sub">Manage your account details and security.</p>
+          <h1><i class="fas fa-sliders-h"></i> Settings</h1>
+          <p class="sub">Customize your Study Sphere experience</p>
         </div>
         <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
       </div>
 
-      <!-- Profile summary -->
-      <div class="panel glass" style="margin-bottom:1.4rem; display:flex; align-items:center; gap:1.2rem;">
-        <span class="avatar" id="bigAvatar" style="width:72px;height:72px;border-radius:20px;background:var(--grad);display:grid;place-items:center;font-size:1.8rem;font-weight:800;">U</span>
-        <div>
-          <h2 id="pName" style="margin:0">—</h2>
-          <p class="sub" id="pEmail">—</p>
-          <p class="sub" id="pJoined" style="font-size:.82rem;"></p>
+      <!-- Settings Tabs -->
+      <div class="settings-tabs">
+        <button class="tab-btn active" data-tab="account"><i class="fas fa-user"></i> Account</button>
+        <button class="tab-btn" data-tab="appearance"><i class="fas fa-palette"></i> Appearance</button>
+        <button class="tab-btn" data-tab="dashboard"><i class="fas fa-gauge-high"></i> Dashboard</button>
+        <button class="tab-btn" data-tab="notifications"><i class="fas fa-bell"></i> Notifications</button>
+        <button class="tab-btn" data-tab="ai"><i class="fas fa-brain"></i> AI Settings</button>
+      </div>
+
+      <!-- Account Settings -->
+      <div class="settings-panel active" id="account-tab">
+        <div class="settings-grid">
+          <div class="settings-card glass">
+            <h3><i class="fas fa-user-circle"></i> Profile Information</h3>
+            <div class="form-msg" id="profileMsg"></div>
+            <div class="field">
+              <label>Full Name</label>
+              <input type="text" id="fullName" placeholder="Your name" />
+            </div>
+            <div class="field">
+              <label>Username</label>
+              <input type="text" id="username" placeholder="your_username" disabled />
+              <small>Username cannot be changed</small>
+            </div>
+            <div class="field">
+              <label>Email</label>
+              <input type="email" id="email" placeholder="your@email.com" disabled />
+              <small>Email cannot be changed</small>
+            </div>
+            <button class="btn" id="saveProfileBtn"><i class="fas fa-save"></i> Save Changes</button>
+          </div>
+
+          <div class="settings-card glass">
+            <h3><i class="fas fa-lock"></i> Security</h3>
+            <div class="form-msg" id="pwMsg"></div>
+            <div class="field">
+              <label>Current Password</label>
+              <div class="input-wrap">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="currentPassword" placeholder="••••••••" />
+                <button type="button" class="toggle-pw" data-target="currentPassword"><i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <div class="field">
+              <label>New Password</label>
+              <div class="input-wrap">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="newPassword" placeholder="••••••••" />
+                <button type="button" class="toggle-pw" data-target="newPassword"><i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <div class="field">
+              <label>Confirm New Password</label>
+              <div class="input-wrap">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="confirmPassword" placeholder="••••••••" />
+                <button type="button" class="toggle-pw" data-target="confirmPassword"><i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <button class="btn" id="changePasswordBtn"><i class="fas fa-key"></i> Change Password</button>
+          </div>
+
+          <div class="settings-card glass danger">
+            <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+            <p style="color: var(--text-dim); margin-bottom: 1rem;">Permanently delete your account and all associated data. This action cannot be undone.</p>
+            <button class="btn danger" id="deleteAccountBtn"><i class="fas fa-trash"></i> Delete Account</button>
+          </div>
         </div>
       </div>
 
-      <div class="settings-grid">
-        <!-- Edit profile -->
-        <div class="settings-card glass">
-          <h3><i class="fas fa-user-pen" style="color:var(--accent)"></i> Edit profile</h3>
-          <div class="form-msg" id="profileMsg"></div>
-          <form id="profileForm">
-            <div class="field"><label>Full name</label><input id="editName" type="text" class="with-icon" style="padding-left:1rem" /></div>
-            <div class="field"><label>Email (read-only)</label><input id="editEmail" type="email" disabled style="padding-left:1rem;opacity:.7" /></div>
-            <button class="btn block" id="profileBtn"><i class="fas fa-floppy-disk"></i> Save changes</button>
-          </form>
-        </div>
+      <!-- Appearance Settings -->
+      <div class="settings-panel" id="appearance-tab">
+        <div class="settings-grid">
+          <div class="settings-card glass">
+            <h3><i class="fas fa-sun"></i> Theme</h3>
+            <div class="field">
+              <label>Color Theme</label>
+              <div class="theme-options">
+                <button type="button" class="theme-opt" data-theme="light"><i class="fas fa-sun"></i> Light</button>
+                <button type="button" class="theme-opt active" data-theme="dark"><i class="fas fa-moon"></i> Dark</button>
+                <button type="button" class="theme-opt" data-theme="system"><i class="fas fa-circle-half-stroke"></i> System</button>
+              </div>
+            </div>
+          </div>
 
-        <!-- Change password -->
-        <div class="settings-card glass">
-          <h3><i class="fas fa-lock" style="color:var(--accent)"></i> Change password</h3>
-          <div class="form-msg" id="pwMsg"></div>
-          <form id="pwForm">
-            <div class="field"><label>Current password</label><input id="curPw" type="password" style="padding-left:1rem" /></div>
-            <div class="field"><label>New password</label><input id="newPw" type="password" style="padding-left:1rem" /></div>
-            <button class="btn block" id="pwBtn"><i class="fas fa-key"></i> Update password</button>
-          </form>
+          <div class="settings-card glass">
+            <h3><i class="fas fa-palette"></i> Accent Color</h3>
+            <div class="field">
+              <label>Choose Accent Color</label>
+              <div class="color-picker">
+                <button type="button" class="color-opt active" data-color="#3b82f6" style="background: #3b82f6;" title="Blue"></button>
+                <button type="button" class="color-opt" data-color="#8b5cf6" style="background: #8b5cf6;" title="Purple"></button>
+                <button type="button" class="color-opt" data-color="#ec4899" style="background: #ec4899;" title="Pink"></button>
+                <button type="button" class="color-opt" data-color="#f59e0b" style="background: #f59e0b;" title="Amber"></button>
+                <button type="button" class="color-opt" data-color="#10b981" style="background: #10b981;" title="Green"></button>
+                <button type="button" class="color-opt" data-color="#06b6d4" style="background: #06b6d4;" title="Cyan"></button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Telegram bot info -->
-      <div class="panel glass" style="margin-top:1.4rem;">
-        <h3><i class="fab fa-telegram" style="color:var(--accent)"></i> Telegram bot</h3>
-        <p class="sub">Study Sphere also runs as a Telegram bot, sharing the same backend &amp; database. Use <code>/start</code>, <code>/add</code>, <code>/list</code> and <code>/delete</code> there to manage your personal Q&amp;A library, or just ask any question.</p>
+      <!-- Dashboard Settings -->
+      <div class="settings-panel" id="dashboard-tab">
+        <div class="settings-grid">
+          <div class="settings-card glass">
+            <h3><i class="fas fa-gauge-high"></i> Dashboard Layout</h3>
+            <div class="form-msg" id="dashboardMsg"></div>
+            <div class="field">
+              <label class="checkbox-label">
+                <input type="checkbox" id="compactSidebar" />
+                <span>Use Compact Sidebar</span>
+              </label>
+              <small>Reduce sidebar width on desktop</small>
+            </div>
+            <div class="field">
+              <label class="checkbox-label">
+                <input type="checkbox" id="showWelcome" checked />
+                <span>Show Welcome Animation</span>
+              </label>
+              <small>Display welcome popup after login</small>
+            </div>
+            <div class="field">
+              <label class="checkbox-label">
+                <input type="checkbox" id="showStreak" checked />
+                <span>Show Study Streak</span>
+              </label>
+              <small>Display your study streak on dashboard</small>
+            </div>
+            <div class="field">
+              <label>Default Dashboard Page</label>
+              <select id="defaultPage">
+                <option value="dashboard">Dashboard</option>
+                <option value="chat">AI Chat</option>
+                <option value="tools">Study Tools</option>
+              </select>
+            </div>
+            <button class="btn" id="saveDashboardBtn"><i class="fas fa-save"></i> Save Preferences</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications Settings -->
+      <div class="settings-panel" id="notifications-tab">
+        <div class="settings-grid">
+          <div class="settings-card glass">
+            <h3><i class="fas fa-bell"></i> Notification Preferences</h3>
+            <div class="form-msg" id="notificationsMsg"></div>
+            <div class="field">
+              <label class="checkbox-label">
+                <input type="checkbox" id="emailNotifications" checked />
+                <span>Email Notifications</span>
+              </label>
+              <small>Receive updates via email</small>
+            </div>
+            <div class="field">
+              <label class="checkbox-label">
+                <input type="checkbox" id="studyReminders" checked />
+                <span>Study Reminders</span>
+              </label>
+              <small>Get reminded to study regularly</small>
+            </div>
+            <div class="field">
+              <label class="checkbox-label">
+                <input type="checkbox" id="dailyGoalReminders" checked />
+                <span>Daily Goal Reminders</span>
+              </label>
+              <small>Remind me to complete daily goals</small>
+            </div>
+            <button class="btn" id="saveNotificationsBtn"><i class="fas fa-save"></i> Save Preferences</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Settings -->
+      <div class="settings-panel" id="ai-tab">
+        <div class="settings-grid">
+          <div class="settings-card glass">
+            <h3><i class="fas fa-brain"></i> AI Configuration</h3>
+            <div class="form-msg" id="aiMsg"></div>
+            <div class="field">
+              <label>Preferred AI Model</label>
+              <select id="aiModel">
+                <option value="gpt-4">GPT-4 (Advanced)</option>
+                <option value="gpt-3.5">GPT-3.5 (Fast)</option>
+                <option value="claude">Claude (Balanced)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Response Length</label>
+              <select id="responseLength">
+                <option value="short">Short (1-2 sentences)</option>
+                <option value="medium" selected>Medium (2-3 paragraphs)</option>
+                <option value="long">Long (Detailed)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Study Difficulty</label>
+              <select id="studyDifficulty">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate" selected>Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+            <button class="btn" id="saveAiBtn"><i class="fas fa-save"></i> Save Settings</button>
+          </div>
+        </div>
       </div>
     </main>
   </div>
