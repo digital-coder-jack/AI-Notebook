@@ -69,14 +69,19 @@ class ChangePwIn(BaseModel):
 
 
 def _public_user(row) -> dict:
+    if not row:
+        return None
+
+    row = dict(row)
+
     return {
-        "id": row["id"],
-        "name": row["name"],
+        "id": row.get("id"),
+        "name": row.get("name"),
         "username": row.get("username"),
-        "email": row["email"],
-        "created_at": row["created_at"],
+        "email": row.get("email"),
+        "created_at": row.get("created_at"),
         "last_login": row.get("last_login"),
-        "is_guest": row["email"].endswith("@guest.studysphere")
+        "is_guest": row.get("email", "").endswith("@guest.studysphere")
     }
 
 
@@ -237,23 +242,42 @@ class SettingsUpdateIn(BaseModel):
 
 @router.get("/settings")
 async def get_settings(user=Depends(auth.current_user)):
-    row = db.get_user_settings(user["id"])
-    if not row:
-        # Fallback if somehow not initialized
+    try:
+        row = db.get_user_settings(user["id"])
+        if not row:
+            # Fallback if somehow not initialized
+            return {
+                "appearance": {"theme": "system", "accentColor": "#3b82f6"},
+                "dashboard": {"compactSidebar": False, "showWelcome": True, "showStreak": True, "defaultPage": "dashboard"},
+                "notifications": {"email": True, "reminders": True, "dailyGoal": True},
+                "ai_settings": {"model": "gpt-4", "length": "medium", "difficulty": "intermediate"}
+            }
+        
+        import json
+        row = dict(row)
+        
+        def _safe_json_load(val, default):
+            try:
+                return json.loads(val) if val else default
+            except (json.JSONDecodeError, TypeError):
+                return default
+
+        return {
+            "appearance": _safe_json_load(row.get("appearance"), {"theme": "system", "accentColor": "#3b82f6"}),
+            "dashboard": _safe_json_load(row.get("dashboard"), {"compactSidebar": False, "showWelcome": True, "showStreak": True, "defaultPage": "dashboard"}),
+            "notifications": _safe_json_load(row.get("notifications"), {"email": True, "reminders": True, "dailyGoal": True}),
+            "ai_settings": _safe_json_load(row.get("ai_settings"), {"model": "gpt-4", "length": "medium", "difficulty": "intermediate"})
+        }
+    except Exception as e:
+        import logging
+        logging.getLogger("study-sphere").error(f"Error retrieving settings for user {user.get('id')}: {e}")
+        # Return defaults on any error to prevent 500
         return {
             "appearance": {"theme": "system", "accentColor": "#3b82f6"},
             "dashboard": {"compactSidebar": False, "showWelcome": True, "showStreak": True, "defaultPage": "dashboard"},
             "notifications": {"email": True, "reminders": True, "dailyGoal": True},
             "ai_settings": {"model": "gpt-4", "length": "medium", "difficulty": "intermediate"}
         }
-    
-    import json
-    return {
-        "appearance": json.loads(row["appearance"]),
-        "dashboard": json.loads(row["dashboard"]),
-        "notifications": json.loads(row["notifications"]),
-        "ai_settings": json.loads(row["ai_settings"])
-    }
 
 @router.put("/settings")
 async def update_settings(body: SettingsUpdateIn, user=Depends(auth.current_user)):

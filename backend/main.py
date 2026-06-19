@@ -238,6 +238,7 @@ async def get_dashboard_stats_endpoint(current_user: dict = Depends(current_user
     # Basic admin check: assuming an admin user has a specific ID or role
     # For now, let's assume TELEGRAM_ADMIN_ID is also the web admin ID for simplicity
     admin_id = os.environ.get("TELEGRAM_ADMIN_ID") # Reusing for web admin check
+    # current_user is already a dict from auth.current_user
     if not admin_id or str(current_user.get("id")) != admin_id:
         raise HTTPException(status_code=403, detail="Not authorized")
     
