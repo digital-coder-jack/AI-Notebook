@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadSettings();
   setupTabNavigation();
   setupEventListeners();
+  setupToggleSwitches();
 });
 
 function setupPasswordToggles() {
@@ -22,6 +23,14 @@ function setupPasswordToggles() {
       const isPw = input.type === 'password';
       input.type = isPw ? 'text' : 'password';
       btn.innerHTML = `<i class="fas fa-eye${isPw ? '-slash' : ''}"></i>`;
+    });
+  });
+}
+
+function setupToggleSwitches() {
+  document.querySelectorAll('.toggle-switch').forEach(toggle => {
+    toggle.addEventListener('click', () => {
+      toggle.classList.toggle('active');
     });
   });
 }
@@ -60,17 +69,17 @@ async function loadSettings() {
 
     // Apply dashboard settings
     if (data.dashboard) {
-      document.getElementById('compactSidebar').checked = data.dashboard.compactSidebar || false;
-      document.getElementById('showWelcome').checked = data.dashboard.showWelcome !== false;
-      document.getElementById('showStreak').checked = data.dashboard.showStreak !== false;
+      document.getElementById('compactSidebar').classList.toggle('active', !!data.dashboard.compactSidebar);
+      document.getElementById('showWelcome').classList.toggle('active', data.dashboard.showWelcome !== false);
+      document.getElementById('showStreak').classList.toggle('active', data.dashboard.showStreak !== false);
       document.getElementById('defaultPage').value = data.dashboard.defaultPage || 'dashboard';
     }
 
     // Apply notification settings
     if (data.notifications) {
-      document.getElementById('emailNotifications').checked = data.notifications.email !== false;
-      document.getElementById('studyReminders').checked = data.notifications.reminders !== false;
-      document.getElementById('dailyGoalReminders').checked = data.notifications.dailyGoal !== false;
+      document.getElementById('emailNotifications').classList.toggle('active', data.notifications.email !== false);
+      document.getElementById('studyReminders').classList.toggle('active', data.notifications.reminders !== false);
+      document.getElementById('dailyGoalReminders').classList.toggle('active', data.notifications.dailyGoal !== false);
     }
 
     // Apply AI settings
@@ -96,6 +105,11 @@ function setupTabNavigation() {
       // Update active panel
       document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
       document.getElementById(`${tabName}-tab`).classList.add('active');
+      
+      // On mobile, scroll to top of content when switching tabs
+      if (window.innerWidth <= 768) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     });
   });
 }
@@ -137,21 +151,21 @@ function setupEventListeners() {
 
 async function saveProfile() {
   const name = document.getElementById('fullName').value.trim();
-  if (!name) return showMsg('profileMsg', 'Please enter your name.');
+  if (!name) return showGlobalMsg('Please enter your name.', 'error');
 
   const btn = document.getElementById('saveProfileBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Saving…';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
   try {
     await SS.api('/api/auth/profile', {
       method: 'PUT',
       body: { name }
     });
-    showMsg('profileMsg', 'Profile updated successfully!', 'success');
+    showGlobalMsg('Profile updated successfully!', 'success');
     SS.toast('Profile updated!');
   } catch (err) {
-    showMsg('profileMsg', err.message);
+    showGlobalMsg(err.message, 'error');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
@@ -159,39 +173,37 @@ async function saveProfile() {
 }
 
 async function changePassword() {
-  const current = document.getElementById('currentPassword').value;
   const newPw = document.getElementById('newPassword').value;
   const confirm = document.getElementById('confirmPassword').value;
 
-  if (!current || !newPw || !confirm) {
-    return showMsg('pwMsg', 'Please fill in all password fields.');
+  if (!newPw || !confirm) {
+    return showGlobalMsg('Please fill in all password fields.', 'error');
   }
   if (newPw.length < 6) {
-    return showMsg('pwMsg', 'New password must be at least 6 characters.');
+    return showGlobalMsg('New password must be at least 6 characters.', 'error');
   }
   if (newPw !== confirm) {
-    return showMsg('pwMsg', 'New passwords do not match.');
+    return showGlobalMsg('New passwords do not match.', 'error');
   }
 
   const btn = document.getElementById('changePasswordBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Updating…';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
 
   try {
     await SS.api('/api/auth/change-password', {
       method: 'PUT',
-      body: { current_password: current, new_password: newPw }
+      body: { new_password: newPw }
     });
-    showMsg('pwMsg', 'Password changed successfully!', 'success');
-    document.getElementById('currentPassword').value = '';
+    showGlobalMsg('Password changed successfully!', 'success');
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmPassword').value = '';
     SS.toast('Password updated!');
   } catch (err) {
-    showMsg('pwMsg', err.message);
+    showGlobalMsg(err.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-key"></i> Change Password';
+    btn.innerHTML = '<i class="fas fa-key"></i> Update Password';
   }
 }
 
@@ -202,11 +214,11 @@ async function deleteAccount() {
 
   const btn = document.getElementById('deleteAccountBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Deleting…';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
   try {
     await SS.api('/api/auth/account', { method: 'DELETE' });
-    SS.toast('Account deleted. Redirecting…');
+    SS.toast('Account deleted. Redirecting...');
     setTimeout(() => {
       SS.clearSession();
       window.location.href = '/';
@@ -238,25 +250,25 @@ async function saveAppearanceSettings() {
 
 async function saveDashboardSettings() {
   const data = {
-    compactSidebar: document.getElementById('compactSidebar').checked,
-    showWelcome: document.getElementById('showWelcome').checked,
-    showStreak: document.getElementById('showStreak').checked,
+    compactSidebar: document.getElementById('compactSidebar').classList.contains('active'),
+    showWelcome: document.getElementById('showWelcome').classList.contains('active'),
+    showStreak: document.getElementById('showStreak').classList.contains('active'),
     defaultPage: document.getElementById('defaultPage').value
   };
 
   const btn = document.getElementById('saveDashboardBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Saving…';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
   try {
     await SS.api('/api/auth/settings', {
       method: 'PUT',
       body: { category: 'dashboard', data }
     });
-    showMsg('dashboardMsg', 'Dashboard settings saved!', 'success');
+    showGlobalMsg('Dashboard settings saved!', 'success');
     SS.toast('Dashboard settings updated!');
   } catch (err) {
-    showMsg('dashboardMsg', err.message);
+    showGlobalMsg(err.message, 'error');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-save"></i> Save Preferences';
@@ -265,24 +277,24 @@ async function saveDashboardSettings() {
 
 async function saveNotificationSettings() {
   const data = {
-    email: document.getElementById('emailNotifications').checked,
-    reminders: document.getElementById('studyReminders').checked,
-    dailyGoal: document.getElementById('dailyGoalReminders').checked
+    email: document.getElementById('emailNotifications').classList.contains('active'),
+    reminders: document.getElementById('studyReminders').classList.contains('active'),
+    dailyGoal: document.getElementById('dailyGoalReminders').classList.contains('active')
   };
 
   const btn = document.getElementById('saveNotificationsBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Saving…';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
   try {
     await SS.api('/api/auth/settings', {
       method: 'PUT',
       body: { category: 'notifications', data }
     });
-    showMsg('notificationsMsg', 'Notification settings saved!', 'success');
+    showGlobalMsg('Notification settings saved!', 'success');
     SS.toast('Notification preferences updated!');
   } catch (err) {
-    showMsg('notificationsMsg', err.message);
+    showGlobalMsg(err.message, 'error');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-save"></i> Save Preferences';
@@ -298,29 +310,29 @@ async function saveAiSettings() {
 
   const btn = document.getElementById('saveAiBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Saving…';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
   try {
     await SS.api('/api/auth/settings', {
       method: 'PUT',
       body: { category: 'ai_settings', data }
     });
-    showMsg('aiMsg', 'AI settings saved!', 'success');
+    showGlobalMsg('AI settings saved!', 'success');
     SS.toast('AI settings updated!');
   } catch (err) {
-    showMsg('aiMsg', err.message);
+    showGlobalMsg(err.message, 'error');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
   }
 }
 
-function showMsg(elementId, text, type = 'error') {
-  const box = document.getElementById(elementId);
+function showGlobalMsg(text, type = 'error') {
+  const box = document.getElementById('settingsMsg');
   if (!box) return;
   box.textContent = text;
-  box.className = `form-msg show ${type}`;
+  box.className = `settings-msg show ${type}`;
   setTimeout(() => {
-    box.className = 'form-msg';
+    box.className = 'settings-msg';
   }, 5000);
 }
