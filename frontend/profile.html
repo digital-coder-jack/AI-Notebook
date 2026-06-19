@@ -17,150 +17,13 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/profile.css" />
   
   <!-- Vercel Speed Insights -->
   <script type="module">
     import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights@2.0.0/dist/index.mjs';
     injectSpeedInsights();
   </script>
-  <style>
-    .settings-tabs {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.8rem;
-      flex-wrap: wrap;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 0;
-    }
-    .tab-btn {
-      padding: 0.8rem 1.2rem;
-      background: transparent;
-      border: none;
-      color: var(--text-dim);
-      font-weight: 500;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .tab-btn:hover { color: var(--text); }
-    .tab-btn.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-    .settings-panel {
-      display: none;
-    }
-    .settings-panel.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .settings-card.danger {
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      background: rgba(239, 68, 68, 0.05);
-    }
-    .btn.danger {
-      background: #ef4444;
-      color: white;
-    }
-    .btn.danger:hover {
-      background: #dc2626;
-      box-shadow: 0 8px 22px rgba(239, 68, 68, 0.4);
-    }
-    .theme-options, .color-picker {
-      display: flex;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-      margin-top: 0.8rem;
-    }
-    .theme-opt, .color-opt {
-      padding: 0.8rem 1.2rem;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      background: var(--glass);
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 500;
-    }
-    .theme-opt:hover, .color-opt:hover {
-      border-color: var(--accent);
-    }
-    .theme-opt.active, .color-opt.active {
-      border-color: var(--accent);
-      background: var(--grad);
-      color: white;
-      box-shadow: 0 8px 22px rgba(109, 123, 255, 0.4);
-    }
-    .color-opt {
-      width: 48px;
-      height: 48px;
-      padding: 0;
-      border-radius: 50%;
-    }
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    .checkbox-label input {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-    .field select {
-      width: 100%;
-      padding: 0.8rem;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--glass);
-      color: var(--text);
-      font-family: inherit;
-      margin-top: 0.5rem;
-    }
-    .field select:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .input-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-    .input-wrap i {
-      position: absolute;
-      left: 0.8rem;
-      color: var(--text-dim);
-      pointer-events: none;
-    }
-    .input-wrap input {
-      padding-left: 2.8rem;
-    }
-    .toggle-pw {
-      position: absolute;
-      right: 0.8rem;
-      background: none;
-      border: none;
-      color: var(--text-dim);
-      cursor: pointer;
-      font-size: 0.9rem;
-      padding: 0.4rem;
-    }
-    .toggle-pw:hover {
-      color: var(--text);
-    }
-  </style>
 </head>
 <body>
   <div id="particles-js"></div>
@@ -168,7 +31,7 @@
   <div class="side-overlay" id="sideOverlay"></div>
 
   <div class="app-shell">
-    <aside class="sidebar" id="sidebar" data-active="profile"></aside>
+    <aside class="sidebar" id="sidebar" data-active="settings"></aside>
 
     <main class="content">
       <div class="topbar">
@@ -179,211 +42,165 @@
         <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
       </div>
 
-      <!-- Settings Tabs -->
-      <div class="settings-tabs">
-        <button class="tab-btn active" data-tab="account"><i class="fas fa-user"></i> Account</button>
-        <button class="tab-btn" data-tab="appearance"><i class="fas fa-palette"></i> Appearance</button>
-        <button class="tab-btn" data-tab="dashboard"><i class="fas fa-gauge-high"></i> Dashboard</button>
-        <button class="tab-btn" data-tab="notifications"><i class="fas fa-bell"></i> Notifications</button>
-        <button class="tab-btn" data-tab="ai"><i class="fas fa-brain"></i> AI Settings</button>
-      </div>
+      <div class="settings-wrapper">
+        <!-- Settings Tabs -->
+        <div class="settings-tabs">
+          <button class="tab-btn active" data-tab="account"><i class="fas fa-user"></i> Account</button>
+          <button class="tab-btn" data-tab="appearance"><i class="fas fa-palette"></i> Appearance</button>
+          <button class="tab-btn" data-tab="dashboard"><i class="fas fa-gauge-high"></i> Dashboard</button>
+          <button class="tab-btn" data-tab="notifications"><i class="fas fa-bell"></i> Notifications</button>
+          <button class="tab-btn" data-tab="ai"><i class="fas fa-brain"></i> AI Settings</button>
+        </div>
 
-      <!-- Account Settings -->
-      <div class="settings-panel active" id="account-tab">
-        <div class="settings-grid">
-          <div class="settings-card glass">
+        <div id="settingsMsg" class="settings-msg"></div>
+
+        <!-- Account Settings -->
+        <div class="settings-panel active" id="account-tab">
+          <div class="settings-card">
             <h3><i class="fas fa-user-circle"></i> Profile Information</h3>
-            <div class="form-msg" id="profileMsg"></div>
-            <div class="field">
+            <p>Update your personal details and how others see you.</p>
+            <div class="settings-field">
               <label>Full Name</label>
               <input type="text" id="fullName" placeholder="Your name" />
             </div>
-            <div class="field">
+            <div class="settings-field">
               <label>Username</label>
               <input type="text" id="username" placeholder="your_username" disabled />
-              <small>Username cannot be changed</small>
             </div>
-            <div class="field">
-              <label>Email</label>
+            <div class="settings-field">
+              <label>Email Address</label>
               <input type="email" id="email" placeholder="your@email.com" disabled />
-              <small>Email cannot be changed</small>
             </div>
-            <button class="btn" id="saveProfileBtn"><i class="fas fa-save"></i> Save Changes</button>
+            <button class="btn primary" id="saveProfileBtn"><i class="fas fa-save"></i> Save Changes</button>
           </div>
 
-          <div class="settings-card glass">
-            <h3><i class="fas fa-lock"></i> Security</h3>
-            <div class="form-msg" id="pwMsg"></div>
-            <div class="field">
-              <label>Current Password</label>
-              <div class="input-wrap">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="currentPassword" placeholder="••••••••" />
-                <button type="button" class="toggle-pw" data-target="currentPassword"><i class="fas fa-eye"></i></button>
-              </div>
-            </div>
-            <div class="field">
+          <div class="settings-card">
+            <h3><i class="fas fa-lock"></i> Password & Security</h3>
+            <p>Change your password to keep your account secure.</p>
+            <div class="settings-field">
               <label>New Password</label>
-              <div class="input-wrap">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="newPassword" placeholder="••••••••" />
-                <button type="button" class="toggle-pw" data-target="newPassword"><i class="fas fa-eye"></i></button>
-              </div>
+              <input type="password" id="newPassword" placeholder="••••••••" />
             </div>
-            <div class="field">
+            <div class="settings-field">
               <label>Confirm New Password</label>
-              <div class="input-wrap">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="confirmPassword" placeholder="••••••••" />
-                <button type="button" class="toggle-pw" data-target="confirmPassword"><i class="fas fa-eye"></i></button>
-              </div>
+              <input type="password" id="confirmPassword" placeholder="••••••••" />
             </div>
-            <button class="btn" id="changePasswordBtn"><i class="fas fa-key"></i> Change Password</button>
+            <button class="btn secondary" id="changePasswordBtn"><i class="fas fa-key"></i> Update Password</button>
           </div>
 
-          <div class="settings-card glass danger">
-            <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
-            <p style="color: var(--text-dim); margin-bottom: 1rem;">Permanently delete your account and all associated data. This action cannot be undone.</p>
+          <div class="settings-card danger">
+            <h3><i class="fas fa-trash-can"></i> Danger Zone</h3>
+            <p>Permanently delete your account and all your data. This cannot be undone.</p>
             <button class="btn danger" id="deleteAccountBtn"><i class="fas fa-trash"></i> Delete Account</button>
           </div>
         </div>
-      </div>
 
-      <!-- Appearance Settings -->
-      <div class="settings-panel" id="appearance-tab">
-        <div class="settings-grid">
-          <div class="settings-card glass">
-            <h3><i class="fas fa-sun"></i> Theme</h3>
-            <div class="field">
-              <label>Color Theme</label>
-              <div class="theme-options">
-                <button type="button" class="theme-opt" data-theme="light"><i class="fas fa-sun"></i> Light</button>
-                <button type="button" class="theme-opt active" data-theme="dark"><i class="fas fa-moon"></i> Dark</button>
-                <button type="button" class="theme-opt" data-theme="system"><i class="fas fa-circle-half-stroke"></i> System</button>
-              </div>
+        <!-- Appearance Settings -->
+        <div class="settings-panel" id="appearance-tab">
+          <div class="settings-card">
+            <h3><i class="fas fa-sun"></i> Theme Mode</h3>
+            <p>Choose between light, dark, or system-matched appearance.</p>
+            <div class="theme-options">
+              <button class="theme-opt" data-theme="light"><i class="fas fa-sun"></i> Light</button>
+              <button class="theme-opt active" data-theme="dark"><i class="fas fa-moon"></i> Dark</button>
+              <button class="theme-opt" data-theme="system"><i class="fas fa-circle-half-stroke"></i> System</button>
             </div>
           </div>
 
-          <div class="settings-card glass">
+          <div class="settings-card">
             <h3><i class="fas fa-palette"></i> Accent Color</h3>
-            <div class="field">
-              <label>Choose Accent Color</label>
-              <div class="color-picker">
-                <button type="button" class="color-opt active" data-color="#3b82f6" style="background: #3b82f6;" title="Blue"></button>
-                <button type="button" class="color-opt" data-color="#8b5cf6" style="background: #8b5cf6;" title="Purple"></button>
-                <button type="button" class="color-opt" data-color="#ec4899" style="background: #ec4899;" title="Pink"></button>
-                <button type="button" class="color-opt" data-color="#f59e0b" style="background: #f59e0b;" title="Amber"></button>
-                <button type="button" class="color-opt" data-color="#10b981" style="background: #10b981;" title="Green"></button>
-                <button type="button" class="color-opt" data-color="#06b6d4" style="background: #06b6d4;" title="Cyan"></button>
-              </div>
+            <p>Personalize your interface with a custom accent color.</p>
+            <div class="color-picker">
+              <button class="color-opt active" data-color="#3b82f6" title="Blue"><div class="color-circle" style="background: #3b82f6;"></div> Blue</button>
+              <button class="color-opt" data-color="#8b5cf6" title="Purple"><div class="color-circle" style="background: #8b5cf6;"></div> Purple</button>
+              <button class="color-opt" data-color="#ec4899" title="Pink"><div class="color-circle" style="background: #ec4899;"></div> Pink</button>
+              <button class="color-opt" data-color="#f59e0b" title="Amber"><div class="color-circle" style="background: #f59e0b;"></div> Amber</button>
+              <button class="color-opt" data-color="#10b981" title="Green"><div class="color-circle" style="background: #10b981;"></div> Green</button>
+              <button class="color-opt" data-color="#06b6d4" title="Cyan"><div class="color-circle" style="background: #06b6d4;"></div> Cyan</button>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Dashboard Settings -->
-      <div class="settings-panel" id="dashboard-tab">
-        <div class="settings-grid">
-          <div class="settings-card glass">
-            <h3><i class="fas fa-gauge-high"></i> Dashboard Layout</h3>
-            <div class="form-msg" id="dashboardMsg"></div>
-            <div class="field">
-              <label class="checkbox-label">
-                <input type="checkbox" id="compactSidebar" />
-                <span>Use Compact Sidebar</span>
-              </label>
-              <small>Reduce sidebar width on desktop</small>
+        <!-- Dashboard Settings -->
+        <div class="settings-panel" id="dashboard-tab">
+          <div class="settings-card">
+            <h3><i class="fas fa-gauge-high"></i> Dashboard Preferences</h3>
+            <p>Customize your workspace layout and features.</p>
+            <div class="toggle-group">
+              <label>Compact Sidebar</label>
+              <button class="toggle-switch" id="compactSidebar"></button>
             </div>
-            <div class="field">
-              <label class="checkbox-label">
-                <input type="checkbox" id="showWelcome" checked />
-                <span>Show Welcome Animation</span>
-              </label>
-              <small>Display welcome popup after login</small>
+            <div class="toggle-group">
+              <label>Show Welcome Animation</label>
+              <button class="toggle-switch active" id="showWelcome"></button>
             </div>
-            <div class="field">
-              <label class="checkbox-label">
-                <input type="checkbox" id="showStreak" checked />
-                <span>Show Study Streak</span>
-              </label>
-              <small>Display your study streak on dashboard</small>
+            <div class="toggle-group">
+              <label>Show Study Streak</label>
+              <button class="toggle-switch active" id="showStreak"></button>
             </div>
-            <div class="field">
-              <label>Default Dashboard Page</label>
+            <div class="settings-field" style="margin-top: 1rem;">
+              <label>Default Start Page</label>
               <select id="defaultPage">
                 <option value="dashboard">Dashboard</option>
                 <option value="chat">AI Chat</option>
                 <option value="tools">Study Tools</option>
               </select>
             </div>
-            <button class="btn" id="saveDashboardBtn"><i class="fas fa-save"></i> Save Preferences</button>
+            <button class="btn primary" id="saveDashboardBtn" style="margin-top: 1rem;"><i class="fas fa-save"></i> Save Preferences</button>
           </div>
         </div>
-      </div>
 
-      <!-- Notifications Settings -->
-      <div class="settings-panel" id="notifications-tab">
-        <div class="settings-grid">
-          <div class="settings-card glass">
-            <h3><i class="fas fa-bell"></i> Notification Preferences</h3>
-            <div class="form-msg" id="notificationsMsg"></div>
-            <div class="field">
-              <label class="checkbox-label">
-                <input type="checkbox" id="emailNotifications" checked />
-                <span>Email Notifications</span>
-              </label>
-              <small>Receive updates via email</small>
+        <!-- Notifications Settings -->
+        <div class="settings-panel" id="notifications-tab">
+          <div class="settings-card">
+            <h3><i class="fas fa-bell"></i> Notifications</h3>
+            <p>Control how and when you receive updates.</p>
+            <div class="toggle-group">
+              <label>Email Notifications</label>
+              <button class="toggle-switch active" id="emailNotifications"></button>
             </div>
-            <div class="field">
-              <label class="checkbox-label">
-                <input type="checkbox" id="studyReminders" checked />
-                <span>Study Reminders</span>
-              </label>
-              <small>Get reminded to study regularly</small>
+            <div class="toggle-group">
+              <label>Study Reminders</label>
+              <button class="toggle-switch active" id="studyReminders"></button>
             </div>
-            <div class="field">
-              <label class="checkbox-label">
-                <input type="checkbox" id="dailyGoalReminders" checked />
-                <span>Daily Goal Reminders</span>
-              </label>
-              <small>Remind me to complete daily goals</small>
+            <div class="toggle-group">
+              <label>Daily Goal Reminders</label>
+              <button class="toggle-switch active" id="dailyGoalReminders"></button>
             </div>
-            <button class="btn" id="saveNotificationsBtn"><i class="fas fa-save"></i> Save Preferences</button>
+            <button class="btn primary" id="saveNotificationsBtn" style="margin-top: 1rem;"><i class="fas fa-save"></i> Save Preferences</button>
           </div>
         </div>
-      </div>
 
-      <!-- AI Settings -->
-      <div class="settings-panel" id="ai-tab">
-        <div class="settings-grid">
-          <div class="settings-card glass">
-            <h3><i class="fas fa-brain"></i> AI Configuration</h3>
-            <div class="form-msg" id="aiMsg"></div>
-            <div class="field">
+        <!-- AI Settings -->
+        <div class="settings-panel" id="ai-tab">
+          <div class="settings-card">
+            <h3><i class="fas fa-brain"></i> AI Personalization</h3>
+            <p>Fine-tune your AI tutor's responses and difficulty level.</p>
+            <div class="settings-field">
               <label>Preferred AI Model</label>
               <select id="aiModel">
-                <option value="gpt-4">GPT-4 (Advanced)</option>
-                <option value="gpt-3.5">GPT-3.5 (Fast)</option>
-                <option value="claude">Claude (Balanced)</option>
+                <option value="gpt-4">GPT-4 (Advanced Reasoning)</option>
+                <option value="gpt-3.5">GPT-3.5 (Turbo Speed)</option>
+                <option value="claude">Claude (Creative & Concise)</option>
               </select>
             </div>
-            <div class="field">
-              <label>Response Length</label>
+            <div class="settings-field">
+              <label>Response Detail Level</label>
               <select id="responseLength">
-                <option value="short">Short (1-2 sentences)</option>
-                <option value="medium" selected>Medium (2-3 paragraphs)</option>
-                <option value="long">Long (Detailed)</option>
+                <option value="short">Concise (Fast answers)</option>
+                <option value="medium" selected>Balanced (Standard)</option>
+                <option value="long">Comprehensive (In-depth)</option>
               </select>
             </div>
-            <div class="field">
+            <div class="settings-field">
               <label>Study Difficulty</label>
               <select id="studyDifficulty">
-                <option value="beginner">Beginner</option>
-                <option value="intermediate" selected>Intermediate</option>
-                <option value="advanced">Advanced</option>
+                <option value="beginner">Beginner (Simplified)</option>
+                <option value="intermediate" selected>Intermediate (Standard)</option>
+                <option value="advanced">Advanced (Rigorous)</option>
               </select>
             </div>
-            <button class="btn" id="saveAiBtn"><i class="fas fa-save"></i> Save Settings</button>
+            <button class="btn primary" id="saveAiBtn"><i class="fas fa-save"></i> Save AI Preferences</button>
           </div>
         </div>
       </div>
