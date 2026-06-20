@@ -42,8 +42,8 @@
   
   background: var(--glass-strong);
   border-right: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: none;
   
   display: flex;
   flex-direction: column;
@@ -478,8 +478,8 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: none;
   
   z-index: 999;
   opacity: 0;
