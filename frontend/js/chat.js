@@ -71,11 +71,11 @@ function showEmptyState() {
   el.messages.innerHTML = `
     <div class="chat-empty">
       <div>
-        <div class="big">🌌</div>
+        <div class="big"><img src="/assets/logo.png" alt="Study Sphere AI Logo" class="logo-img" /></div>
         <h2>How can I help you study today?</h2>
         <p>Ask a question, request an explanation, or pick a starter below.</p>
         <div class="suggest-grid">
-          <button class="suggest" data-q="Explain photosynthesis in simple terms with an analogy."><b>📘 Explain a concept</b><span>Photosynthesis, simply explained</span></button>
+          <button class="suggest" data-q="Explain photosynthesis in simple terms with an analogy."><b>📘 Explain a concept</b><span>Photosynthesis</span></button>
           <button class="suggest" data-q="Give me 5 practice questions on the Pythagorean theorem with answers."><b>✍️ Practice questions</b><span>Pythagorean theorem</span></button>
           <button class="suggest" data-q="Write a Python function that checks if a string is a palindrome, with comments."><b>💻 Help me code</b><span>Palindrome checker in Python</span></button>
           <button class="suggest" data-q="Summarise the causes of World War 1 in bullet points."><b>📝 Summarise</b><span>Causes of World War 1</span></button>
@@ -103,7 +103,7 @@ function appendMessage(role, content) {
   const stream = ensureStream();
   const msg = document.createElement('div');
   msg.className = `msg ${role}`;
-  const avatar = role === 'user' ? userInitial() : '🌌';
+  const avatar = role === 'user' ? userInitial() : '<img src="/assets/logo.png" alt="Study Sphere AI Logo" class="logo-img" />';
   msg.innerHTML = `
     <div class="avatar">${avatar}</div>
     <div class="bubble"><div class="role">${role === 'user' ? 'You' : 'Study Sphere AI'}</div><div class="body"></div></div>`;
@@ -301,7 +301,7 @@ async function downloadChat() {
     const data = await SS.api(`/api/chats/${state.currentId}`);
     let md = `# ${data.chat.title}\n\n_Exported from Study Sphere AI_\n\n`;
     data.messages.forEach((m) => {
-      md += `## ${m.role === 'user' ? '🧑 You' : '🌌 Study Sphere AI'}\n\n${m.content}\n\n---\n\n`;
+      md += `## ${m.role === 'user' ? '🧑 You' : '<img src="/assets/logo.png" alt="Study Sphere AI Logo" class="logo-img" /> Study Sphere AI'}\n\n${m.content}\n\n---\n\n`;
     });
     const blob = new Blob([md], { type: 'text/markdown' });
     const a = document.createElement('a');
