@@ -42,7 +42,7 @@
   
   background: var(--glass-strong);
   border-right: 1px solid var(--border);
-  backdrop-filter: blur(24px);
+  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(24px);
   
   display: flex;
@@ -478,7 +478,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(10px);
   
   z-index: 999;
