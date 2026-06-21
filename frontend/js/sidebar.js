@@ -29,7 +29,7 @@
 
   /* ========== NAVIGATION ITEMS ========== */
   const items = [
-    { id: 'dashboard', href: '/dashboard', icon: 'fa-gauge-high', label: 'Dashboard' },
+    { id: 'dashboard', href: '/dashboard.html', icon: 'fa-gauge-high', label: 'Dashboard' },
     { id: 'chat', href: '/chat', icon: 'fa-comments', label: 'AI Chat' },
     { section: 'Study tools' },
     { id: 'notes', href: '/tools#notes', icon: 'fa-note-sticky', label: 'Notes' },
