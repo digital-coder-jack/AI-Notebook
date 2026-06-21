@@ -330,12 +330,12 @@ FAVICON_SVG = (
     "<stop offset='0' stop-color='#6d7bff'/><stop offset='0.5' stop-color='#a855f7'/>"
     "<stop offset='1' stop-color='#22d3ee'/></linearGradient></defs>"
     "<rect width='100' height='100' rx='22' fill='url(#g)'/>"
-    "<text x='50' y='68' font-size='56' text-anchor='middle'>🌌</text></svg>"
+    "<text x='50' y='68' font-size='56' text-anchor='middle'> <img src="/assets/logo.png" alt="Study Sphere AI Logo" class="logo-img" /></text></svg>"
 )
 
 
-@app.get("/favicon.ico")
-@app.get("/favicon.svg")
+@app.get("/assets/logo.png")
+@app.get("/assets/logo.png")
 async def favicon():
     fav_path = os.path.join(FRONTEND_DIR, "assets", "logo.png")
     if os.path.exists(fav_path):
@@ -361,49 +361,49 @@ async def index():
     )
 
 
-@app.get("/login")
+@app.get("/login.html")
 @app.get("/login.html")
 async def login_page():
     return _page("login.html")
 
 
-@app.get("/signup")
+@app.get("/signup.html")
 @app.get("/signup.html")
 async def signup_page():
     return _page("signup.html")
 
 
-@app.get("/forgot")
+@app.get("/forgot.html")
 @app.get("/forgot.html")
 async def forgot_page():
     return _page("forgot.html")
 
 
-@app.get("/dashboard")
+@app.get("/dashboard.html")
 @app.get("/dashboard.html")
 async def dashboard_page():
     return _page("dashboard.html")
 
 
-@app.get("/chat")
+@app.get("/chat.html")
 @app.get("/chat.html")
 async def chat_page():
     return _page("chat.html")
 
 
-@app.get("/tools")
+@app.get("/tools.html")
 @app.get("/tools.html")
 async def tools_page():
     return _page("tools.html")
 
 
-@app.get("/profile")
+@app.get("/profile.html")
 @app.get("/profile.html")
 async def profile_page():
     return _page("profile.html")
 
 
-@app.get("/analytics")
+@app.get("/analytics.html")
 @app.get("/analytics.html")
 async def analytics_page():
     return _page("analytics.html")
