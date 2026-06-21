@@ -197,7 +197,7 @@ async function deleteChat(id) {
     if (state.currentId === id) {
       state.currentId = null;
       if (state.chats.length) openChat(state.chats[0].id);
-      else { showEmptyState(); history.replaceState(null, '', '/chat'); }
+      else { showEmptyState(); history.replaceState(null, '', '/chat.html'); }
     }
     renderChatList();
     SS.toast('Chat deleted.');
