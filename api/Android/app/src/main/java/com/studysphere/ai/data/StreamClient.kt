@@ -1,5 +1,7 @@
 package com.studysphere.ai.data
 
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ProducerScope
@@ -121,9 +123,11 @@ object StreamClient {
         var attempt = 0
         var backoff = INITIAL_BACKOFF_MS
 
-        while (attempt <= MAX_RETRIES && !terminated && isActive) {
-            val call = buildCall()
-            activeCall = call
+        while (
+    attempt <= MAX_RETRIES &&
+    !terminated &&
+    currentCoroutineContext().isActive
+) {
 
             // Result of a single attempt: true = finished (terminal emitted or success),
             // false = retryable transient failure.
