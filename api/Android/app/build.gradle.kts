@@ -33,7 +33,7 @@ android {
             buildConfigField(
                 "String",
                 "API_BASE_URL",
-                "\"https://study-sphere-ai.onrender.com\""
+                "\"https://study-sphere-ai-mwlq.vercel.app\""
             )
         }
         release {
