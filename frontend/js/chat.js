@@ -542,7 +542,10 @@ function closeMobileSidebar() {
 el.send.addEventListener('click', sendMessage);
 el.input.addEventListener('input', autoGrow);
 el.input.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
 });
 el.newBtn.addEventListener('click', newChat);
 el.delBtn.addEventListener('click', () => state.currentId && deleteChat(state.currentId));
