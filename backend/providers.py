@@ -290,6 +290,15 @@ async def chat_stream(
                     headers=_headers(name),
                 ) as resp:
                     if resp.status_code != 200:
+    body = await resp.aread()
+
+    print("========== ERROR ==========")
+    print("Provider:", name)
+    print("Status:", resp.status_code)
+    print("Body:", body.decode(errors="ignore"))
+    print("===========================")
+
+    continue
                         body = await resp.aread()
                         last_error = {
                             "type": "http",
