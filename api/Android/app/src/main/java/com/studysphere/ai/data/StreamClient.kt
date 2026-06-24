@@ -145,8 +145,23 @@ object StreamClient {
                             AttemptResult.RETRY("Server busy (${response.code})")
                         }
                         !response.isSuccessful -> {
-                            emitTerminal(StreamEvent.Error("Request failed (${response.code})", retryable = false))
-                            AttemptResult.DONE
+    val errorBody = runCatching {
+        response.body?.string()
+    }.getOrNull()
+
+    android.util.Log.e(
+        "API_ERROR",
+        "Code=${response.code} Body=$errorBody"
+    )
+
+    emitTerminal(
+        StreamEvent.Error(
+            "Request failed (${response.code}): $errorBody",
+            retryable = false
+        )
+    )
+    AttemptResult.DONE
+}
                         }
                         else -> {
                             val source = response.body?.source()
