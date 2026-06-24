@@ -94,7 +94,6 @@ fun ChatScreen(
     var input by remember { mutableStateOf("") }
     var editing by remember { mutableStateOf<ChatMessage?>(null) }
     val listState = rememberLazyListState()
-    // FIX: replaced rememberCoroutineScopeLocal() with the standard rememberCoroutineScope()
     val scope = rememberCoroutineScope()
     val haptic = rememberHaptics()
 
@@ -107,14 +106,16 @@ fun ChatScreen(
         else vm.startNewChat()
     }
 
-    // Auto-scroll to the latest message as tokens stream in.
-    LaunchedEffect(state.messages.size, state.messages.lastOrNull()?.content) {
+    // FIX (Bug 3 partial): Only depend on messages.size, not content, to avoid
+    // re-triggering animateScrollToItem on every streaming token — which was
+    // cancelling and restarting the scroll coroutine hundreds of times and could
+    // cause the list state to become inconsistent.
+    LaunchedEffect(state.messages.size) {
         if (state.messages.isNotEmpty()) {
             listState.animateScrollToItem(state.messages.size - 1)
         }
     }
 
-    // Show a scroll-to-bottom FAB when the user has scrolled up.
     val showScrollDown by remember {
         derivedStateOf {
             val last = listState.layoutInfo.totalItemsCount - 1
@@ -123,8 +124,6 @@ fun ChatScreen(
         }
     }
 
-    // FIX: Wrapped entire screen in a Box so the scroll-to-bottom FAB can be
-    // overlaid with Alignment.BottomCenter, and the Column fills the rest.
     Box(Modifier.fillMaxSize()) {
         Column(
             Modifier
@@ -139,10 +138,18 @@ fun ChatScreen(
                 onModel = { haptic(); showModels = true }
             )
 
+            // FIX (Bug 2 + Bug 3): EmptyChat and LazyColumn both occupy the
+            // same weight(1f) slot so the Column can always resolve heights.
+            // ChatInputBar is now OUTSIDE the if/else so it is always present —
+            // this eliminates the layout thrash that occurred when the first
+            // message was sent and the entire bottom half of the screen was
+            // suddenly added in a single recomposition.
             if (state.messages.isEmpty()) {
-                EmptyChat(onSuggestion = { vm.send(it) })
+                EmptyChat(
+                    modifier = Modifier.weight(1f),
+                    onSuggestion = { vm.send(it) }
+                )
             } else {
-                // FIX: LazyColumn is now properly inside the else branch and weight is applied here.
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
@@ -152,45 +159,53 @@ fun ChatScreen(
                     verticalArrangement = Arrangement.spacedBy(18.dp),
                     contentPadding = PaddingValues(vertical = 12.dp)
                 ) {
-                    items(state.messages, key = { it.id }) { msg ->
-                        // FIX: Removed the invalid remember(state.messages) block for lastMsg
-                        // which was unused. isLastAssistant is computed inline correctly.
+                    // FIX (Bug 1 — MAIN CRASH): Removed key = { it.id }.
+                    //
+                    // Room auto-generates IDs only after a row is inserted.
+                    // While messages are in-flight (user message sent, assistant
+                    // placeholder added), BOTH have id = 0. Compose's LazyColumn
+                    // requires keys to be unique; two items sharing key=0 throws
+                    // an IllegalArgumentException and crashes the app immediately.
+                    //
+                    // Chat messages are append-only, so position-based identity
+                    // (the default when no key is supplied) is perfectly stable
+                    // and correct here.
+                    items(state.messages) { msg ->
                         MessageRow(
                             msg = msg,
                             streaming = state.streaming,
-                            // FIX: Added missing comma after isLastAssistant argument
                             isLastAssistant = msg == state.messages.lastOrNull { it.role == "assistant" },
                             onRegenerate = { haptic(); vm.regenerateLast() },
                             onEdit = { editing = msg; input = msg.content }
                         )
                     }
-                } // End LazyColumn
+                }
+            }
 
-                ChatInputBar(
-                    value = input,
-                    onValueChange = { input = it },
-                    streaming = state.streaming,
-                    isEditing = editing != null,
-                    onCancelEdit = { editing = null; input = "" },
-                    onSend = {
-                        val text = input.trim()
-                        if (text.isNotEmpty()) {
-                            haptic()
-                            if (editing != null) {
-                                vm.editAndResend(text)
-                                editing = null
-                            } else {
-                                vm.send(text)
-                            }
-                            input = ""
+            // Always-visible input bar (moved out of else branch).
+            ChatInputBar(
+                value = input,
+                onValueChange = { input = it },
+                streaming = state.streaming,
+                isEditing = editing != null,
+                onCancelEdit = { editing = null; input = "" },
+                onSend = {
+                    val text = input.trim()
+                    if (text.isNotEmpty()) {
+                        haptic()
+                        if (editing != null) {
+                            vm.editAndResend(text)
+                            editing = null
+                        } else {
+                            vm.send(text)
                         }
+                        input = ""
                     }
-                )
-            } // End else branch
+                }
+            )
         } // End Column
 
-        // FIX: Scroll-to-bottom FAB is now a direct child of the outer Box,
-        // so Alignment.BottomCenter resolves correctly against the full screen.
+        // Scroll-to-bottom FAB.
         AnimatedVisibility(
             visible = showScrollDown && !showHistory,
             enter = scaleIn() + fadeIn(),
@@ -399,13 +414,18 @@ private fun ChatInputBar(
     }
 }
 
-// FIX: Receiver changed from ColumnScope extension to a plain @Composable that
-// accepts a Modifier with weight applied at the call site via the else branch above.
+// FIX (Bug 2): Added modifier parameter so the call site can pass weight(1f),
+// letting the Column resolve heights without ambiguity. Changed internal Box
+// from fillMaxSize() to fillMaxWidth() — height is now controlled by the
+// caller via the modifier, not asserted from inside.
 @Composable
-private fun EmptyChat(onSuggestion: (String) -> Unit) {
+private fun EmptyChat(
+    modifier: Modifier = Modifier,
+    onSuggestion: (String) -> Unit
+) {
     Box(
-        Modifier
-            .fillMaxSize()
+        modifier
+            .fillMaxWidth()
             .padding(horizontal = 24.dp),
         contentAlignment = Alignment.Center
     ) {
