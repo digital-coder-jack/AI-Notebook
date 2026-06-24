@@ -299,14 +299,18 @@ async def chat_stream(
     print("===========================")
 
     continue
-                        body = await resp.aread()
-                        last_error = {
-                            "type": "http",
-                            "message": f"{name} returned {resp.status_code}",
-                            "status": resp.status_code,
-                        }
-                        logger.warning("Stream %s failed (%s); falling back.", name, body[:200])
-                        continue
+                    body = await resp.aread()
+                    last_error = {
+                        "type": "http",
+                        "message": f"{name} returned {resp.status_code}",
+                        "status": resp.status_code,
+                    }
+                    logger.warning(
+                        "Stream %s failed (%s); falling back.",
+                        name,
+                        body[:200],
+                    )
+                    continue
 
                     line_iter = resp.aiter_lines().__aiter__()
                     while True:
