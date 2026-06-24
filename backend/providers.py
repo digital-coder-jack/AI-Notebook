@@ -289,31 +289,17 @@ async def chat_stream(
                     json=_payload(name, messages, temperature, max_tokens, stream=True),
                     headers=_headers(name),
                 ) as resp:
-       ...
-async with client.stream(...) as resp:
-    if ?????:
-        body = await resp.aread()
-        ...
-        continue
-
-    ...
-
-    print("========== ERROR ==========")
-    print("Provider:", name)
-    print("Status:", resp.status_code)
-    print("Body:", body.decode(errors="ignore"))
-    print("===========================")
-
-    continue
-                        if resp.status_code != 200:
-    body = await resp.aread()
-    last_error = {
-        "type": "http",
-        "message": f"{name} returned {resp.status_code}",
-        "status": resp.status_code,
-    }
-    logger.warning("Stream %s failed (%s); falling back.", name, body[:200])
-    continue
+                    if resp.status_code != 200:
+                        body = await resp.aread()
+                        last_error = {
+                            "type": "http",
+                            "message": f"{name} returned {resp.status_code}",
+                            "status": resp.status_code,
+                        }
+                        logger.warning(
+                            "Stream %s failed (%s); falling back.", name, body[:200]
+                        )
+                        continue
 
                     line_iter = resp.aiter_lines().__aiter__()
                     while True:
@@ -325,7 +311,10 @@ async with client.stream(...) as resp:
                             if produced:
                                 yield ("token", "\n\n⚠️ Response timed out.")
                                 return
-                            last_error = {"type": "timeout", "message": f"{name} exceeded time budget"}
+                            last_error = {
+                                "type": "timeout",
+                                "message": f"{name} exceeded time budget",
+                            }
                             break
 
                         try:
@@ -359,13 +348,18 @@ async with client.stream(...) as resp:
                                 produced = True
                                 yield ("meta", name)
                             yield ("token", token)
+
             if produced:
                 logger.info("AI stream served by '%s'", name)
                 return
+
         except (httpx.ConnectError, httpx.ConnectTimeout) as exc:
-            last_error = {"type": "network", "message": f"Could not reach {name}: {type(exc).__name__}"}
+            last_error = {
+                "type": "network",
+                "message": f"Could not reach {name}: {type(exc).__name__}",
+            }
             logger.warning("Stream %s network error (%s); falling back.", name, last_error)
-        except httpx.ReadTimeout as exc:
+        except httpx.ReadTimeout:
             last_error = {"type": "timeout", "message": f"{name} read timed out"}
             logger.warning("Stream %s read timeout; falling back.", name)
             if produced:
