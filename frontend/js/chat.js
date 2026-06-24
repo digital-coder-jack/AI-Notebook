@@ -109,11 +109,20 @@ function escapeHtml(s) {
 }
 
 function userInitial() {
-  return (SS.getUser().name || 'U').trim().charAt(0).toUpperCase();
+  try {
+    const user = (window.SS && typeof SS.getUser === 'function')
+      ? SS.getUser()
+      : JSON.parse(localStorage.getItem('ss_user') || '{}');
+    const name = (user && user.name) || 'U';
+    return String(name).trim().charAt(0).toUpperCase() || 'U';
+  } catch {
+    return 'U';
+  }
 }
 
 function showEmptyState() {
-  el.title.textContent = 'Study Sphere AI';
+  if (!el.messages) return;
+  if (el.title) el.title.textContent = 'Study Sphere AI';
   el.messages.innerHTML = `
     <div class="chat-empty">
       <div>
@@ -149,18 +158,9 @@ function appendMessage(role, content) {
   const stream = ensureStream();
   const msg = document.createElement('div');
   msg.className = `msg ${role}`;
-  const avatar = role === 'user' ? function userInitial() {
-  try {
-    const user = (window.SS && typeof SS.getUser === 'function')
-      ? SS.getUser()
-      : JSON.parse(localStorage.getItem('ss_user') || '{}');
-
-    const name = user.name || 'U';
-    return name.trim().charAt(0).toUpperCase();
-  } catch {
-    return 'U';
-  }
-}: '<img src="/assets/logo.png" alt="Study Sphere AI Logo" class="logo-img" />';
+  const avatar = role === 'user'
+    ? escapeHtml(userInitial())
+    : '<img src="/assets/logo.png" alt="Study Sphere AI Logo" class="logo-img" />';
   msg.innerHTML = `
     <div class="avatar">${avatar}</div>
     <div class="bubble"><div class="role">${role === 'user' ? 'You' : 'Study Sphere AI'}</div><div class="body"></div></div>`;
@@ -173,7 +173,7 @@ function appendMessage(role, content) {
 }
 
 function scrollToBottom() {
-  el.messages.scrollTop = el.messages.scrollHeight;
+  if (el.messages) el.messages.scrollTop = el.messages.scrollHeight;
 }
 
 /* ---------- Chat list ---------- */
@@ -188,6 +188,7 @@ async function loadChats() {
 }
 
 function renderChatList() {
+  if (!el.list) return;
   if (!state.chats.length) {
     el.list.innerHTML = '<div class="empty" style="padding:1.5rem 1rem;color:var(--text-dim);font-size:.88rem;text-align:center;">No chats yet.<br>Start a new one above.</div>';
     return;
@@ -223,10 +224,10 @@ async function openChat(id) {
   try {
     const data = await SS.api(`/api/chats/${id}`);
     state.currentId = id;
-    el.title.textContent = data.chat.title;
+    if (el.title) el.title.textContent = data.chat.title;
     renderChatList();
-    if (!data.messages.length) { showEmptyState(); return; }
-    el.messages.innerHTML = '<div class="msg-stream"></div>';
+    if (!data.messages || !data.messages.length) { showEmptyState(); return; }
+    if (el.messages) el.messages.innerHTML = '<div class="msg-stream"></div>';
     data.messages.forEach((m) => appendMessage(m.role, m.content));
     scrollToBottom();
     history.replaceState(null, '', `/chat?id=${id}`);
@@ -240,11 +241,11 @@ async function newChat() {
     const data = await SS.api('/api/chats', { method: 'POST', body: {} });
     state.chats.unshift(data.chat);
     state.currentId = data.chat.id;
-    el.title.textContent = data.chat.title;
+    if (el.title) el.title.textContent = data.chat.title;
     showEmptyState();
     renderChatList();
     history.replaceState(null, '', `/chat?id=${data.chat.id}`);
-    el.input.focus();
+    if (el.input) el.input.focus();
   } catch (err) {
     SS.toast(err.message, 'error');
   }
@@ -276,6 +277,9 @@ async function cancelActiveStream(reason = 'user') {
   if (state.controller) {
     try { state.controller.abort(); } catch { /* noop */ }
   }
+  // Reflect the stopped state immediately so the Stop button feels responsive
+  // (the stream's own `finally` performs the full cleanup once it unwinds).
+  if (reason === 'user') setStreamingUI(false);
   if (chatId != null) {
     // Best-effort server-side cancel (idempotent).
     try { await SS.api(`/api/chats/${chatId}/cancel`, { method: 'POST', body: {} }); }
@@ -299,21 +303,34 @@ function setStreamingUI(on) {
   el.send.disabled = false;
 }
 
-/* ---------- Send + stream ---------- */
+/* ---------- Send + stream ----------
+   Single, audited implementation:
+     - Guarantees only ONE active stream (cancels any prior stream first).
+     - Uses one AbortController and cleans it up in `finally`, even on errors,
+       so there are no leaked readers/controllers (no memory leaks).
+     - Parses SSE frames with a single buffer (handles partial frames split
+       across network chunks) and flushes a trailing partial frame at EOF.
+     - Handles every backend event: start, provider, token, cancelled, error,
+       done — plus empty-response and network-failure cases.
+     - Never freezes the UI: rendering happens incrementally and the Stop
+       button toggles immediately via setStreamingUI(). */
 async function sendMessage() {
+  // If a stream is already running, the Send button acts as a Stop button.
   if (state.streaming) {
     await cancelActiveStream('user');
     return;
   }
 
-  const text = el.input.value.trim();
+  const text = (el.input && el.input.value || '').trim();
   if (!text) return;
 
+  // Make sure we have a chat to post into.
   if (!state.currentId) {
     await newChat();
     if (!state.currentId) return;
   }
 
+  // Defensive: abort any lingering stream before starting a new one.
   await cancelActiveStream('superseded');
 
   el.input.value = '';
@@ -331,8 +348,53 @@ async function sendMessage() {
 
   let full = '';
   let firstToken = true;
-  let buffer = '';
   let cancelled = false;
+  let reader = null;
+
+  /* Apply a single decoded SSE frame to the UI. */
+  const handleFrame = (frame) => {
+    for (const line of frame.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('data:')) continue;
+      const payload = trimmed.slice(5).trim();
+      if (!payload) continue;
+
+      let obj;
+      try { obj = JSON.parse(payload); } catch { continue; }
+
+      switch (obj.event) {
+        case 'provider': {
+          const msgEl = body.closest('.msg');
+          const r = msgEl && msgEl.querySelector('.role');
+          if (r && obj.provider && obj.provider !== 'auto' && obj.provider !== 'cache') {
+            r.innerHTML = `Study Sphere AI <span class="model-badge">${escapeHtml(obj.provider)}</span>`;
+          }
+          break;
+        }
+        case 'token': {
+          if (firstToken) { body.innerHTML = ''; firstToken = false; }
+          full += obj.token || '';
+          body.innerHTML = '';
+          body.appendChild(renderMarkdown(full));
+          scrollToBottom();
+          break;
+        }
+        case 'cancelled':
+          cancelled = true;
+          break;
+        case 'error': {
+          const msg = friendlyError(obj.error || {});
+          body.innerHTML = '';
+          body.appendChild(renderMarkdown((full ? full + '\n\n' : '') + '⚠️ ' + msg));
+          break;
+        }
+        case 'start':
+        case 'done':
+        default:
+          break;
+      }
+    }
+  };
 
   try {
     const res = await fetch(`/api/chats/${state.currentId}/stream`, {
@@ -341,140 +403,33 @@ async function sendMessage() {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + SS.getToken(),
       },
-      body: JSON.stringify({
-        content: text,
-        model: state.model,
-      }),
+      body: JSON.stringify({ content: text, model: state.model }),
       signal: controller.signal,
     });
 
-    if (!res.ok || !res.body) throw new Error('Streaming failed');
+    if (!res.ok || !res.body) throw new Error('Streaming failed. Please try again.');
 
-    const reader = res.body.getReader();
-const decoder = new TextDecoder();
-let buffer = '';
+    reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
 
-while (true) {
-  const { value, done } = await reader.read();
-  if (done) break;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
 
-  buffer += decoder.decode(value, { stream: true });
+      buffer += decoder.decode(value, { stream: true });
 
-  const frames = buffer.split('\n\n');
-  buffer = frames.pop();
-
-  for (const frame of frames) {
-    const lines = frame.split('\n');
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed.startsWith('data:')) continue;
-
-      const payload = trimmed.slice(5).trim();
-
-      let obj;
-      try {
-        obj = JSON.parse(payload);
-      } catch {
-        continue;
-      }
-
-      switch (obj.event) {
-        case 'provider': {
-          const msgEl = body.closest('.msg');
-          const r = msgEl?.querySelector('.role');
-          if (r && obj.provider && obj.provider !== 'auto' && obj.provider !== 'cache') {
-            r.innerHTML = `Study Sphere AI <span class="model-badge">${escapeHtml(obj.provider)}</span>`;
-          }
-          break;
-        }
-
-        case 'token': {
-          if (firstToken) {
-            body.innerHTML = '';
-            firstToken = false;
-          }
-          full += obj.token || '';
-          body.innerHTML = '';
-          body.appendChild(renderMarkdown(full));
-          scrollToBottom();
-          break;
-        }
-
-        case 'cancelled':
-          cancelled = true;
-          break;
-
-        case 'error': {
-          const msg = friendlyError(obj.error || {});
-          body.innerHTML = '';
-          body.appendChild(renderMarkdown('⚠️ ' + msg));
-          break;
-        }
-      }
-    }
-  }
-}
-    if (!full.trim()) {
-      body.innerHTML = '';
-      body.appendChild(renderMarkdown('⚠️ No response generated'));
+      // Split on SSE frame boundary; keep the trailing partial in `buffer`.
+      const frames = buffer.split('\n\n');
+      buffer = frames.pop() || '';
+      for (const frame of frames) handleFrame(frame);
     }
 
-    refreshTitle();
+    // Flush any final frame that wasn't terminated by a blank line.
+    buffer += decoder.decode();
+    if (buffer.trim()) handleFrame(buffer);
 
-  } catch (err) {
-    if (err.name === 'AbortError') {
-      body.innerHTML = renderMarkdown('⏹️ Stopped');
-    } else {
-      body.innerHTML = renderMarkdown('⚠️ ' + err.message);
-    }
-  } finally {
-    if (state.controller === controller) {
-      state.controller = null;
-      state.streaming = false;
-      setStreamingUI(false);
-    }
-  }
-}
-          // Structured event protocol (see backend/routes/chat.py).
-          switch (obj.event) {
-            case 'provider': {
-              const msgEl = body.closest('.msg');
-              const r = msgEl && msgEl.querySelector('.role');
-              if (r && obj.provider && obj.provider !== 'auto' && obj.provider !== 'cache') {
-                r.innerHTML = `Study Sphere AI <span class="model-badge">${escapeHtml(obj.provider)}</span>`;
-              }
-              break;
-            }
-            case 'token': {
-              if (firstToken) { body.innerHTML = ''; firstToken = false; }
-              full += obj.token || '';
-              body.innerHTML = '';
-              body.appendChild(renderMarkdown(full));
-              scrollToBottom();
-              break;
-            }
-            case 'cancelled': {
-              cancelled = true;
-              break;
-            }
-            case 'error': {
-              const e = obj.error || {};
-              const msg = friendlyError(e);
-              full = full || '';
-              body.innerHTML = '';
-              body.appendChild(renderMarkdown((full ? full + '\n\n' : '') + '⚠️ ' + msg));
-              break;
-            }
-            case 'done':
-            case 'start':
-            default:
-              break;
-          }
-        }
-      }
-    }
-
+    // Empty-response / cancellation messaging.
     if (cancelled && !full.trim()) {
       body.innerHTML = '';
       body.appendChild(renderMarkdown('⏹️ Generation stopped.'));
@@ -483,28 +438,29 @@ while (true) {
       body.appendChild(renderMarkdown('⚠️ No response was generated. Please try again.'));
     }
 
-    // Refresh the chat list so the auto-title appears.
     refreshTitle();
   } catch (err) {
     if (err && err.name === 'AbortError') {
-      // We aborted on purpose (stop button / superseded). Keep partial output.
+      // Intentional abort (Stop button / superseded). Preserve partial output.
       if (!full.trim()) {
         body.innerHTML = '';
         body.appendChild(renderMarkdown('⏹️ Generation stopped.'));
       }
     } else {
       body.innerHTML = '';
-      body.appendChild(renderMarkdown('⚠️ ' + (err.message || 'Network error. Please try again.')));
+      body.appendChild(renderMarkdown('⚠️ ' + ((err && err.message) || 'Network error. Please try again.')));
     }
   } finally {
-    // Only clear streaming UI if THIS stream is still the active one
-    // (a superseding stream may have already taken over).
+    // Release the reader to avoid leaking the underlying stream.
+    if (reader) { try { reader.cancel(); } catch { /* noop */ } }
+    // Only reset UI/state if THIS stream is still the active one
+    // (a superseding stream may already have taken over).
     if (state.controller === controller) {
       state.controller = null;
       state.activeBody = null;
       state.streamChatId = null;
       setStreamingUI(false);
-      el.input.focus();
+      if (el.input) el.input.focus();
     }
   }
 }
@@ -555,39 +511,65 @@ async function downloadChat() {
 
 /* ---------- textarea auto-grow ---------- */
 function autoGrow() {
+  if (!el.input) return;
   el.input.style.height = 'auto';
   el.input.style.height = Math.min(el.input.scrollHeight, 180) + 'px';
 }
 
+function openMobileSidebar() {
+  if (el.side) el.side.classList.add('open');
+  if (el.overlay) el.overlay.classList.add('show');
+}
 function closeMobileSidebar() {
-  el.side.classList.remove('open');
-  el.overlay.classList.remove('show');
+  if (el.side) el.side.classList.remove('open');
+  if (el.overlay) el.overlay.classList.remove('show');
+}
+function toggleMobileSidebar() {
+  if (el.side && el.side.classList.contains('open')) closeMobileSidebar();
+  else openMobileSidebar();
 }
 
-/* ---------- Events ---------- */
-el.send.addEventListener('click', sendMessage);
-el.input.addEventListener('input', autoGrow);
-el.input.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    e.stopPropagation();
-    sendMessage();
-  }
+/* ---------- Events ----------
+   Every binding is null-guarded so a single missing DOM node can never throw
+   and break the whole chat script. */
+if (el.send) el.send.addEventListener('click', sendMessage);
+
+if (el.input) {
+  el.input.addEventListener('input', autoGrow);
+  el.input.addEventListener('keydown', (e) => {
+    // Enter sends; Shift+Enter inserts a newline (default behaviour).
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+}
+
+if (el.newBtn) el.newBtn.addEventListener('click', newChat);
+if (el.delBtn) el.delBtn.addEventListener('click', () => { if (state.currentId) deleteChat(state.currentId); });
+if (el.dlBtn) el.dlBtn.addEventListener('click', downloadChat);
+if (el.burger) el.burger.addEventListener('click', toggleMobileSidebar);
+if (el.overlay) el.overlay.addEventListener('click', closeMobileSidebar);
+// ESC closes the mobile conversation drawer.
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && el.side && el.side.classList.contains('open')) closeMobileSidebar();
 });
-el.newBtn.addEventListener('click', newChat);
-el.delBtn.addEventListener('click', () => state.currentId && deleteChat(state.currentId));
-el.dlBtn.addEventListener('click', downloadChat);
-el.burger.addEventListener('click', () => { el.side.classList.toggle('open'); el.overlay.classList.toggle('show'); });
-el.overlay.addEventListener('click', closeMobileSidebar);
 if (el.modelSelect) el.modelSelect.addEventListener('change', (e) => saveModel(e.target.value));
 
 /* ---------- Boot ---------- */
 (async function boot() {
-  await loadModels();
-  await loadChats();
-  const params = new URLSearchParams(location.search);
-  const id = parseInt(params.get('id'), 10);
-  if (id && state.chats.some((c) => c.id === id)) openChat(id);
-  else if (state.chats.length) openChat(state.chats[0].id);
-  else showEmptyState();
+  // The chat UI needs at least the messages container to function.
+  if (!el.messages) return;
+  try {
+    await loadModels();
+    await loadChats();
+    const params = new URLSearchParams(location.search);
+    const id = parseInt(params.get('id'), 10);
+    if (id && state.chats.some((c) => c.id === id)) openChat(id);
+    else if (state.chats.length) openChat(state.chats[0].id);
+    else showEmptyState();
+  } catch (err) {
+    console.error('Chat boot failed:', err);
+    showEmptyState();
+  }
 })();
