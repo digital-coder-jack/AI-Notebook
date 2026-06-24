@@ -63,8 +63,7 @@ def _validate_environment() -> None:
     # be set for AI features to work; the chat layer falls back automatically.
     ai_providers = {
         "KIMI_API_KEY": "primary AI provider (Moonshot Kimi)",
-        "GEMINI_API_KEY": "secondary AI provider (Google Gemini)",
-        "GROQ_API_KEY": "tertiary AI provider (Groq)",
+        "GROQ_API_KEY": "secondary AI provider (Groq)",
     }
     recommended = {
         "JWT_SECRET": "stable session signing secret (logins break on restart without it)",
@@ -72,7 +71,6 @@ def _validate_environment() -> None:
     }
     optional = {
         "KIMI_MODEL": "override default Kimi model (moonshot-v1-8k)",
-        "GEMINI_MODEL": "override default Gemini model (gemini-1.5-flash)",
         "GROQ_MODEL": "override default Groq model (llama-3.3-70b-versatile)",
         "MONGODB_URI_WEB": "MongoDB Atlas URI for web-analytics dashboard",
         "TELEGRAM_BOT_TOKEN": "Telegram bot integration",
@@ -257,7 +255,7 @@ async def get_dashboard_stats_endpoint(current_user: dict = Depends(current_user
     admin_id = os.environ.get("TELEGRAM_ADMIN_ID") # Reusing for web admin check
     if not admin_id or str(current_user.get("id")) != admin_id:
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+
     stats = web_analytics_db.get_dashboard_stats()
     return stats
 
