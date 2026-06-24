@@ -116,33 +116,25 @@ object StreamClient {
             return streamingClient.newCall(reqBuilder.build())
         }
 
-        // Holder so awaitClose can cancel whatever call is currently active.
-        object StreamClient {
-
-    @Volatile
-    private var activeCall: Call? = null
+        // FIX 1: Removed the illegal nested `object StreamClient { ... }` block.
+        // `activeCall` is simply a local variable captured by the awaitClose lambda.
+        var activeCall: Call? = null
 
         // ---- Retry loop ----
         var attempt = 0
         var backoff = INITIAL_BACKOFF_MS
 
-        while (
-    attempt <= MAX_RETRIES &&
-    !terminated &&
-    currentCoroutineContext().isActive
-) {
+        while (attempt <= MAX_RETRIES && !terminated && currentCoroutineContext().isActive) {
 
-            // Result of a single attempt: true = finished (terminal emitted or success),
-            // false = retryable transient failure.
+            // Result of a single attempt: DONE = finished (terminal emitted or success),
+            // RETRY = retryable transient failure.
             val attemptOutcome: AttemptResult = try {
 
-    val call = buildCall()   // ✅ FIX 1: DEFINE CALL HERE
-    activeCall = call        // optional but correct
+                // FIX 2: Removed the duplicate `val call = buildCall()` declaration.
+                val call = buildCall()
+                activeCall = call
 
-    val call = buildCall()
-activeCall = call
-
-call.execute().use { response ->
+                call.execute().use { response ->
                     when {
                         response.code == 401 || response.code == 403 -> {
                             emitTerminal(StreamEvent.Error("Unauthorized (${response.code})", retryable = false))
