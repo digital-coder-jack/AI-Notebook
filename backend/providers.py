@@ -42,13 +42,13 @@ logger = logging.getLogger("study-sphere.providers")
 # Groq natively), so a single request/response code path handles both.
 PROVIDERS: dict[str, dict] = {
     "kimi": {
-        "label": "Kimi (Moonshot)",
+        "label": "Study Sphere Pro",
         "env": "KIMI_API_KEY",
         "url": "https://api.moonshot.ai/v1/chat/completions",
         "default_model": os.environ.get("KIMI_MODEL", "moonshot-v1-8k"),
     },
     "groq": {
-        "label": "Groq",
+        "label": "Study Sphere Lite",
         "env": "GROQ_API_KEY",
         "url": "https://api.groq.com/openai/v1/chat/completions",
         "default_model": os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
