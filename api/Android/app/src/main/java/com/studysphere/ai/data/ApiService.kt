@@ -35,7 +35,17 @@ interface ApiService {
     @DELETE("api/auth/account")
     suspend fun deleteAccount(): MessageResponse
 
-    /* ---------- Chats ---------- */
+    /* ---------- Chats (CRUD ONLY) ----------
+     *
+     * SINGLE SOURCE OF TRUTH:
+     * Sending a message and receiving an AI reply is STREAMING-ONLY and lives
+     * exclusively in [StreamClient] via  POST api/chats/{id}/stream  (SSE).
+     *
+     * The backend exposes NO REST "send message" endpoint. Do NOT add a
+     * `@POST("api/chats/{id}")` here — that route only accepts GET/PUT/DELETE
+     * server-side and would fail with 405 Method Not Allowed / HTML fallback.
+     * Keep these declarations limited to chat metadata CRUD.
+     */
     @GET("api/chats")
     suspend fun listChats(): ChatListResponse
 
