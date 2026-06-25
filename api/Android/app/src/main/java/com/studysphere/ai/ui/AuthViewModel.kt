@@ -96,4 +96,5 @@ class AuthViewModel(private val repo: Repository) : ViewModel() {
         else -> e.message ?: "Something went wrong."
     }
 }
-   
+}
+
