@@ -132,7 +132,12 @@ fun ChatScreen(
         ) {
             ChatHeader(
                 title = if (state.streaming) "Thinking…" else state.currentTitle,
-                model = state.model,
+                when (model) {
+    "kimi" -> "Study Sphere Pro"
+    "groq" -> "Study Sphere Lite"
+    "auto" -> "Auto"
+    else   -> model.replaceFirstChar { it.uppercase() }
+},
                 onNewChat = { haptic(); vm.startNewChat(); editing = null; input = "" },
                 onHistory = { haptic(); showHistory = true },
                 onModel = { haptic(); showModels = true }
