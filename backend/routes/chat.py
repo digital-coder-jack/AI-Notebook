@@ -379,7 +379,6 @@ async def homework(body: QuestionIn, user=Depends(auth.current_user)):
 class ModelIn(BaseModel):
     model: str = Field(min_length=1, max_length=20)
 
-
 @router.get("/ai/models")
 async def ai_models(user=Depends(auth.current_user)):
     """List selectable providers + the user's current selection."""
@@ -388,6 +387,11 @@ async def ai_models(user=Depends(auth.current_user)):
         "selected": _user_model(user),
         "options": ["auto"] + [p["id"] for p in snapshot["providers"]],
         "providers": snapshot["providers"],
+        "display_names": {                      # ← ADD THESE 5 LINES
+            "auto": "Auto",
+            "kimi": "Study Sphere Pro",
+            "groq": "Study Sphere Lite",
+        }
     }
 
 
