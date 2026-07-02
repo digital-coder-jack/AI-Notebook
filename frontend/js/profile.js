@@ -1,5 +1,5 @@
 /* =====================================================================
-   Study Sphere AI  -  profile.js  (2026 Premium Settings)
+   AI Notebook  -  profile.js  (2026 Premium Settings)
    ---------------------------------------------------------------------
    Powers the expanded settings page: Profile, Security, Privacy,
    Appearance, Dashboard, Notifications, AI Preferences, Accessibility.
@@ -459,7 +459,7 @@ function downloadData() {
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'study-sphere-data.json';
+  a.download = 'ai-notebook-data.json';
   a.click();
   URL.revokeObjectURL(a.href);
   SS.toast('Your data was downloaded');

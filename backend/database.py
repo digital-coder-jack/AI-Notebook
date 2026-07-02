@@ -266,6 +266,9 @@ def init_db() -> None:
         for ddl in (
             "ALTER TABLE notes ADD COLUMN pinned INTEGER DEFAULT 0",
             "ALTER TABLE notes ADD COLUMN favorite INTEGER DEFAULT 0",
+            # Onboarding wizard answers (education level, goals, interests,
+            # study time, learning style, experience, security preferences).
+            "ALTER TABLE user_settings ADD COLUMN onboarding TEXT",
         ):
             try:
                 conn.execute(ddl)
@@ -680,7 +683,7 @@ def get_user_settings(user_id: int) -> sqlite3.Row | None:
 
 def update_user_settings(user_id: int, category: str, data: dict) -> bool:
     """Update a specific category of settings (appearance, dashboard, etc)."""
-    valid_categories = ["appearance", "dashboard", "notifications", "ai_settings"]
+    valid_categories = ["appearance", "dashboard", "notifications", "ai_settings", "onboarding"]
     if category not in valid_categories:
         return False
     
