@@ -38,7 +38,25 @@ The original Telegram bot is **fully preserved** — it now benefits from the sa
 
 ---
 
-## 🎨 2026 Premium Redesign (Study Sphere)
+## ✨ AI Notebook Rebrand + Glass Sidebar & Onboarding (latest)
+
+The project was fully **renamed from “AI Notebook” to “AI Notebook”** across every surface (dashboard, navbar, sidebar, login, signup, guest mode, metadata, titles, SEO, footer, settings, mobile UI, docs, loading screens). The JWT-salt constant and legacy deploy URL strings were intentionally left untouched so existing sessions and deployments keep working.
+
+**Sidebar — premium glass redesign** (`js/sidebar.js` + `css/sidebar.css`)
+- **Expanded**: floating glassmorphism panel (22px radius, blur + saturation, layered shadows) detached from the viewport edge, grouped navigation — **Workspace / Study / Library / Account / Support** — with meaningful Font Awesome icons per feature, gradient active pill + accent bar, smooth hover micro-interactions.
+- **Collapsed**: not a shrunk sidebar but a **macOS-Dock-style floating vertical glass rail (~76px)** — centered 46px icon tiles, active-item glow ring, section dividers as hairlines, hover scale + **tooltips**, profile dropdown opens as a floating panel to the right.
+- **Expand/collapse button moved directly below the logo** (Logo → toggle → nav → footer), full-width pill when expanded, square icon button in dock mode.
+- **Logo & avatar**: circular glass container with a conic-gradient glow ring and spring hover animation; avatar is a circular gradient-ring badge with status dot.
+- Accessibility: `aria-current`, `aria-expanded`, focus-visible outlines, 44px+ touch targets, keyboard navigation, `prefers-reduced-motion` support. Mobile keeps the slide-in drawer with full labels.
+
+**Onboarding wizard** (`js/onboarding.js` + `css/onboarding.css`)
+- Shown **once after every auth method** (login / signup / guest) on the dashboard; a glass modal with animated step progress bar, emoji step headers, auto-advancing single-choice steps and multi-select chips.
+- Steps: **Education level → Primary study goal (14 options incl. UPSC/JEE/NEET/GATE) → Study interests (21 multi-select chips) → Daily study time → Preferred learning style → Experience level → Account & security preferences** (display name, optional recovery email/phone, 2FA toggle, data-sync consent, notification + privacy preferences). *No passwords, banking details or IDs are ever requested.*
+- Answers persist to the backend via a new `onboarding` category on `PUT /api/auth/settings` (idempotent `ALTER TABLE user_settings ADD COLUMN onboarding` migration) and mirror to `localStorage`; the dashboard greeting personalizes to the chosen goal. Skippable at any point; confetti finish screen with a summary of picks.
+
+---
+
+## 🎨 2026 Premium Redesign
 
 A full **premium UI/UX overhaul** giving the app the look & feel of Notion / Linear / Vercel / Raycast / Stripe Dashboard — **minimal yet premium**. No functionality, auth, API, or Android code was removed; existing features were redesigned, not replaced.
 

@@ -1,5 +1,5 @@
 /* =====================================================================
-   Study Sphere AI  -  command-palette.js
+   AI Notebook  -  command-palette.js
    ---------------------------------------------------------------------
    A Raycast-style global command palette + instant search.
      • Opens with  Ctrl/Cmd + K  (or "/" when not typing, or .search-trigger)

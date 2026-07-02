@@ -1,5 +1,5 @@
 /* =====================================================================
-   Study Sphere AI — topic.js
+   AI Notebook — topic.js
    The Topic Workspace (AI Learning OS).
    URL: /topic?id=123  or  /topic?t=Machine%20Learning (creates/reuses)
    Tabs: overview · summary · notes · mindmap · roadmap · timeline ·
@@ -85,7 +85,7 @@
     const h1 = $('#topicTitle');
     h1.classList.remove('skeleton');
     h1.textContent = topic.title;
-    document.title = topic.title + ' · Study Sphere AI';
+    document.title = topic.title + ' · AI Notebook';
     updateFlagButtons();
   }
 

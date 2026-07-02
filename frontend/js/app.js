@@ -47,6 +47,8 @@ const SS = (() => {
   function clearSession() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    // Next account gets its own onboarding check (server-side state decides).
+    localStorage.removeItem('ainb_onboarded');
   }
   function isAuthed() { return !!getToken(); }
   function logout() { clearSession(); window.location.href = '/'; }

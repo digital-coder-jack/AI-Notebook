@@ -1,69 +1,188 @@
 /* =====================================================================
-   Study Sphere AI  -  sidebar.css  (2026 Premium Redesign)
+   AI Notebook  -  sidebar.css  (Premium Glass Redesign)
    ---------------------------------------------------------------------
-   Layers OVER /css/sidebar-mobile.css (which keeps the proven
-   positioning / drawer / collapse mechanics). This file restyles the
-   surface, navigation and the new profile-footer block with its
-   collapsed / expanded states + dropdown.
+   Layers OVER /css/sidebar-mobile.css (positioning / drawer mechanics).
+   Expanded  : floating glass panel, rounded 22px, grouped nav,
+               collapse button BELOW the logo.
+   Collapsed : macOS-dock style floating vertical glass rail (~76px),
+               centered icons, glow on active, tooltips on hover.
    ===================================================================== */
 
-/* ---- Surface ---- */
+/* ---- Floating glass surface ---- */
 .sidebar {
-  width: 286px;
-  padding: 1.3rem 0.85rem;
-  background: var(--surface-glass);
+  width: 288px;
+  margin: 12px 0 12px 12px;
+  height: calc(100vh - 24px);
+  height: calc(100dvh - 24px);
+  padding: 1.1rem 0.85rem;
+  border-radius: 22px;
+  border: 1px solid var(--border);
   border-right: 1px solid var(--border);
-  backdrop-filter: blur(26px) saturate(150%);
-  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  background: var(--surface-glass);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 18px 50px rgba(0, 0, 0, 0.35);
+  transition:
+    width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.32s ease;
 }
-.sidebar.collapsed { width: 84px; }
 
-/* Soften the legacy animated glow */
-.sidebar::before { opacity: 0.5; }
+/* Collapsed → floating vertical dock */
+.sidebar.collapsed {
+  width: 76px;
+  padding: 1.1rem 0.6rem;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 22px 60px rgba(0, 0, 0, 0.45),
+    0 0 40px hsl(var(--accent-h) 90% 60% / 0.06);
+}
 
-/* ---- Header ---- */
+/* Soften the legacy animated glow sheen */
+.sidebar::before { opacity: 0.45; border-radius: inherit; }
+
+/* =====================================================================
+   HEADER — logo on top, collapse button DIRECTLY BELOW the logo
+   ===================================================================== */
 .side-head {
-  margin-bottom: 1rem;
-  padding: 0.2rem 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+  padding: 0.35rem 0.4rem 0.95rem;
   border-bottom: 1px solid var(--border-light);
 }
-.brand-text { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; }
-.brand .logo, .brand .logo img, .brand .logo .logo-img { width: 36px; height: 36px; }
 
+.brand {
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: center;
+  text-align: center;
+}
+
+/* Circular glass logo container with glow ring */
+.brand .logo {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--glass-2);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 0 0 4px hsl(var(--accent-h) 90% 60% / 0.08),
+    0 8px 24px hsl(var(--accent-h) 90% 50% / 0.25);
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+}
+.brand .logo::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  padding: 1.5px;
+  background: conic-gradient(from 140deg, var(--accent), var(--accent-2), transparent 65%, var(--accent));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.brand:hover .logo {
+  transform: scale(1.07) rotate(-3deg);
+  box-shadow:
+    0 0 0 6px hsl(var(--accent-h) 90% 60% / 0.12),
+    0 12px 32px hsl(var(--accent-h) 90% 50% / 0.4);
+}
+.brand .logo img,
+.brand .logo .logo-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.brand-text {
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+/* Collapse button — full-width pill under the logo */
 .collapse-btn {
-  width: 30px; height: 30px;
-  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 34px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
   background: var(--glass-2);
   border: 1px solid var(--border);
   color: var(--text-dim);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
-.collapse-btn:hover { background: var(--glass-strong); border-color: var(--accent-ring); color: var(--accent); transform: scale(1.06); }
+.collapse-btn:hover {
+  background: var(--glass-strong);
+  border-color: var(--accent-ring);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+.collapse-btn:active { transform: scale(0.97); }
+.collapse-btn .cb-label { line-height: 1; }
 
-/* ---- Navigation ---- */
-.side-nav { gap: 0.2rem; }
+/* =====================================================================
+   NAVIGATION
+   ===================================================================== */
+.side-nav { gap: 0.18rem; }
 
 .side-nav a {
+  position: relative;
   gap: 0.85rem;
-  padding: 0.7rem 0.85rem;
-  border-radius: var(--radius-md);
+  padding: 0.66rem 0.85rem;
+  min-height: 44px;
+  border-radius: 12px;
   color: var(--text-dim);
   font-weight: 500;
   font-size: var(--fs-sm);
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
-.side-nav a i { width: 22px; height: 22px; font-size: 1.05rem; }
+.side-nav a i {
+  width: 22px;
+  height: 22px;
+  font-size: 1.02rem;
+  display: grid;
+  place-items: center;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
 .side-nav a:hover { background: var(--glass-2); color: var(--text); transform: translateX(3px); }
+.side-nav a:hover i { transform: scale(1.12); }
+.side-nav a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
-/* Active item — soft tinted pill + gradient accent bar */
+/* Active item — tinted pill + gradient accent bar + soft glow */
 .side-nav a.active {
   background: var(--accent-soft);
   color: var(--accent);
-  box-shadow: none;
+  box-shadow: 0 0 18px hsl(var(--accent-h) 90% 60% / 0.10) inset;
 }
 .side-nav a.active i { color: var(--accent); }
 .side-nav a::before {
   width: 3px;
-  height: 60%;
+  height: 62%;
   border-radius: 0 4px 4px 0;
   background: var(--grad);
 }
@@ -74,89 +193,124 @@
   background: var(--grad);
   color: #fff;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.55rem;
   box-shadow: var(--shadow-accent);
-  border-radius: var(--radius-md);
+  border-radius: 12px;
 }
-.side-nav a.nav-primary:hover { color: #fff; filter: brightness(1.06); transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+.side-nav a.nav-primary:hover {
+  color: #fff;
+  filter: brightness(1.07);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
 .side-nav a.nav-primary i { color: #fff; }
 
+/* Section labels */
 .nav-section {
-  font-size: var(--fs-xs);
+  font-size: 0.66rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--text-muted);
-  padding: 1rem 0.85rem 0.4rem;
+  padding: 0.95rem 0.85rem 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-/* ---- Footer ---- */
+/* =====================================================================
+   FOOTER
+   ===================================================================== */
 .side-foot {
   border-top: 1px solid var(--border-light);
-  padding-top: 0.9rem;
-  margin-top: 0.6rem;
-  gap: 0.55rem;
+  padding-top: 0.85rem;
+  margin-top: 0.55rem;
+  gap: 0.5rem;
 }
 
 .side-theme {
   gap: 0.8rem;
-  padding: 0.65rem 0.85rem;
-  border-radius: var(--radius-md);
+  padding: 0.62rem 0.85rem;
+  min-height: 44px;
+  border-radius: 12px;
   background: var(--glass);
   border: 1px solid var(--border);
   color: var(--text-dim);
   font-size: var(--fs-sm);
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 .side-theme:hover { background: var(--glass-2); color: var(--text); border-color: var(--accent-ring); }
 
-/* =====================================================================
-   PROFILE CARD  (new)
-   ===================================================================== */
+/* ---- Profile card ---- */
 .side-user-card {
   position: relative;
   background: var(--glass);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   padding: 0.4rem;
-  transition: border-color var(--dur-base) var(--ease-smooth), background var(--dur-base) var(--ease-smooth);
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
 }
-.side-user-card:hover { border-color: var(--accent-ring); background: var(--glass-2); }
+.side-user-card:hover {
+  border-color: var(--accent-ring);
+  background: var(--glass-2);
+  box-shadow: 0 0 24px hsl(var(--accent-h) 90% 60% / 0.10);
+}
 
 .side-user-trigger {
   display: flex;
   align-items: center;
   gap: 0.7rem;
   width: 100%;
-  padding: 0.4rem;
+  padding: 0.35rem;
   background: none;
   border: none;
   color: inherit;
   cursor: pointer;
   text-align: left;
   font: inherit;
-  border-radius: var(--radius-md);
+  border-radius: 12px;
 }
+.side-user-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* Circular glowing avatar */
 .side-user-trigger .avatar {
   position: relative;
-  width: 38px; height: 38px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
-  border-radius: var(--radius-md);
-  background: var(--grad);
-  display: grid; place-items: center;
-  font-weight: 700;
-  color: #fff;
-  box-shadow: var(--shadow-accent);
-  transition: transform var(--dur-base) var(--ease-spring);
+  border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(from 200deg, var(--accent), var(--accent-2), var(--accent));
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 18px hsl(var(--accent-h) 90% 50% / 0.35);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
 }
-.side-user-card:hover .avatar { transform: scale(1.05); }
+.side-user-trigger .avatar .avatar-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--grad);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.side-user-card:hover .avatar {
+  transform: scale(1.08);
+  box-shadow: 0 8px 26px hsl(var(--accent-h) 90% 50% / 0.5);
+}
 
 .side-user-trigger .avatar .status-dot {
   position: absolute;
-  right: -2px; bottom: -2px;
-  width: 11px; height: 11px;
+  right: -1px;
+  bottom: -1px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--success);
   border: 2px solid var(--bg-1);
+  z-index: 1;
 }
 .side-user-trigger .avatar .status-dot.guest { background: var(--warning); }
 
@@ -165,93 +319,221 @@
   display: block;
   font-size: var(--fs-sm);
   font-weight: 600;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .side-user-trigger .meta span {
   display: block;
   font-size: var(--fs-xs);
   color: var(--text-muted);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .side-user-trigger .chev {
   color: var(--text-muted);
   font-size: 0.85rem;
-  transition: color var(--dur-fast);
+  transition: color 0.15s ease;
 }
 .side-user-card:hover .chev { color: var(--text-dim); }
 
-/* Collapsed quick settings shortcut — hidden when expanded */
-.side-user-quick {
-  display: none;
-  position: absolute;
-  top: 50%; right: 0.4rem;
-  transform: translateY(-50%);
-  width: 30px; height: 30px;
-  border-radius: var(--radius-sm);
-  place-items: center;
-  color: var(--text-dim);
-  background: var(--glass-2);
-  border: 1px solid var(--border);
-}
-
-/* Dropdown menu position (expanded) */
+/* Dropdown menu position */
 .side-user-menu {
   position: absolute;
   bottom: calc(100% + 8px);
-  left: 0; right: 0;
+  left: 0;
+  right: 0;
   transform-origin: bottom center;
   transform: translateY(8px) scale(0.97);
 }
 .side-user-menu.open { transform: translateY(0) scale(1); }
 
 /* =====================================================================
-   COLLAPSED (desktop) — icons only, centered + profile compact
+   COLLAPSED (desktop) — floating dock: icons centered, tooltips, glow
    ===================================================================== */
-.sidebar.collapsed .side-nav a { padding: 0.7rem; justify-content: center; }
-.sidebar.collapsed .side-nav a span { display: none; }
-.sidebar.collapsed .side-nav a:hover { transform: none; }
+.sidebar.collapsed .side-head { padding: 0.3rem 0 0.85rem; gap: 0.55rem; }
+.sidebar.collapsed .brand .logo { width: 46px; height: 46px; }
+.sidebar.collapsed .brand .logo img { width: 32px; height: 32px; }
+.sidebar.collapsed .brand-text { display: none; }
 
-.sidebar.collapsed .side-theme { justify-content: center; padding: 0.65rem; }
+.sidebar.collapsed .collapse-btn {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 12px;
+}
+.sidebar.collapsed .collapse-btn .cb-label { display: none; }
+
+.sidebar.collapsed .side-nav a {
+  padding: 0;
+  width: 46px;
+  height: 46px;
+  min-height: 46px;
+  margin: 0 auto;
+  justify-content: center;
+  border-radius: 14px;
+}
+.sidebar.collapsed .side-nav a span { display: none; }
+.sidebar.collapsed .side-nav a:hover { transform: scale(1.1); }
+.sidebar.collapsed .side-nav a::before { display: none; }
+
+/* Active item glow (dock style) */
+.sidebar.collapsed .side-nav a.active {
+  box-shadow:
+    0 0 0 1px var(--accent-ring),
+    0 0 20px hsl(var(--accent-h) 90% 60% / 0.35);
+}
+
+/* Section separators become thin lines */
+.sidebar.collapsed .nav-section {
+  padding: 0.45rem 0;
+  height: auto;
+}
+.sidebar.collapsed .nav-section span { display: none; }
+.sidebar.collapsed .nav-section::after {
+  content: '';
+  display: block;
+  width: 26px;
+  height: 1px;
+  margin: 0 auto;
+  background: var(--border);
+}
+
+.sidebar.collapsed .side-theme {
+  width: 46px;
+  height: 46px;
+  min-height: 46px;
+  margin: 0 auto;
+  justify-content: center;
+  padding: 0;
+  border-radius: 14px;
+}
 .sidebar.collapsed .side-theme span { display: none; }
 
-.sidebar.collapsed .side-user-card { padding: 0.3rem; }
-.sidebar.collapsed .side-user-trigger { justify-content: center; padding: 0.2rem; }
+.sidebar.collapsed .side-user-card {
+  padding: 0.25rem;
+  border-radius: 50%;
+  width: 52px;
+  margin: 0 auto;
+  border-color: transparent;
+  background: transparent;
+}
+.sidebar.collapsed .side-user-trigger { justify-content: center; padding: 0; }
 .sidebar.collapsed .side-user-trigger .meta,
 .sidebar.collapsed .side-user-trigger .chev { display: none; }
-.sidebar.collapsed .side-user-menu { display: none; }
-/* Collapsed: show the quick settings shortcut beside the avatar */
-.sidebar.collapsed .side-user-quick { display: grid; }
-.sidebar.collapsed .side-user-quick:hover { color: var(--accent); border-color: var(--accent-ring); }
 
-/* Tooltips for collapsed nav (use data-tooltip from components.css) */
-.sidebar.collapsed .side-nav a:hover::after {
+/* Collapsed: dropdown opens as a floating panel to the right */
+.sidebar.collapsed .side-user-menu {
+  left: calc(100% + 12px);
+  right: auto;
+  bottom: 0;
+  min-width: 190px;
+  transform-origin: bottom left;
+}
+
+/* Tooltips for collapsed nav + footer controls */
+.sidebar.collapsed .side-nav a:hover::after,
+.sidebar.collapsed .side-theme:hover::after,
+.sidebar.collapsed .collapse-btn:hover::after,
+.sidebar.collapsed .side-user-trigger:hover::after {
   content: attr(title);
   position: absolute;
-  left: calc(100% + 14px);
+  left: calc(100% + 16px);
   top: 50%;
   transform: translateY(-50%);
   background: var(--menu-bg);
   color: var(--text);
-  padding: 0.45rem 0.7rem;
-  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
   font-size: var(--fs-xs);
+  font-weight: 600;
   white-space: nowrap;
   border: 1px solid var(--border);
   box-shadow: var(--shadow-md);
   z-index: 1001;
   pointer-events: none;
+  animation: tooltipIn 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sidebar.collapsed .side-theme,
+.sidebar.collapsed .collapse-btn,
+.sidebar.collapsed .side-user-trigger { position: relative; }
+
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translateY(-50%) translateX(-6px); }
+  to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .side-nav a,
+  .brand .logo,
+  .side-user-trigger .avatar { transition: none !important; animation: none !important; }
 }
 
 /* =====================================================================
-   MOBILE — restore full profile inside drawer
+   MOBILE — slide-in drawer: restore full-width layout
    ===================================================================== */
 @media (max-width: 880px) {
-  .sidebar { width: min(86vw, 320px); border-radius: 0 24px 24px 0; }
-  .sidebar.collapsed .side-user-trigger { justify-content: flex-start; padding: 0.4rem; }
-  .sidebar.collapsed .side-user-trigger .meta,
-  .sidebar.collapsed .side-user-trigger .chev { display: block; }
-  .sidebar.collapsed .side-user-menu { display: block; }
-  .sidebar.collapsed .side-user-quick { display: none; }
-  .sidebar.collapsed .side-theme { justify-content: flex-start; padding: 0.65rem 0.85rem; }
+  .sidebar {
+    width: min(86vw, 330px);
+    margin: 0;
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0 24px 24px 0;
+  }
+  .sidebar .side-head { flex-direction: column; }
+
+  /* Collapsed state is a desktop concept — undo it inside the drawer */
+  .sidebar.collapsed { width: min(86vw, 330px); padding: 1.1rem 0.85rem; }
+  .sidebar.collapsed .brand-text { display: inline; }
+  .sidebar.collapsed .brand .logo { width: 56px; height: 56px; }
+  .sidebar.collapsed .brand .logo img { width: 40px; height: 40px; }
+  .sidebar.collapsed .collapse-btn { display: none; }
+  .sidebar.collapsed .side-nav a {
+    width: auto;
+    height: auto;
+    min-height: 46px;
+    margin: 0;
+    padding: 0.7rem 0.9rem;
+    justify-content: flex-start;
+    border-radius: 12px;
+  }
+  .sidebar.collapsed .side-nav a span { display: inline; }
+  .sidebar.collapsed .side-nav a::before { display: block; }
+  .sidebar.collapsed .nav-section { padding: 0.95rem 0.85rem 0.35rem; }
+  .sidebar.collapsed .nav-section span { display: inline; }
+  .sidebar.collapsed .nav-section::after { display: none; }
+  .sidebar.collapsed .side-theme {
+    width: auto;
+    height: auto;
+    min-height: 44px;
+    margin: 0;
+    justify-content: flex-start;
+    padding: 0.62rem 0.85rem;
+    border-radius: 12px;
+  }
   .sidebar.collapsed .side-theme span { display: inline; }
+  .sidebar.collapsed .side-user-card {
+    width: auto;
+    padding: 0.4rem;
+    border-radius: 16px;
+    border-color: var(--border);
+    background: var(--glass);
+  }
+  .sidebar.collapsed .side-user-trigger { justify-content: flex-start; padding: 0.35rem; }
+  .sidebar.collapsed .side-user-trigger .meta { display: block; }
+  .sidebar.collapsed .side-user-trigger .chev { display: inline-block; }
+  .sidebar.collapsed .side-user-menu {
+    left: 0;
+    right: 0;
+    bottom: calc(100% + 8px);
+    transform-origin: bottom center;
+  }
+  /* No hover tooltips on touch */
+  .sidebar.collapsed .side-nav a:hover::after,
+  .sidebar.collapsed .side-theme:hover::after,
+  .sidebar.collapsed .collapse-btn:hover::after,
+  .sidebar.collapsed .side-user-trigger:hover::after { display: none; }
 }

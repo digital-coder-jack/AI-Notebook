@@ -1,5 +1,5 @@
 /* =====================================================================
-   Study Sphere AI  -  motion.js
+   AI Notebook  -  motion.js
    ---------------------------------------------------------------------
    Lightweight, dependency-free motion system (the best animation
    approach compatible with this vanilla multi-page app). Provides the

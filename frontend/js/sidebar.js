@@ -1,32 +1,26 @@
 /* =====================================================================
-   Study Sphere AI  -  sidebar.js  (2026 Premium Redesign)
+   AI Notebook  -  sidebar.js  (Premium Glass Redesign)
    ---------------------------------------------------------------------
-   A single-source sidebar renderer powering every authenticated page.
-   Inspired by Notion · Linear · Discord · Raycast.
+   Single-source sidebar renderer powering every authenticated page.
+   Inspired by ChatGPT · Perplexity · Vercel · Linear · macOS Dock.
 
-   Layout
-     ┌──────────────────────────────┐
-     │  LOGO  +  collapse button     │  ← header
-     ├──────────────────────────────┤
-     │  New chat (primary)           │
-     │  ── Workspace ──              │  ← nav (scrollable)
-     │  AI Models / History / …      │
-     │  ── Insights ──               │
-     │  Analytics / Settings         │
-     ├──────────────────────────────┤
-     │  THEME TOGGLE                 │  ← footer
-     │  ┌──────────────────────────┐ │
-     │  │ avatar  name      ⋮      │ │  ← PROFILE block w/ dropdown
-     │  │         email            │ │
-     │  └──────────────────────────┘ │
-     └──────────────────────────────┘
+   Layout (expanded)                    Layout (collapsed = floating dock)
+     ┌──────────────────────────┐          ┌──────┐
+     │        ◉ LOGO            │          │  ◉   │  ← circular glass logo
+     │      AI Notebook         │          │ ⇔   │  ← expand button BELOW logo
+     │  [⇔ collapse button]     │          │ ──── │
+     ├──────────────────────────┤          │  ✚   │  ← new chat
+     │  ✚ New Chat              │          │  🏠  │
+     │  ── WORKSPACE ──         │          │  📝  │  ← icons centered,
+     │  🏠 Dashboard …          │          │  …   │     tooltips on hover
+     │  ── STUDY ──             │          │ ──── │
+     │  … groups …              │          │  🌙  │
+     ├──────────────────────────┤          │  ◉   │  ← avatar
+     │  🌙 theme  ◉ profile     │          └──────┘
+     └──────────────────────────┘
 
-   Collapsed (desktop): icons only, centered, profile shows avatar +
-   notification dot + settings shortcut. Expanded: full profile + ⋮ menu.
-
-   Styling lives in /css/sidebar.css (new) which layers over the legacy
-   /css/sidebar-mobile.css. Behaviour preserved (mobile drawer, collapse
-   persistence, keyboard nav, ripples, guest mode).
+   Behaviour preserved: guest auto-login, mobile drawer, collapse
+   persistence, keyboard nav, profile dropdown.
    ===================================================================== */
 
 (function () {
@@ -50,31 +44,45 @@
   var active = aside.dataset.active || '';
   var user = SS.getUser();
 
-  /* ---- Navigation catalogue ---- */
+  /* ---- Navigation catalogue (grouped) ---- */
   var items = [
     { id: 'chat', href: '/chat', icon: 'fa-pen-to-square', label: 'New Chat', primary: true },
+
     { section: 'Workspace' },
-    { id: 'dashboard', href: '/dashboard', icon: 'fa-gauge-high', label: 'Dashboard' },
-    { id: 'topics', href: '/dashboard#ai-workspace', icon: 'fa-book-open-reader', label: 'Topics' },
-    { id: 'models', href: '/chat#models', icon: 'fa-microchip', label: 'AI Models' },
-    { id: 'history', href: '/dashboard#history', icon: 'fa-clock-rotate-left', label: 'History' },
-    { id: 'notes', href: '/tools#notes', icon: 'fa-note-sticky', label: 'Notes' },
-    { id: 'projects', href: '/tools#planner', icon: 'fa-diagram-project', label: 'Projects' },
-    { id: 'prompts', href: '/tools#flashcards', icon: 'fa-lightbulb', label: 'Saved Prompts' },
-    { id: 'files', href: '/tools#summarizer', icon: 'fa-folder-open', label: 'Files' },
-    { section: 'Insights' },
-    { id: 'analytics', href: '/analytics', icon: 'fa-chart-pie', label: 'Analytics' },
-    { id: 'settings', href: '/settings', icon: 'fa-gear', label: 'Settings' },
+    { id: 'dashboard',  href: '/dashboard',              icon: 'fa-house',             label: 'Dashboard' },
+    { id: 'notes',      href: '/tools#notes',            icon: 'fa-note-sticky',       label: 'AI Notes' },
+    { id: 'summarizer', href: '/tools#summarizer',       icon: 'fa-file-lines',        label: 'AI Summarizer' },
+    { id: 'mindmap',    href: '/dashboard#ai-workspace', icon: 'fa-diagram-project',   label: 'AI Mind Map' },
+    { id: 'roadmap',    href: '/dashboard#ai-workspace', icon: 'fa-route',             label: 'AI Roadmap' },
+
+    { section: 'Study' },
+    { id: 'flashcards', href: '/tools#flashcards',       icon: 'fa-layer-group',       label: 'Flashcards' },
+    { id: 'quiz',       href: '/tools#quiz',             icon: 'fa-circle-check',      label: 'Practice Quiz' },
+    { id: 'planner',    href: '/tools#planner',          icon: 'fa-calendar-days',     label: 'Study Planner' },
+    { id: 'homework',   href: '/tools#homework',         icon: 'fa-graduation-cap',    label: 'Homework Help' },
+
+    { section: 'Library' },
+    { id: 'topics',     href: '/topics',                 icon: 'fa-folder-open',       label: 'Collections' },
+    { id: 'history',    href: '/dashboard#history',      icon: 'fa-clock-rotate-left', label: 'History' },
+
+    { section: 'Account' },
+    { id: 'analytics',  href: '/analytics',              icon: 'fa-chart-line',        label: 'Progress' },
+    { id: 'profile',    href: '/profile',                icon: 'fa-user',              label: 'Profile' },
+    { id: 'settings',   href: '/settings',               icon: 'fa-gear',              label: 'Settings' },
+
+    { section: 'Support' },
+    { id: 'telegram',   href: '/telegram',               icon: 'fa-paper-plane',       label: 'Telegram Bot' },
+    { id: 'help',       href: '/telegram#help',          icon: 'fa-circle-question',   label: 'Help & Feedback' },
   ];
 
   var navHtml = items.map(function (it) {
     if (it.section) {
-      return '<div class="nav-section" role="separator">' + escapeHtml(it.section) + '</div>';
+      return '<div class="nav-section" role="presentation" aria-hidden="true"><span>' + escapeHtml(it.section) + '</span></div>';
     }
     var classes = [it.id === active ? 'active' : '', it.primary ? 'nav-primary' : ''].filter(Boolean).join(' ');
     return '' +
       '<a class="' + classes + '" href="' + escapeHtml(it.href) + '" title="' + escapeHtml(it.label) + '" ' +
-      'role="menuitem" aria-label="' + escapeHtml(it.label) + '" data-tooltip-pos="right">' +
+      'aria-label="' + escapeHtml(it.label) + '"' + (it.id === active ? ' aria-current="page"' : '') + '>' +
         '<i class="fas ' + escapeHtml(it.icon) + '" aria-hidden="true"></i>' +
         '<span>' + escapeHtml(it.label) + '</span>' +
       '</a>';
@@ -88,13 +96,16 @@
   aside.setAttribute('role', 'complementary');
   aside.innerHTML =
     '<div class="side-head">' +
-      '<a class="brand" href="/dashboard" aria-label="Study Sphere home">' +
-        '<span class="logo" aria-hidden="true"><img src="/assets/logo.png" alt="Study Sphere logo" class="logo-img" /></span>' +
-        '<span class="brand-text">Study <span class="grad-text">Sphere</span></span>' +
+      '<a class="brand" href="/dashboard" aria-label="AI Notebook home">' +
+        '<span class="logo" aria-hidden="true">' +
+          '<img src="/assets/logo.png" alt="" class="logo-img" />' +
+        '</span>' +
+        '<span class="brand-text">AI <span class="grad-text">Notebook</span></span>' +
       '</a>' +
-      '<button id="sidebarCollapse" class="collapse-btn" aria-label="Toggle sidebar" ' +
-        'aria-expanded="' + (!isCollapsed) + '" aria-controls="sidebar" data-tooltip="Collapse">' +
-        '<i class="fas fa-chevron-' + (isCollapsed ? 'right' : 'left') + '" aria-hidden="true"></i>' +
+      '<button id="sidebarCollapse" class="collapse-btn" type="button" aria-label="Toggle sidebar" ' +
+        'aria-expanded="' + (!isCollapsed) + '" aria-controls="sidebar" title="' + (isCollapsed ? 'Expand sidebar' : 'Collapse sidebar') + '">' +
+        '<i class="fas fa-angles-' + (isCollapsed ? 'right' : 'left') + '" aria-hidden="true"></i>' +
+        '<span class="cb-label">' + (isCollapsed ? 'Expand' : 'Collapse') + '</span>' +
       '</button>' +
     '</div>' +
     '<nav class="side-nav" role="navigation" aria-label="Main navigation">' + navHtml + '</nav>' +
@@ -107,9 +118,11 @@
       var collapsed = aside.classList.toggle('collapsed');
       localStorage.setItem('ainb_sidebar_collapsed', collapsed);
       var icon = collBtn.querySelector('i');
-      if (icon) icon.className = 'fas fa-chevron-' + (collapsed ? 'right' : 'left');
+      if (icon) icon.className = 'fas fa-angles-' + (collapsed ? 'right' : 'left');
+      var lbl = collBtn.querySelector('.cb-label');
+      if (lbl) lbl.textContent = collapsed ? 'Expand' : 'Collapse';
       collBtn.setAttribute('aria-expanded', String(!collapsed));
-      collBtn.setAttribute('data-tooltip', collapsed ? 'Expand' : 'Collapse');
+      collBtn.setAttribute('title', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
       closeProfileMenu();
     });
   }
@@ -121,7 +134,7 @@
     })();
     return '' +
       '<button class="theme-toggle side-theme" id="sideThemeToggle" type="button" ' +
-        'aria-label="Toggle dark and light mode" data-tooltip-pos="right" data-tooltip="Theme">' +
+        'aria-label="Toggle dark and light mode" title="Theme">' +
         '<i class="fas ' + (light ? 'fa-sun' : 'fa-moon') + '" aria-hidden="true"></i>' +
         '<span>' + (light ? 'Light mode' : 'Dark mode') + '</span>' +
       '</button>' +
@@ -136,8 +149,8 @@
 
     return '' +
       '<div class="side-user-card" id="sideUserCard">' +
-        '<button class="side-user-trigger" id="sideUserTrigger" aria-haspopup="true" aria-expanded="false" aria-label="Account menu">' +
-          '<span class="avatar" aria-hidden="true">' + escapeHtml(init) +
+        '<button class="side-user-trigger" id="sideUserTrigger" aria-haspopup="true" aria-expanded="false" aria-label="Account menu" title="Account">' +
+          '<span class="avatar" aria-hidden="true"><span class="avatar-inner">' + escapeHtml(init) + '</span>' +
             '<span class="status-dot' + (isGuest ? ' guest' : '') + '"></span>' +
           '</span>' +
           '<span class="meta">' +
@@ -146,15 +159,10 @@
           '</span>' +
           '<i class="fas fa-ellipsis-vertical chev" aria-hidden="true"></i>' +
         '</button>' +
-        // Collapsed-only quick actions (settings shortcut shown beside avatar)
-        '<a class="side-user-quick" href="/settings" title="Settings" aria-label="Settings" data-tooltip-pos="right" data-tooltip="Settings">' +
-          '<i class="fas fa-gear"></i>' +
-        '</a>' +
-        // Dropdown menu (expanded mode)
         '<div class="dropdown-menu side-user-menu" id="sideUserMenu" role="menu">' +
           '<a class="dropdown-item" href="/profile" role="menuitem"><i class="fas fa-user"></i> View profile</a>' +
           '<a class="dropdown-item" href="/settings" role="menuitem"><i class="fas fa-gear"></i> Settings</a>' +
-          '<a class="dropdown-item" href="/analytics" role="menuitem"><i class="fas fa-chart-pie"></i> Analytics</a>' +
+          '<a class="dropdown-item" href="/analytics" role="menuitem"><i class="fas fa-chart-line"></i> Progress</a>' +
           '<div class="dropdown-sep"></div>' +
           '<button class="dropdown-item danger" id="logoutBtn" role="menuitem">' +
             '<i class="fas fa-right-from-bracket"></i> ' + (isGuest ? 'Exit guest mode' : 'Log out') +
@@ -186,11 +194,6 @@
       trigger.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        // In collapsed desktop mode, clicking avatar goes to profile instead
-        if (aside.classList.contains('collapsed') && window.innerWidth > 880) {
-          window.location.href = '/profile';
-          return;
-        }
         var open = menu.classList.toggle('open');
         trigger.setAttribute('aria-expanded', String(open));
       });

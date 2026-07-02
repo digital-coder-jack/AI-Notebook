@@ -1,5 +1,5 @@
 /* =====================================================================
-   Study Sphere AI  -  dashboard.js  (2026 Premium Redesign)
+   AI Notebook  -  dashboard.js  (2026 Premium Redesign)
    Populates the redesigned dashboard from the existing /api/stats data.
    No backend changes — all new widgets are derived client-side.
    ===================================================================== */
@@ -9,12 +9,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const nameEl = document.getElementById('userName');
   if (nameEl) nameEl.textContent = (user.name || 'there').split(' ')[0];
 
-  // Time-aware subtitle
+  // Time-aware, personalized subtitle (uses onboarding answers when present)
   const subEl = document.getElementById('dashSubtitle');
   if (subEl) {
     const h = new Date().getHours();
     const part = h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
-    subEl.textContent = `Good ${part} — here's your learning activity at a glance.`;
+    let ob = null;
+    try { ob = JSON.parse(localStorage.getItem('ainb_onboarding') || 'null'); } catch (e) {}
+    if (ob && ob.goal) {
+      subEl.textContent = `Good ${part} — let's make progress on “${ob.goal}” today.`;
+    } else {
+      subEl.textContent = `Good ${part} — here's your learning activity at a glance.`;
+    }
   }
 
   // Guest banner
@@ -204,7 +210,7 @@ function renderRecentNotes(notes) {
             SS.toast('Note duplicated');
             refreshNotes();
           } else if (act === 'share') {
-            const text = '📝 ' + note.topic + ' — study note from Study Sphere AI';
+            const text = '📝 ' + note.topic + ' — study note from AI Notebook';
             if (navigator.share) await navigator.share({ title: note.topic, text });
             else { await navigator.clipboard.writeText(text + '\n' + location.origin); SS.toast('Share text copied to clipboard'); }
           } else if (act === 'del') {
