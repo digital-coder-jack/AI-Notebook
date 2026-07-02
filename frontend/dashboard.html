@@ -41,6 +41,7 @@
   <link rel="stylesheet" href="/css/sidebar.css" />
   <link rel="stylesheet" href="/css/command-palette.css" />
   <link rel="stylesheet" href="/css/dashboard-premium.css" />
+  <link rel="stylesheet" href="/css/dashboard-los.css" />
 </head>
 <body>
   <div id="particles-js"></div>
@@ -67,6 +68,19 @@
         </div>
       </div>
 
+      <!-- Learn anything launcher -->
+      <section class="learn-launcher glass" id="learn-launcher" data-reveal>
+        <div class="ll-copy">
+          <h2><i class="fas fa-graduation-cap"></i> Learn anything, in depth</h2>
+          <p>Type any topic — AI builds a complete workspace: notes, mind map, roadmap, quiz, flashcards &amp; more.</p>
+        </div>
+        <form class="ll-form" id="topicForm">
+          <i class="fas fa-wand-magic-sparkles"></i>
+          <input type="text" id="topicInput" placeholder="e.g. Machine Learning, Quantum Computing, World War II…" maxlength="200" autocomplete="off" />
+          <button type="submit" class="btn" id="topicGo">Start learning <i class="fas fa-arrow-right"></i></button>
+        </form>
+      </section>
+
       <!-- Stats -->
       <section class="stats-grid" id="statsGrid" data-stagger>
         <div class="stat-card glass"><div class="ic skeleton" style="width:46px;height:46px"></div><b class="skeleton" style="height:28px;width:60%">&nbsp;</b><span class="skeleton" style="height:14px;width:80%">&nbsp;</span></div>
@@ -75,27 +89,22 @@
         <div class="stat-card glass"><div class="ic skeleton" style="width:46px;height:46px"></div><b class="skeleton" style="height:28px;width:60%">&nbsp;</b><span class="skeleton" style="height:14px;width:80%">&nbsp;</span></div>
       </section>
 
-      <!-- Quick actions -->
-      <section class="dash-section" data-reveal>
-        <div class="section-title"><h2><i class="fas fa-bolt"></i> Quick actions</h2></div>
-        <div class="quick-actions" data-stagger>
-          <a class="qa-card glass ripple-host" href="/chat">
-            <span class="qa-ic" style="--qa: 256"><i class="fas fa-pen-to-square"></i></span>
-            <b>Ask AI</b><span>Start a new conversation</span>
-          </a>
-          <a class="qa-card glass ripple-host" href="/tools#notes">
-            <span class="qa-ic" style="--qa: 190"><i class="fas fa-note-sticky"></i></span>
-            <b>New note</b><span>Capture an idea</span>
-          </a>
-          <a class="qa-card glass ripple-host" href="/tools#quiz">
-            <span class="qa-ic" style="--qa: 158"><i class="fas fa-clipboard-question"></i></span>
-            <b>Generate quiz</b><span>Test your knowledge</span>
-          </a>
-          <a class="qa-card glass ripple-host" href="/tools#flashcards">
-            <span class="qa-ic" style="--qa: 38"><i class="fas fa-layer-group"></i></span>
-            <b>Flashcards</b><span>Revise faster</span>
-          </a>
-        </div>
+      <!-- My topics (continue learning) -->
+      <section class="dash-section" id="myTopicsSection" data-reveal hidden>
+        <div class="section-title"><h2><i class="fas fa-book-open-reader"></i> Continue learning</h2></div>
+        <div class="topics-grid" id="myTopics" data-stagger></div>
+      </section>
+
+      <!-- AI Workspace -->
+      <section class="dash-section" id="ai-workspace" data-reveal>
+        <div class="section-title"><h2><i class="fas fa-bolt"></i> AI Workspace</h2></div>
+        <div class="workspace-grid" id="workspaceGrid" data-stagger></div>
+      </section>
+
+      <!-- Trending topics -->
+      <section class="dash-section" id="trending-topics" data-reveal>
+        <div class="section-title"><h2><i class="fas fa-arrow-trend-up"></i> Trending topics</h2></div>
+        <div class="trending-grid" id="trendingGrid" data-stagger></div>
       </section>
 
       <!-- Main grid -->
@@ -131,8 +140,20 @@
 
       <!-- Secondary grid -->
       <section class="dash-grid-2">
+        <!-- Recent notes -->
+        <div class="panel glass" id="recent-notes-panel" data-reveal="left">
+          <div class="panel-head">
+            <h3><i class="fas fa-note-sticky"></i> Recent notes</h3>
+            <a class="chip clickable" href="/tools#notes">View all</a>
+          </div>
+          <div class="recent-list" id="recentNotes">
+            <div class="recent-item skeleton" style="height:54px"></div>
+            <div class="recent-item skeleton" style="height:54px"></div>
+          </div>
+        </div>
+
         <!-- Recent chats -->
-        <div class="panel glass" id="history" data-reveal="left">
+        <div class="panel glass" id="history" data-reveal="right">
           <div class="panel-head">
             <h3><i class="fas fa-clock-rotate-left"></i> Recent chats</h3>
             <a class="chip clickable" href="/chat">View all</a>
@@ -144,19 +165,20 @@
           </div>
         </div>
 
-        <!-- AI usage -->
-        <div class="panel glass dash-ai" data-reveal="right">
-          <div class="panel-head">
-            <h3><i class="fas fa-robot"></i> AI usage</h3>
+      </section>
+
+      <!-- AI usage -->
+      <section class="panel glass dash-ai" data-reveal>
+        <div class="panel-head">
+          <h3><i class="fas fa-robot"></i> AI usage</h3>
+        </div>
+        <div class="ai-usage" id="aiUsage">
+          <div class="ai-usage-bar">
+            <div class="aub-label"><span>AI generations</span><b id="aiResponses">0</b></div>
+            <div class="progress"><span id="aiResponsesBar" style="width:0%"></span></div>
           </div>
-          <div class="ai-usage" id="aiUsage">
-            <div class="ai-usage-bar">
-              <div class="aub-label"><span>Responses generated</span><b id="aiResponses">0</b></div>
-              <div class="progress"><span id="aiResponsesBar" style="width:0%"></span></div>
-            </div>
-            <div class="ai-providers" id="aiProvidersMini">
-              <span class="model-badge"><span class="model-dot off"></span> Checking…</span>
-            </div>
+          <div class="ai-providers" id="aiProvidersMini">
+            <span class="model-badge"><span class="model-dot off"></span> Checking…</span>
           </div>
         </div>
       </section>

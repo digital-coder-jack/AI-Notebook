@@ -201,6 +201,172 @@ async def generate_quiz(topic: str, num_questions: int = 5, selection: str | Non
     return cleaned
 
 
+# ---------------------------------------------------------------------------
+# TOPIC WORKSPACE GENERATORS  (AI Learning OS)
+# ---------------------------------------------------------------------------
+# Each generator produces one section of a topic's learning workspace.
+# Markdown sections render directly; structured sections (mindmap, roadmap,
+# timeline, quiz) return JSON strings so the frontend can build interactive UI.
+
+_TOPIC_MD_PROMPTS: dict[str, str] = {
+    "overview": (
+        "Create a compact AI OVERVIEW of the topic '{topic}'. Use Markdown with EXACTLY these "
+        "sections:\n## Definition\n## Introduction\n## Why it matters\n## Key concepts\n"
+        "## Quick explanation\nKeep it clear, student-friendly and under 600 words."
+    ),
+    "summary": (
+        "Create a DEEP STRUCTURED SUMMARY of the topic '{topic}'. Use Markdown with these H2 "
+        "sections in order:\n## What is it?\n## History & Origin\n## Timeline\n## Why it exists\n"
+        "## How it works\n## Advantages\n## Disadvantages\n## Applications & Real-life uses\n"
+        "## Examples\n## Future\n## Common misconceptions\n## FAQ\n## Important facts\n## References\n"
+        "Be thorough but concise in each section. Use bullet points and tables where helpful."
+    ),
+    "notes": (
+        "Create professional STUDY NOTES on '{topic}'. Use Markdown with:\n"
+        "- A title heading\n- Clear section headings\n- Bullet points for key concepts\n"
+        "- **Bold** important definitions\n- Concrete examples\n"
+        "- Code examples in fenced blocks if the topic is technical\n"
+        "- A final '## Revision Summary' section with the 8 most important takeaways."
+    ),
+    "practice": (
+        "Create a PRACTICE PACK for '{topic}'. Use Markdown with these sections:\n"
+        "## Exercises (5 short exercises)\n## Assignments (2 assignments)\n"
+        "## Mini Projects (2 project ideas with steps)\n"
+        "## Challenges (2 harder challenges — coding challenges if technical)\n"
+        "## Real-world Scenarios (2 applied problem-solving scenarios)\n"
+        "For each item give clear instructions and expected outcome. Do NOT include solutions."
+    ),
+    "resources": (
+        "Recommend LEARNING RESOURCES for '{topic}'. Use Markdown with these sections:\n"
+        "## Official documentation\n## Books\n## Research papers\n## GitHub repositories\n"
+        "## YouTube channels & videos\n## Online courses\n## Blogs & articles\n"
+        "For each item: **Name** — one-line description. Only recommend well-known, real resources; "
+        "if unsure of a URL, give the name and where to search instead of inventing links."
+    ),
+}
+
+
+async def generate_topic_section(topic: str, kind: str, selection: str | None = "auto") -> str:
+    """Generate a Markdown section of a topic workspace."""
+    prompt = _TOPIC_MD_PROMPTS[kind].format(topic=topic)
+    return await groq_chat(
+        [{"role": "system", "content": SYSTEM_BASE},
+         {"role": "user", "content": prompt}],
+        temperature=0.5,
+        max_tokens=2400,
+        selection=selection,
+    )
+
+
+async def _generate_json(prompt: str, selection: str | None = "auto", max_tokens: int = 2600):
+    """Run a JSON-only generation and return parsed data (or None)."""
+    reply = await groq_chat(
+        [{"role": "system", "content":
+            "You are a structured data generator. Respond ONLY with valid JSON. "
+            "No prose, no markdown fences."},
+         {"role": "user", "content": prompt}],
+        temperature=0.4,
+        max_tokens=max_tokens,
+        selection=selection,
+    )
+    return _extract_json(reply)
+
+
+async def generate_mindmap(topic: str, selection: str | None = "auto") -> dict | None:
+    """Return a nested mind-map tree: {label, note?, children:[...]} ."""
+    data = await _generate_json(
+        f"Create a mind map for the topic '{topic}'. Return a JSON object with this shape: "
+        '{"label": string (the topic), "children": [{"label": string, '
+        '"note": short one-sentence explanation, "children": [... up to 3 levels deep ...]}]}. '
+        "Include 5-8 main branches, each with 2-4 sub-branches. Every node needs a 'note'. "
+        "Output ONLY the JSON object.",
+        selection=selection,
+    )
+    return data if isinstance(data, dict) and data.get("label") else None
+
+
+async def generate_roadmap(topic: str, selection: str | None = "auto") -> list | None:
+    """Return roadmap levels: [{level, duration, topics:[], projects:[], practice:[], resources:[]}]"""
+    data = await _generate_json(
+        f"Create a learning roadmap for '{topic}' with EXACTLY 4 levels: "
+        "Beginner, Intermediate, Advanced, Expert. Return a JSON array where each item has: "
+        '"level" (string), "duration" (estimated time e.g. "2-3 weeks"), '
+        '"topics" (array of 4-6 strings), "projects" (array of 2 strings), '
+        '"practice" (array of 2 strings), "resources" (array of 2 strings). '
+        "Output ONLY the JSON array.",
+        selection=selection,
+    )
+    return data if isinstance(data, list) and data else None
+
+
+async def generate_timeline(topic: str, selection: str | None = "auto") -> list | None:
+    """Return chronological events: [{year, title, description}]"""
+    data = await _generate_json(
+        f"Create a chronological timeline of the most important events in the history and "
+        f"evolution of '{topic}'. Return a JSON array of 8-14 items, each with: "
+        '"year" (string, e.g. "1956" or "1990s"), "title" (short string), '
+        '"description" (1-2 sentence string). Order oldest to newest. '
+        "Output ONLY the JSON array.",
+        selection=selection,
+    )
+    return data if isinstance(data, list) and data else None
+
+
+async def generate_topic_quiz(topic: str, difficulty: str = "medium",
+                              selection: str | None = "auto") -> list | None:
+    """Mixed-type quiz: [{type, question, options?, answer, explanation}]"""
+    data = await _generate_json(
+        f"Generate a {difficulty}-difficulty quiz about '{topic}' with 8 questions: "
+        "4 multiple-choice, 2 true/false, 2 fill-in-the-blank. Return a JSON array where each item has: "
+        '"type" ("mcq"|"tf"|"fill"), "question" (string; use ___ for the blank in fill questions), '
+        '"options" (array of 4 strings for mcq, ["True","False"] for tf, omit or [] for fill), '
+        '"answer" (for mcq/tf: integer index of correct option; for fill: the answer string), '
+        '"explanation" (short string). Output ONLY the JSON array.',
+        selection=selection,
+    )
+    if not isinstance(data, list):
+        return None
+    cleaned = []
+    for it in data:
+        if not isinstance(it, dict) or not it.get("question"):
+            continue
+        qtype = str(it.get("type", "mcq")).lower()
+        if qtype not in ("mcq", "tf", "fill"):
+            qtype = "mcq"
+        cleaned.append({
+            "type": qtype,
+            "question": str(it["question"]),
+            "options": [str(o) for o in (it.get("options") or [])][:4],
+            "answer": it.get("answer", 0),
+            "explanation": str(it.get("explanation", "")),
+        })
+    return cleaned or None
+
+
+async def generate_compare(topic: str, other: str, selection: str | None = "auto") -> str:
+    """Markdown comparison of two topics."""
+    return await groq_chat(
+        [{"role": "system", "content": SYSTEM_BASE},
+         {"role": "user", "content":
+            f"Compare '{topic}' vs '{other}' for a student. Use Markdown with:\n"
+            f"## At a glance\nA comparison table with rows: Definition, Best for, "
+            f"Performance, Learning curve, Popularity, Cost.\n"
+            f"## {topic}: Advantages & Disadvantages\n## {other}: Advantages & Disadvantages\n"
+            f"## Use cases\n## Examples\n## Verdict\nBe balanced and specific."}],
+        temperature=0.5,
+        max_tokens=2200,
+        selection=selection,
+    )
+
+
+TOPIC_CHAT_SYSTEM = (
+    "You are the dedicated AI tutor for the topic '{topic}' inside AI Notebook's "
+    "learning workspace. Stay focused on this topic (and directly related concepts). "
+    "Explain clearly with Markdown, use examples and code blocks where helpful, and "
+    "adapt depth to what the student asks (simple, detailed, ELI5, interview-prep, etc.)."
+)
+
+
 async def generate_flashcards(topic: str, num_cards: int = 8, selection: str | None = "auto") -> list[dict]:
     """Return a list of {front, back} flashcards."""
     reply = await groq_chat(

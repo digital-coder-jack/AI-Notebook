@@ -74,6 +74,48 @@ A full **premium UI/UX overhaul** giving the app the look & feel of Notion / Lin
 
 ---
 
+## 🧠 Learning OS Upgrade (2026)
+
+The app is now a full **AI-powered Learning Operating System**: every topic you type opens a complete, cached, AI-generated learning workspace.
+
+### Topic Workspace (`/topic?t=<title>` or `/topic?id=<id>`)
+One page, **12 AI-powered tabs** — each section is generated once, **cached server-side** in SQLite (`topic_artifacts`), and instantly re-served; “Regenerate” (`?refresh=1`) creates a fresh version:
+
+| Tab | What it does |
+|---|---|
+| 🧭 Overview | Auto-generated intro (definition, importance, applications, misconceptions) |
+| 📖 Summary | Deep structured summary with sections & key takeaways |
+| 📝 Notes | Exam-ready study notes (definitions, formulas, mnemonics) |
+| 🕸 Mind Map | **Interactive SVG mind map** — custom tidy-tree layout, pan/zoom (wheel + drag), expand/collapse nodes, click a node for an explanation popover |
+| 🛣 Roadmap | Beginner → Intermediate → Advanced → Expert learning path with **checkbox progress tracking** (autosaved via `PUT /api/topics/{id}/progress`) |
+| 🕰 Timeline | Historical evolution of the topic (8–14 milestones) |
+| ❓ Quiz | MCQ / True-False / Fill-in questions across **4 difficulties** (easy/medium/hard/expert, cached per difficulty), scoring + explanations |
+| 🃏 Flashcards | 3D flip cards, prev/next, keyboard (Space/←/→), bookmarkable |
+| ⚖️ Compare | AI comparison table vs any other topic (cached per pair) |
+| 🏋️ Practice | Worked problems & exercises |
+| 💬 AI Chat | **Topic-aware SSE streaming tutor** with suggested prompts |
+| 🔗 Resources | Curated books/courses/videos/communities |
+
+Plus: **pin/favorite topics**, emoji headers, and **Export** (Markdown / HTML / Word / PDF-via-print) of all generated content.
+
+### Redesigned Dashboard (`/dashboard`)
+- **Learn-anything launcher** — type any topic → instant AI workspace
+- **AI Workspace grid** — 10 tool cards (Notes, Summary, Mind Map, Roadmap, Quiz, Flashcards, Chat, Practice, Compare, Timeline) that deep-link into the matching workspace tab
+- **My Topics** — resume any previously opened workspace
+- **Trending Topics** — 9 curated one-click starters (AI, ML, Quantum Computing, Blockchain, Cybersecurity, Physics, Mathematics, Biology, History)
+- **Recent Notes** with hover actions: 📌 Pin · ⭐ Favorite · 📄 Duplicate · 🔗 Share · 🗑 Delete
+- Updated stats: Topics started · Notes & quizzes · **AI generations** · Total chats
+
+### Global Search (Ctrl/⌘ + K)
+The command palette now performs **debounced server-side search** (`GET /api/search?q=`) across **topics, notes, saved chats, and quizzes**, merged with pages/actions — plus a **“Learn ‘<query>’ with AI”** fallback action that opens a new workspace for anything you type.
+
+### New Backend (FastAPI)
+- **Tables**: `topics` (pin/favorite/progress JSON) & `topic_artifacts` (`UNIQUE(topic_id, kind, variant)` upsert cache); `notes` gained `pinned`/`favorite` columns (idempotent migration)
+- **Routes** (`backend/routes/topics.py`): topics CRUD, `POST /api/topics/{id}/generate/{kind}` (overview/summary/notes/practice/resources/mindmap/roadmap/timeline/quiz/flashcards/compare), `POST /api/topics/{id}/chat` (SSE), `GET /api/search`, note pin/favorite/duplicate endpoints
+- **AI** (`backend/ai.py`): per-section prompts, strict-JSON generators for mind map / roadmap / timeline / quiz, comparison generator, topic-tutor system prompt — all through the existing **multi-provider fallback chain**
+
+---
+
 ## 🚀 Completed Features
 
 ### 1. Landing Page (`/`)
