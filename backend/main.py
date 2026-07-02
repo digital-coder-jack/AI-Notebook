@@ -32,6 +32,7 @@ from pydantic import BaseModel
 from backend import database as db
 from backend.routes import chat as chat_routes
 from backend.routes import files as files_routes
+from backend.routes import topics as topics_routes
 from backend.routes import users as users_routes
 from backend.analytics_web import web_analytics_db
 from backend.auth import current_user
@@ -165,6 +166,7 @@ db.init_db()
 app.include_router(users_routes.router)
 app.include_router(chat_routes.router)
 app.include_router(files_routes.router)
+app.include_router(topics_routes.router)
 
 # ---------------------------------------------------------------------------
 # Web Analytics API Routes (MongoDB Atlas)
@@ -436,6 +438,8 @@ PAGE_ALIASES = {
     "profile": "profile",
     "analytics": "analytics",
     "telegram": "telegram",  # Telegram bot info / integration page
+    "topic": "topic",        # AI Learning OS topic workspace
+    "topics": "dashboard",   # topic list lives on the dashboard
     # Modern AI-workspace sidebar destinations. These map onto the existing
     # pages so every nav item resolves instead of 404-ing.
     "history": "dashboard",  # recent chat history lives on the dashboard

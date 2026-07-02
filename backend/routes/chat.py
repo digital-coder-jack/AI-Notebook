@@ -299,7 +299,10 @@ async def stats(user=Depends(auth.current_user)):
         "ai_responses": db.count_ai_messages(uid),
         "notes": db.count_notes(uid),
         "quizzes": db.count_quizzes(uid),
+        "topics": db.count_topics(uid),
+        "ai_generations": db.count_ai_messages(uid) + db.count_artifacts(uid),
         "recent_chats": [dict(c) for c in chats[:5]],
+        "recent_notes": [dict(n) for n in db.list_notes(uid)[:6]],
         "daily_activity": db.daily_activity(uid, days=7),
     }
 

@@ -220,6 +220,58 @@ def init_db() -> None:
             )
             """
         )
+
+        # --- Topics (Learning OS workspaces) -------------------------------
+        # A topic is a complete AI learning workspace. Each generated section
+        # (overview, summary, notes, mindmap, roadmap, timeline, quiz,
+        # flashcards, compare, practice, resources, chat) is stored as an
+        # artifact row so it is cached and instantly reloadable.
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS topics (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id     INTEGER NOT NULL,
+                title       TEXT    NOT NULL,
+                emoji       TEXT    DEFAULT '📚',
+                pinned      INTEGER DEFAULT 0,
+                favorite    INTEGER DEFAULT 0,
+                progress    TEXT    DEFAULT '{}',   -- JSON: roadmap checkboxes etc.
+                created_at  TEXT    DEFAULT (datetime('now')),
+                updated_at  TEXT    DEFAULT (datetime('now')),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS topic_artifacts (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                topic_id    INTEGER NOT NULL,
+                kind        TEXT    NOT NULL,   -- overview|summary|notes|mindmap|...
+                variant     TEXT    NOT NULL DEFAULT '',  -- e.g. quiz difficulty, compare target
+                content     TEXT    NOT NULL,   -- markdown or JSON payload
+                created_at  TEXT    DEFAULT (datetime('now')),
+                updated_at  TEXT    DEFAULT (datetime('now')),
+                UNIQUE (topic_id, kind, variant),
+                FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE
+            )
+            """
+        )
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_topics_user ON topics(user_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_artifacts_topic ON topic_artifacts(topic_id)")
+
+        # --- Lightweight migrations (idempotent) ----------------------------
+        # Add pin/favorite flags to notes so the dashboard can offer
+        # pin / favorite / duplicate actions on recent notes.
+        for ddl in (
+            "ALTER TABLE notes ADD COLUMN pinned INTEGER DEFAULT 0",
+            "ALTER TABLE notes ADD COLUMN favorite INTEGER DEFAULT 0",
+        ):
+            try:
+                conn.execute(ddl)
+            except sqlite3.OperationalError:
+                pass  # column already exists
+
         conn.commit()
 
 
@@ -652,3 +704,197 @@ def delete_user_account(user_id: int) -> bool:
         cur = conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
         conn.commit()
         return cur.rowcount > 0
+
+
+# ===========================================================================
+# TOPICS  (AI Learning OS workspaces)
+# ===========================================================================
+def create_topic(user_id: int, title: str, emoji: str = "📚") -> int:
+    with closing(get_connection()) as conn:
+        cur = conn.execute(
+            "INSERT INTO topics (user_id, title, emoji) VALUES (?, ?, ?)",
+            (user_id, title.strip()[:200], emoji),
+        )
+        conn.commit()
+        return cur.lastrowid
+
+
+def find_topic_by_title(user_id: int, title: str) -> sqlite3.Row | None:
+    with closing(get_connection()) as conn:
+        return conn.execute(
+            "SELECT * FROM topics WHERE user_id = ? AND lower(title) = lower(?) LIMIT 1",
+            (user_id, title.strip()),
+        ).fetchone()
+
+
+def list_topics(user_id: int) -> list[sqlite3.Row]:
+    with closing(get_connection()) as conn:
+        return conn.execute(
+            "SELECT id, title, emoji, pinned, favorite, created_at, updated_at "
+            "FROM topics WHERE user_id = ? "
+            "ORDER BY pinned DESC, updated_at DESC",
+            (user_id,),
+        ).fetchall()
+
+
+def get_topic(user_id: int, topic_id: int) -> sqlite3.Row | None:
+    with closing(get_connection()) as conn:
+        return conn.execute(
+            "SELECT * FROM topics WHERE id = ? AND user_id = ? LIMIT 1",
+            (topic_id, user_id),
+        ).fetchone()
+
+
+def touch_topic(topic_id: int) -> None:
+    with closing(get_connection()) as conn:
+        conn.execute(
+            "UPDATE topics SET updated_at = ? WHERE id = ?", (_utcnow(), topic_id)
+        )
+        conn.commit()
+
+
+def update_topic_flags(user_id: int, topic_id: int,
+                       pinned: bool | None = None,
+                       favorite: bool | None = None) -> bool:
+    sets, vals = [], []
+    if pinned is not None:
+        sets.append("pinned = ?"); vals.append(1 if pinned else 0)
+    if favorite is not None:
+        sets.append("favorite = ?"); vals.append(1 if favorite else 0)
+    if not sets:
+        return False
+    vals += [topic_id, user_id]
+    with closing(get_connection()) as conn:
+        cur = conn.execute(
+            f"UPDATE topics SET {', '.join(sets)} WHERE id = ? AND user_id = ?", vals
+        )
+        conn.commit()
+        return cur.rowcount > 0
+
+
+def update_topic_progress(user_id: int, topic_id: int, progress: dict) -> bool:
+    with closing(get_connection()) as conn:
+        cur = conn.execute(
+            "UPDATE topics SET progress = ?, updated_at = ? WHERE id = ? AND user_id = ?",
+            (json.dumps(progress), _utcnow(), topic_id, user_id),
+        )
+        conn.commit()
+        return cur.rowcount > 0
+
+
+def delete_topic(user_id: int, topic_id: int) -> bool:
+    with closing(get_connection()) as conn:
+        cur = conn.execute(
+            "DELETE FROM topics WHERE id = ? AND user_id = ?", (topic_id, user_id)
+        )
+        conn.commit()
+        return cur.rowcount > 0
+
+
+def count_topics(user_id: int) -> int:
+    with closing(get_connection()) as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS c FROM topics WHERE user_id = ?", (user_id,)
+        ).fetchone()
+    return row["c"] if row else 0
+
+
+# ---- Topic artifacts (cached AI generations per section) -------------------
+def get_artifact(topic_id: int, kind: str, variant: str = "") -> sqlite3.Row | None:
+    with closing(get_connection()) as conn:
+        return conn.execute(
+            "SELECT * FROM topic_artifacts WHERE topic_id = ? AND kind = ? AND variant = ? LIMIT 1",
+            (topic_id, kind, variant),
+        ).fetchone()
+
+
+def upsert_artifact(topic_id: int, kind: str, content: str, variant: str = "") -> int:
+    with closing(get_connection()) as conn:
+        cur = conn.execute(
+            """
+            INSERT INTO topic_artifacts (topic_id, kind, variant, content, updated_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT (topic_id, kind, variant)
+            DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at
+            """,
+            (topic_id, kind, variant, content, _utcnow()),
+        )
+        conn.commit()
+    touch_topic(topic_id)
+    return cur.lastrowid
+
+
+def list_artifacts(topic_id: int) -> list[sqlite3.Row]:
+    with closing(get_connection()) as conn:
+        return conn.execute(
+            "SELECT kind, variant, updated_at FROM topic_artifacts WHERE topic_id = ?",
+            (topic_id,),
+        ).fetchall()
+
+
+def count_artifacts(user_id: int) -> int:
+    with closing(get_connection()) as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS c FROM topic_artifacts a "
+            "JOIN topics t ON a.topic_id = t.id WHERE t.user_id = ?",
+            (user_id,),
+        ).fetchone()
+    return row["c"] if row else 0
+
+
+# ---- Notes pin / favorite / duplicate ---------------------------------------
+def update_note_flags(user_id: int, note_id: int,
+                      pinned: bool | None = None,
+                      favorite: bool | None = None) -> bool:
+    sets, vals = [], []
+    if pinned is not None:
+        sets.append("pinned = ?"); vals.append(1 if pinned else 0)
+    if favorite is not None:
+        sets.append("favorite = ?"); vals.append(1 if favorite else 0)
+    if not sets:
+        return False
+    vals += [note_id, user_id]
+    with closing(get_connection()) as conn:
+        cur = conn.execute(
+            f"UPDATE notes SET {', '.join(sets)} WHERE id = ? AND user_id = ?", vals
+        )
+        conn.commit()
+        return cur.rowcount > 0
+
+
+def get_note(user_id: int, note_id: int) -> sqlite3.Row | None:
+    with closing(get_connection()) as conn:
+        return conn.execute(
+            "SELECT * FROM notes WHERE id = ? AND user_id = ? LIMIT 1",
+            (note_id, user_id),
+        ).fetchone()
+
+
+def duplicate_note(user_id: int, note_id: int) -> int | None:
+    src = get_note(user_id, note_id)
+    if not src:
+        return None
+    return add_note(user_id, f"{src['topic']} (copy)", src["content"])
+
+
+# ---- Global search -----------------------------------------------------------
+def global_search(user_id: int, q: str, limit: int = 8) -> dict:
+    """Search notes, topics, chats and quizzes for the command palette."""
+    like = f"%{q.strip()}%"
+    out: dict[str, list] = {"topics": [], "notes": [], "chats": [], "quizzes": []}
+    if not q.strip():
+        return out
+    with closing(get_connection()) as conn:
+        out["topics"] = [dict(r) for r in conn.execute(
+            "SELECT id, title, emoji FROM topics WHERE user_id = ? AND title LIKE ? "
+            "ORDER BY updated_at DESC LIMIT ?", (user_id, like, limit)).fetchall()]
+        out["notes"] = [dict(r) for r in conn.execute(
+            "SELECT id, topic AS title FROM notes WHERE user_id = ? AND (topic LIKE ? OR content LIKE ?) "
+            "ORDER BY id DESC LIMIT ?", (user_id, like, like, limit)).fetchall()]
+        out["chats"] = [dict(r) for r in conn.execute(
+            "SELECT id, title FROM chats WHERE user_id = ? AND title LIKE ? "
+            "ORDER BY updated_at DESC LIMIT ?", (user_id, like, limit)).fetchall()]
+        out["quizzes"] = [dict(r) for r in conn.execute(
+            "SELECT id, topic AS title FROM quizzes WHERE user_id = ? AND topic LIKE ? "
+            "ORDER BY id DESC LIMIT ?", (user_id, like, limit)).fetchall()]
+    return out

@@ -55,6 +55,7 @@
     { id: 'chat', href: '/chat', icon: 'fa-pen-to-square', label: 'New Chat', primary: true },
     { section: 'Workspace' },
     { id: 'dashboard', href: '/dashboard', icon: 'fa-gauge-high', label: 'Dashboard' },
+    { id: 'topics', href: '/dashboard#ai-workspace', icon: 'fa-book-open-reader', label: 'Topics' },
     { id: 'models', href: '/chat#models', icon: 'fa-microchip', label: 'AI Models' },
     { id: 'history', href: '/dashboard#history', icon: 'fa-clock-rotate-left', label: 'History' },
     { id: 'notes', href: '/tools#notes', icon: 'fa-note-sticky', label: 'Notes' },

@@ -40,11 +40,14 @@
     { icon: 'fa-right-from-bracket', title: 'Log out', sub: 'End your session', cat: 'Actions', keys: 'signout exit', run: function () { if (window.SS) { SS.clearSession(); location.href = '/'; } } },
   ];
 
-  var FILTERS = ['All', 'Pages', 'Actions', 'Recent'];
+  var FILTERS = ['All', 'Pages', 'Actions', 'Content', 'Recent'];
   var activeFilter = 'All';
   var activeIndex = 0;
   var currentResults = [];
   var recentChats = [];
+  var serverResults = { topics: [], notes: [], chats: [], quizzes: [] };
+  var searchTimer = null;
+  var lastSearchQ = '';
 
   /* ---- Build DOM ---- */
   var overlay = document.createElement('div');
@@ -56,7 +59,7 @@
     '<div class="cmdk" role="combobox" aria-expanded="true">' +
       '<div class="cmdk-search">' +
         '<i class="fas fa-magnifying-glass"></i>' +
-        '<input type="text" id="cmdkInput" placeholder="Search pages, actions, chats…" autocomplete="off" spellcheck="false" aria-label="Search" />' +
+        '<input type="text" id="cmdkInput" placeholder="Search topics, notes, quizzes, chats…" autocomplete="off" spellcheck="false" aria-label="Search" />' +
         '<span class="cmdk-esc">ESC</span>' +
       '</div>' +
       '<div class="cmdk-filters" id="cmdkFilters"></div>' +
@@ -115,10 +118,48 @@
     return hay.indexOf(q.toLowerCase()) !== -1;
   }
 
+  /* ---- Server-side content search ---- */
+  function contentItems() {
+    var items = [];
+    (serverResults.topics || []).forEach(function (t) {
+      items.push({ icon: 'fa-book-open-reader', emoji: t.emoji, title: t.title, sub: 'Topic workspace', href: '/topic?id=' + t.id, cat: 'Content', keys: 'topic learn workspace' });
+    });
+    (serverResults.notes || []).forEach(function (n) {
+      items.push({ icon: 'fa-note-sticky', title: n.title || 'Untitled note', sub: 'Note', href: '/tools#notes', cat: 'Content', keys: 'note' });
+    });
+    (serverResults.chats || []).forEach(function (c) {
+      items.push({ icon: 'fa-comment', title: c.title || 'Untitled chat', sub: 'Saved chat', href: '/chat?id=' + c.id, cat: 'Content', keys: 'chat conversation' });
+    });
+    (serverResults.quizzes || []).forEach(function (qz) {
+      items.push({ icon: 'fa-clipboard-question', title: qz.title || 'Quiz', sub: 'Quiz', href: '/tools#quiz', cat: 'Content', keys: 'quiz test' });
+    });
+    return items;
+  }
+
+  function scheduleSearch(q) {
+    if (searchTimer) clearTimeout(searchTimer);
+    q = (q || '').trim();
+    if (q.length < 2) {
+      serverResults = { topics: [], notes: [], chats: [], quizzes: [] };
+      lastSearchQ = '';
+      return;
+    }
+    if (q === lastSearchQ) return;
+    searchTimer = setTimeout(function () {
+      if (!window.SS || !SS.api) return;
+      var mine = q;
+      SS.api('/api/search?q=' + encodeURIComponent(mine)).then(function (res) {
+        if (input.value.trim() !== mine) return; // stale
+        lastSearchQ = mine;
+        serverResults = res || { topics: [], notes: [], chats: [], quizzes: [] };
+        render(input.value);
+      }).catch(function () { /* ignore */ });
+    }, 220);
+  }
+
   /* ---- Render ---- */
   function render(q) {
     q = (q || '').trim();
-    var groups = [];
 
     var chatItems = recentChats.map(function (c) {
       return { icon: 'fa-comment', title: c.title || 'Untitled chat', sub: 'Recent chat', href: '/chat?id=' + c.id, cat: 'Recent', keys: 'history conversation' };
@@ -130,6 +171,24 @@
     if (activeFilter === 'All' || activeFilter === 'Recent') pool = pool.concat(chatItems);
 
     var filtered = pool.filter(function (it) { return matches(it, q); });
+
+    // Server content results (already query-matched server-side)
+    if (q.length >= 2 && (activeFilter === 'All' || activeFilter === 'Content')) {
+      filtered = filtered.concat(contentItems());
+    }
+
+    // "Learn with AI" fallback action for any query
+    if (q.length >= 2) {
+      filtered.push({
+        icon: 'fa-wand-magic-sparkles',
+        title: 'Learn “' + q + '” with AI',
+        sub: 'Open a full AI workspace for this topic',
+        href: '/topic?t=' + encodeURIComponent(q),
+        cat: 'Learn',
+        keys: ''
+      });
+    }
+
     currentResults = filtered;
 
     // Empty state
@@ -151,7 +210,7 @@
     // Group by category
     var byCat = {};
     filtered.forEach(function (it) { (byCat[it.cat] = byCat[it.cat] || []).push(it); });
-    var order = ['Pages', 'Actions', 'Recent'];
+    var order = ['Content', 'Pages', 'Actions', 'Recent', 'Learn'];
     var html = '';
     var idx = 0;
     var flat = [];
@@ -161,7 +220,7 @@
       byCat[cat].forEach(function (it) {
         flat.push(it);
         html += '<div class="cmdk-item" data-idx="' + idx + '" role="option">' +
-          '<div class="cmdk-ic"><i class="fas ' + it.icon + '"></i></div>' +
+          '<div class="cmdk-ic">' + (it.emoji ? '<span style="font-size:15px">' + esc(it.emoji) + '</span>' : '<i class="fas ' + it.icon + '"></i>') + '</div>' +
           '<div class="cmdk-text"><b>' + highlight(it.title, q) + '</b>' +
           (it.sub ? '<span>' + esc(it.sub) + '</span>' : '') + '</div>' +
           '<span class="cmdk-hint"><i class="fas fa-arrow-turn-down" style="transform:rotate(90deg)"></i></span>' +
@@ -239,7 +298,10 @@
   }
 
   /* ---- Events ---- */
-  input.addEventListener('input', function () { render(input.value); });
+  input.addEventListener('input', function () {
+    render(input.value);
+    scheduleSearch(input.value);
+  });
 
   overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
   overlay.querySelector('.cmdk-esc').addEventListener('click', close);

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="icon" type="image/png" href="/assets/logo-192.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/assets/logo-192.png" />
+  <meta name="theme-color" content="#4F46E5" />
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('ss_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+    })();
+  </script>
+  <title>Topic Workspace · Study Sphere AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" />
+  <link rel="stylesheet" href="/css/premium-design-system.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/sidebar-mobile.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+  <link rel="stylesheet" href="/css/theme.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/sidebar.css" />
+  <link rel="stylesheet" href="/css/command-palette.css" />
+  <link rel="stylesheet" href="/css/topic.css" />
+</head>
+<body>
+  <div id="toast-wrap"></div>
+  <div class="side-overlay" id="sideOverlay"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" data-active="topics"></aside>
+
+    <main class="content topic-content" id="main-content">
+      <!-- Topic header -->
+      <header class="topic-header" id="topic-header">
+        <div class="topic-title-row">
+          <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open navigation"><i class="fas fa-bars"></i></button>
+          <span class="topic-emoji" id="topicEmoji">📚</span>
+          <div class="topic-title-meta">
+            <h1 id="topicTitle" class="skeleton" style="min-width:220px">&nbsp;</h1>
+            <p class="sub" id="topicSubtitle">AI-powered learning workspace</p>
+          </div>
+        </div>
+        <div class="topic-header-actions">
+          <button class="icon-btn" id="pinTopicBtn" title="Pin topic" aria-label="Pin topic"><i class="fas fa-thumbtack"></i></button>
+          <button class="icon-btn" id="favTopicBtn" title="Favorite" aria-label="Favorite topic"><i class="far fa-star"></i></button>
+          <div class="export-wrap">
+            <button class="btn btn-ghost" id="exportBtn"><i class="fas fa-download"></i> Export</button>
+            <div class="dropdown-menu export-menu" id="exportMenu" role="menu">
+              <button class="dropdown-item" data-export="md"><i class="fas fa-file-lines"></i> Markdown (.md)</button>
+              <button class="dropdown-item" data-export="html"><i class="fas fa-code"></i> HTML (.html)</button>
+              <button class="dropdown-item" data-export="doc"><i class="fas fa-file-word"></i> Word (.doc)</button>
+              <button class="dropdown-item" data-export="pdf"><i class="fas fa-file-pdf"></i> PDF (print)</button>
+            </div>
+          </div>
+          <button class="search-trigger compact" data-cmdk aria-label="Search"><i class="fas fa-magnifying-glass"></i><span class="kbd">⌘K</span></button>
+        </div>
+      </header>
+
+      <!-- Tabs -->
+      <nav class="topic-tabs" id="topicTabs" role="tablist" aria-label="Topic sections">
+        <button class="topic-tab active" data-tab="overview" role="tab"><i class="fas fa-eye"></i><span>Overview</span></button>
+        <button class="topic-tab" data-tab="summary" role="tab"><i class="fas fa-align-left"></i><span>Summary</span></button>
+        <button class="topic-tab" data-tab="notes" role="tab"><i class="fas fa-note-sticky"></i><span>Notes</span></button>
+        <button class="topic-tab" data-tab="mindmap" role="tab"><i class="fas fa-diagram-project"></i><span>Mind Map</span></button>
+        <button class="topic-tab" data-tab="roadmap" role="tab"><i class="fas fa-route"></i><span>Roadmap</span></button>
+        <button class="topic-tab" data-tab="timeline" role="tab"><i class="fas fa-timeline"></i><span>Timeline</span></button>
+        <button class="topic-tab" data-tab="quiz" role="tab"><i class="fas fa-clipboard-question"></i><span>Quiz</span></button>
+        <button class="topic-tab" data-tab="flashcards" role="tab"><i class="fas fa-layer-group"></i><span>Flashcards</span></button>
+        <button class="topic-tab" data-tab="compare" role="tab"><i class="fas fa-scale-balanced"></i><span>Compare</span></button>
+        <button class="topic-tab" data-tab="practice" role="tab"><i class="fas fa-dumbbell"></i><span>Practice</span></button>
+        <button class="topic-tab" data-tab="chat" role="tab"><i class="fas fa-comments"></i><span>AI Chat</span></button>
+        <button class="topic-tab" data-tab="resources" role="tab"><i class="fas fa-book-open"></i><span>Resources</span></button>
+      </nav>
+
+      <!-- Panels -->
+      <section class="topic-panels" id="topicPanels">
+        <div class="topic-panel active" data-panel="overview" role="tabpanel"></div>
+        <div class="topic-panel" data-panel="summary" role="tabpanel"></div>
+        <div class="topic-panel" data-panel="notes" role="tabpanel"></div>
+        <div class="topic-panel" data-panel="mindmap" role="tabpanel"></div>
+        <div class="topic-panel" data-panel="roadmap" role="tabpanel"></div>
+        <div class="topic-panel" data-panel="timeline" role="tabpanel"></div>
+        <div class="topic-panel" data-panel="quiz" role="tabpanel"></div>
+        <div class="topic-panel" data-panel="flashcards" role="tabpanel"></div>
+        <div class="topic-panel" data-panel="compare" role="tabpanel"></div>
+        <div class="topic-panel" data-panel="practice" role="tabpanel"></div>
+        <div class="topic-panel" data-panel="chat" role="tabpanel"></div>
+        <div class="topic-panel" data-panel="resources" role="tabpanel"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.9/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/analytics-tracker.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/motion.js"></script>
+  <script src="/js/command-palette.js"></script>
+  <script src="/js/pwa.js"></script>
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/topic.js"></script>
+</body>
+</html>
