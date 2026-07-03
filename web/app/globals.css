@@ -1,0 +1,131 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Design tokens ---------- */
+:root,
+.dark {
+  /* Dark mode first */
+  --surface: 9 11 17; /* #090b11 app background */
+  --surface-raised: 16 19 28; /* #10131c sidebar / cards */
+  --surface-overlay: 24 28 40; /* #181c28 popovers */
+  --ink: 233 236 244; /* #e9ecf4 primary text */
+  --ink-muted: 148 156 176; /* #949cb0 secondary text */
+  --ink-faint: 100 108 128; /* #646c80 tertiary text */
+  --line: 38 43 58; /* #262b3a borders */
+  --line-strong: 56 62 82; /* #383e52 strong borders */
+}
+
+.light {
+  --surface: 244 246 250;
+  --surface-raised: 255 255 255;
+  --surface-overlay: 255 255 255;
+  --ink: 22 26 38;
+  --ink-muted: 92 100 122;
+  --ink-faint: 140 148 168;
+  --line: 226 230 240;
+  --line-strong: 202 208 224;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-surface font-sans text-ink antialiased;
+  overscroll-behavior-x: none;
+}
+
+/* ---------- Accessibility: focus rings ---------- */
+:focus-visible {
+  outline: 2px solid theme("colors.accent.blue");
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Beautiful thin scrollbar ---------- */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--line-strong) / 0.6) transparent;
+}
+.sidebar-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgb(var(--line-strong) / 0.5);
+  border-radius: 999px;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--line-strong) / 0.9);
+}
+
+/* ---------- Subtle ambient glow behind the sidebar ---------- */
+.sidebar-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      420px 260px at 0% 0%,
+      rgba(79, 124, 255, 0.08),
+      transparent 60%
+    ),
+    radial-gradient(
+      360px 280px at 10% 100%,
+      rgba(139, 92, 246, 0.07),
+      transparent 60%
+    );
+  pointer-events: none;
+}
+
+/* ---------- Ripple click animation ---------- */
+.ripple-host {
+  position: relative;
+  overflow: hidden;
+}
+.ripple {
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(79, 124, 255, 0.25);
+  transform: scale(0);
+  animation: ripple-anim 550ms ease-out forwards;
+  pointer-events: none;
+}
+@keyframes ripple-anim {
+  to {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+
+/* ---------- Safe area for notched phones ---------- */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.safe-left {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+/* ---------- AI glow accent for AI-section icons ---------- */
+.ai-icon-glow {
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.45));
+}
