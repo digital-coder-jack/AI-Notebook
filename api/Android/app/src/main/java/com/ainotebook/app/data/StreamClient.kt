@@ -110,9 +110,7 @@ object StreamClient {
                 .addHeader("Accept", "text/event-stream")
                 .addHeader("Cache-Control", "no-cache")
                 .post(payload.toRequestBody(mediaType))
-            if (!token.isNullOrBlank()) {
-                reqBuilder.addHeader("Authorization", "Bearer $token")
-            }
+            // Authorization header is already added by the shared ApiClient interceptor.
             return streamingClient.newCall(reqBuilder.build())
         }
 
