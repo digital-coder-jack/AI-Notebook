@@ -53,6 +53,7 @@ object Routes {
     const val SIGNUP = "signup"
     const val DASHBOARD = "dashboard"
     const val CHAT = "chat"
+    const val CHAT_DETAIL = "chat?chatId={chatId}"
     const val TOOLS = "tools"
     const val PROFILE = "profile"
 }
@@ -196,7 +197,7 @@ private fun MainShell(factory: VMFactory) {
                         )
                     }
                     composable(
-                        route = "${Routes.CHAT}?chatId={chatId}",
+                        route = Routes.CHAT_DETAIL,
                         arguments = listOf(navArgument("chatId") {
                             type = NavType.IntType; defaultValue = -1
                         })

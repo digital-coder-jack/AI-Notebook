@@ -61,6 +61,7 @@ class NetworkMonitor(context: Context) {
     fun currentlyOnline(): Boolean {
         val active = connectivityManager.activeNetwork ?: return false
         val caps = connectivityManager.getNetworkCapabilities(active) ?: return false
-        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 }

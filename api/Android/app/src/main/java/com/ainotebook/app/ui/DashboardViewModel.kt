@@ -7,6 +7,7 @@ import com.ainotebook.app.data.Stats
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class DashboardUiState(
@@ -24,15 +25,17 @@ class DashboardViewModel(private val repo: Repository) : ViewModel() {
 
     fun load() {
         viewModelScope.launch {
-            _state.value = _state.value.copy(loading = true, error = null)
+            _state.update { it.copy(loading = true, error = null) }
             try {
                 val s = repo.stats()
-                _state.value = DashboardUiState(loading = false, stats = s)
+                _state.update { DashboardUiState(loading = false, stats = s) }
             } catch (e: Exception) {
-                _state.value = DashboardUiState(
-                    loading = false,
-                    error = e.message ?: "Could not load your dashboard."
-                )
+                _state.update {
+                    DashboardUiState(
+                        loading = false,
+                        error = e.message ?: "Could not load your dashboard."
+                    )
+                }
             }
         }
     }

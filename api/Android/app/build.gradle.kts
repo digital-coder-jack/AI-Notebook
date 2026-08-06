@@ -105,5 +105,16 @@ dependencies {
     // DataStore for token persistence
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
+    // Room
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    // annotationProcessor("androidx.room:room-compiler:$roomVersion") // Use KSP if available
+
+    // WorkManager
+    val workVersion = "2.9.0"
+    implementation("androidx.work:work-runtime-ktx:$workVersion")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

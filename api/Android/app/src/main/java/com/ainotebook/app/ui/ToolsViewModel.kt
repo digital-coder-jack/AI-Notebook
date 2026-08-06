@@ -8,6 +8,7 @@ import com.ainotebook.app.data.Repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** Generic result holder for the study tools. */
@@ -27,23 +28,23 @@ class ToolsViewModel(private val repo: Repository) : ViewModel() {
     val state: StateFlow<ToolsUiState> = _state.asStateFlow()
 
     fun reset() {
-        _state.value = ToolsUiState()
+        _state.update { ToolsUiState() }
     }
 
     private fun begin() {
-        _state.value = ToolsUiState(loading = true)
+        _state.update { ToolsUiState(loading = true) }
     }
 
     private fun fail(e: Exception) {
-        _state.value = ToolsUiState(error = e.message ?: "Something went wrong.")
+        _state.update { ToolsUiState(error = e.message ?: "Something went wrong.") }
     }
 
-    fun notes(topic: String) = launch { _state.value = ToolsUiState(textResult = repo.generateNotes(topic).content) }
-    fun plan(goal: String, days: Int) = launch { _state.value = ToolsUiState(textResult = repo.generatePlan(goal, days).content) }
-    fun summarize(text: String) = launch { _state.value = ToolsUiState(textResult = repo.summarize(text).summary) }
-    fun homework(q: String) = launch { _state.value = ToolsUiState(textResult = repo.homework(q).answer) }
-    fun quiz(topic: String, n: Int) = launch { _state.value = ToolsUiState(quiz = repo.generateQuiz(topic, n).questions) }
-    fun flashcards(topic: String, n: Int) = launch { _state.value = ToolsUiState(flashcards = repo.generateFlashcards(topic, n).cards) }
+    fun notes(topic: String) = launch { _state.update { ToolsUiState(textResult = repo.generateNotes(topic).content) } }
+    fun plan(goal: String, days: Int) = launch { _state.update { ToolsUiState(textResult = repo.generatePlan(goal, days).content) } }
+    fun summarize(text: String) = launch { _state.update { ToolsUiState(textResult = repo.summarize(text).summary) } }
+    fun homework(q: String) = launch { _state.update { ToolsUiState(textResult = repo.homework(q).answer) } }
+    fun quiz(topic: String, n: Int) = launch { _state.update { ToolsUiState(quiz = repo.generateQuiz(topic, n).questions) } }
+    fun flashcards(topic: String, n: Int) = launch { _state.update { ToolsUiState(flashcards = repo.generateFlashcards(topic, n).cards) } }
 
     private fun launch(block: suspend () -> Unit) {
         viewModelScope.launch {
