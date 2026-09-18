@@ -349,6 +349,7 @@ async function sendMessage() {
   let full = '';
   let firstToken = true;
   let cancelled = false;
+  let hadError = false;
   let reader = null;
 
   /* Apply a single decoded SSE frame to the UI. */
@@ -383,6 +384,7 @@ async function sendMessage() {
           cancelled = true;
           break;
         case 'error': {
+          hadError = true;
           const msg = friendlyError(obj.error || {});
           body.innerHTML = '';
           body.appendChild(renderMarkdown((full ? full + '\n\n' : '') + '⚠️ ' + msg));
@@ -433,7 +435,7 @@ async function sendMessage() {
     if (cancelled && !full.trim()) {
       body.innerHTML = '';
       body.appendChild(renderMarkdown('⏹️ Generation stopped.'));
-    } else if (!cancelled && !full.trim()) {
+    } else if (!cancelled && !hadError && !full.trim()) {
       body.innerHTML = '';
       body.appendChild(renderMarkdown('⚠️ No response was generated. Please try again.'));
     }
