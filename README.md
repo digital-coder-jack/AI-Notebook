@@ -318,7 +318,8 @@ uvicorn backend.main:app --reload --port 3000
 5. **Telegram bot** (optional): visit `https://<backend-url>/api/set-webhook` once.
 
 - **Platform**: Vercel (frontend) + Render/Railway (backend API) · **Status**: ✅ Ready
-- **Tech**: FastAPI + Gunicorn/Uvicorn + Vanilla JS + Chart.js + Groq + MongoDB Atlas (analytics)
+- **Tech**: FastAPI + Gunicorn/Uvicorn + Vanilla JS + Chart.js + Groq + SQLite
+  (with process-local, privacy-preserving analytics counters)
 - **Last Updated**: 2026-06-21
 
 ### 🩹 Mobile/Navigation/Branding fixes (2026-06-21)

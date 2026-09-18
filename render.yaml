@@ -41,8 +41,6 @@ services:
         generateValue: true                   # Render generates a strong secret
       - key: ALLOWED_ORIGINS
         sync: false                           # e.g. https://your-app.vercel.app
-      - key: MONGODB_URI_WEB
-        sync: false                           # MongoDB Atlas connection string
       - key: GROQ_MODEL
         sync: false                           # optional override
       - key: TELEGRAM_BOT_TOKEN
