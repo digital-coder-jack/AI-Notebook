@@ -73,7 +73,6 @@ def _validate_environment() -> None:
     optional = {
         "KIMI_MODEL": "override default Kimi model (moonshot-v1-8k)",
         "GROQ_MODEL": "override default Groq model (llama-3.3-70b-versatile)",
-        "MONGODB_URI_WEB": "MongoDB Atlas URI for web-analytics dashboard",
         "TELEGRAM_BOT_TOKEN": "Telegram bot integration",
         "WEBHOOK_SECRET": "verify Telegram webhook calls",
         "DB_PATH": "persistent SQLite path (set to a mounted disk in production)",
@@ -169,13 +168,12 @@ app.include_router(files_routes.router)
 app.include_router(topics_routes.router)
 
 # ---------------------------------------------------------------------------
-# Web Analytics API Routes (MongoDB Atlas)
+# Web Analytics API Routes
 #
 # These accept JSON request BODIES to match exactly what
 # frontend/js/analytics-tracker.js sends. (The previous version declared the
 # fields as query parameters, which made every analytics call fail with 422.)
-# All handlers are defensive so analytics never breaks the page if Mongo is
-# unavailable.
+# Analytics are process-local and best-effort, so they never block the page.
 # ---------------------------------------------------------------------------
 class TrackVisitIn(BaseModel):
     guest_id: str
@@ -279,7 +277,7 @@ async def health() -> dict:
         "ai_providers": snapshot["providers"],
         "ai_fallback_order": snapshot["order"],
         "bot_configured": bool(os.environ.get("TELEGRAM_BOT_TOKEN")),
-        "mongo_analytics_configured": bool(os.environ.get("MONGODB_URI_WEB")),
+        "analytics_persistence": "process-local",
         "cors_allowed_origins": ALLOWED_ORIGINS,
     }
 

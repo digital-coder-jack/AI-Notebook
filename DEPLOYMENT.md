@@ -32,7 +32,6 @@ Nothing in the frontend logic or the database structure was rewritten.
 | `ALLOWED_ORIGINS` | **Yes (prod)** | Comma-separated frontend origins allowed by CORS, e.g. `https://your-app.vercel.app`. `*.vercel.app` preview URLs and `localhost` are always allowed automatically. |
 | `JWT_SECRET` | **Strongly recommended** | Stable secret for signing login tokens. Without it, logins break across restarts/instances. (Render `render.yaml` auto-generates one.) |
 | `DB_PATH` | Recommended (prod) | Absolute path to the SQLite file on a **persistent disk** (e.g. `/data/ai_notebook.db`). Without a persistent disk, data resets on each redeploy. |
-| `MONGODB_URI_WEB` | Optional | MongoDB Atlas connection string for the **web-analytics dashboard**. Analytics is disabled gracefully if unset. |
 | `GROQ_MODEL` | Optional | Override the default model `llama-3.3-70b-versatile`. |
 | `JWT_TTL_SECONDS` | Optional | Token lifetime (default `604800` = 7 days). |
 | `TELEGRAM_BOT_TOKEN` | Optional | Enables the Telegram bot. |
@@ -72,7 +71,6 @@ Nothing in the frontend logic or the database structure was rewritten.
 3. Render reads `render.yaml`: it creates the web service, a 1 GB disk mounted
    at `/data`, sets `DB_PATH=/data/ai_notebook.db`, and auto-generates `JWT_SECRET`.
 4. In the dashboard, fill the secret vars marked *sync:false*:
-   `GROQ_API_KEY`, `ALLOWED_ORIGINS`, and (optional) `MONGODB_URI_WEB`,
    `TELEGRAM_BOT_TOKEN`, etc.
 
 ### Option B — Manual web service
@@ -168,7 +166,7 @@ Requires `TELEGRAM_BOT_TOKEN` (and optionally `WEBHOOK_SECRET`) to be set.
 
 - **SQLite** (users, chats, messages, notes, quizzes, uploads) — structure
   **unchanged**. Use `DB_PATH` on a mounted disk for persistence.
-- **MongoDB Atlas** (`MONGODB_URI_WEB`) — used **only** for the web-analytics
-  dashboard, **unchanged**. Kept as-is per requirements.
+- **Analytics** are process-local counters only. They are best-effort,
+  privacy-preserving, and reset when the backend process restarts.
 - For fully durable, multi-instance SQL on serverless, consider migrating the
   SQLite layer to **Turso** (libSQL) later — not required for this fix.

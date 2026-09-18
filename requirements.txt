@@ -22,9 +22,6 @@ pydantic==2.10.6
 pypdf==5.1.0                  # PDF text extraction
 python-docx==1.1.2            # DOCX text extraction
 
-# --- MongoDB Atlas (web analytics dashboard) ------------------------
-pymongo[srv]==4.6.1           # [srv] enables mongodb+srv:// Atlas URIs
-
 # NOTE: Password hashing and JWT are implemented with the Python
 # standard library (hashlib / hmac), so no extra crypto packages are
 # needed.
