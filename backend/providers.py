@@ -148,13 +148,13 @@ def _payload(model: str, messages: list[dict], temperature: float, max_tokens: i
     }
 
 _NOT_CONFIGURED = (
-    "🤖 AI is not configured yet. Set NVIDIA_API_KEY to enable AI features."
+    "AI Notebook is getting ready. Please try again in a moment."
 )
 _ALL_FAILED = (
-    "⚠️ NVIDIA AI is temporarily unavailable. Please try again in a moment."
+    "AI Notebook isn't responding right now. Please try again in a moment."
 )
 _AUTH_FAILED = (
-    "⚠️ NVIDIA AI authentication failed. Check NVIDIA_API_KEY in the server environment."
+    "AI Notebook isn't responding right now. Please try again in a moment."
 )
 
 
@@ -162,10 +162,10 @@ def _http_error(status: int, model: str) -> dict:
     if status in (401, 403):
         return {"type": "auth", "message": _AUTH_FAILED, "status": status}
     if status == 429:
-        return {"type": "http", "message": f"{model} rate limit reached", "status": status}
+        return {"type": "http", "message": "AI Notebook is temporarily busy", "status": status}
     if 500 <= status <= 599:
-        return {"type": "http", "message": f"{model} temporarily unavailable", "status": status}
-    return {"type": "http", "message": f"{model} returned an error", "status": status}
+        return {"type": "http", "message": _ALL_FAILED, "status": status}
+    return {"type": "http", "message": _ALL_FAILED, "status": status}
 
 
 async def chat(
@@ -282,7 +282,7 @@ async def chat_stream(
                         except json.JSONDecodeError:
                             continue
                         if chunk.get("error"):
-                            last_error = {"type": "provider_error", "message": f"{model} returned a provider error"}
+                            last_error = {"type": "provider_error", "message": _ALL_FAILED}
                             break
                         try:
                             token = chunk["choices"][0]["delta"].get("content")

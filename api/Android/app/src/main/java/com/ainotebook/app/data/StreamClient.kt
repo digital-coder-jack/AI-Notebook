@@ -137,12 +137,12 @@ object StreamClient {
                 call.execute().use { response ->
                     when {
                         response.code == 401 || response.code == 403 -> {
-                            emitTerminal(StreamEvent.Error("Unauthorized (${response.code})", retryable = false))
+                            emitTerminal(StreamEvent.Error("AI Notebook isn't responding right now. Please try again in a moment.", retryable = false))
                             AttemptResult.DONE
                         }
                         response.code == 429 || response.code in 500..599 -> {
                             // Server-side transient — worth retrying.
-                            AttemptResult.RETRY("Server busy (${response.code})")
+                            AttemptResult.RETRY("AI Notebook is temporarily busy")
                         }
                         !response.isSuccessful -> {
                             val errorBody = runCatching {
@@ -154,18 +154,13 @@ object StreamClient {
                                 "Code=${response.code} Body=$errorBody"
                             )
 
-                            emitTerminal(
-                                StreamEvent.Error(
-                                    "Request failed (${response.code}): $errorBody",
-                                    retryable = false
-                                )
-                            )
+                            emitTerminal(StreamEvent.Error("AI Notebook isn't responding right now. Please try again in a moment.", retryable = false))
                             AttemptResult.DONE
                         }
                         else -> {
                             val source = response.body?.source()
                             if (source == null) {
-                                emitTerminal(StreamEvent.Error("Empty response", retryable = false))
+                                emitTerminal(StreamEvent.Error("AI Notebook isn't responding right now. Please try again in a moment.", retryable = false))
                                 AttemptResult.DONE
                             } else {
                                 consumeStream(source, ::emitTerminal) { ev -> if (!isClosedForSend) trySend(ev) }
@@ -184,7 +179,7 @@ object StreamClient {
                 AttemptResult.RETRY(e.message ?: "Network error")
             } catch (e: Exception) {
                 // Unexpected — never crash silently.
-                emitTerminal(StreamEvent.Error(e.message ?: "Stream interrupted", retryable = false))
+                emitTerminal(StreamEvent.Error("AI Notebook isn't responding right now. Please try again in a moment.", retryable = false))
                 AttemptResult.DONE
             }
 

@@ -37,9 +37,11 @@ async function loadModels() {
   if (!el.modelSelect) return;
   try {
     const data = await SS.api('/api/ai/models');
-    state.model = data.selected || 'auto';
+    // The backend may retain the internal NVIDIA selection, but the product
+    // exposes one calm user-facing mode: AI Notebook Light.
+    state.model = 'auto';
     state.providers = data.providers || [];
-    el.modelSelect.value = state.model;
+    el.modelSelect.value = 'auto';
     updateModelDot();
     // Disable options for providers that aren't configured (except Auto).
     state.providers.forEach((p) => {
@@ -62,7 +64,7 @@ async function saveModel(model) {
   updateModelDot();
   try {
     await SS.api('/api/ai/model', { method: 'PUT', body: { model } });
-    SS.toast('AI model set to ' + (model === 'auto' ? 'Auto (smart fallback)' : model));
+    SS.toast('AI Notebook Light is ready.');
   } catch (err) { SS.toast(err.message, 'error'); }
 }
 
@@ -349,6 +351,7 @@ async function sendMessage() {
   let full = '';
   let firstToken = true;
   let cancelled = false;
+  let hadError = false;
   let reader = null;
 
   /* Apply a single decoded SSE frame to the UI. */
@@ -363,14 +366,9 @@ async function sendMessage() {
       try { obj = JSON.parse(payload); } catch { continue; }
 
       switch (obj.event) {
-        case 'provider': {
-          const msgEl = body.closest('.msg');
-          const r = msgEl && msgEl.querySelector('.role');
-          if (r && obj.provider && obj.provider !== 'auto' && obj.provider !== 'cache') {
-            r.innerHTML = `AI Notebook <span class="model-badge">${escapeHtml(obj.provider)}</span>`;
-          }
+        case 'provider':
+          // Provider/model routing is intentionally invisible to users.
           break;
-        }
         case 'token': {
           if (firstToken) { body.innerHTML = ''; firstToken = false; }
           full += obj.token || '';
@@ -383,9 +381,10 @@ async function sendMessage() {
           cancelled = true;
           break;
         case 'error': {
+          hadError = true;
           const msg = friendlyError(obj.error || {});
           body.innerHTML = '';
-          body.appendChild(renderMarkdown((full ? full + '\n\n' : '') + '⚠️ ' + msg));
+          body.appendChild(renderMarkdown((full ? full + '\n\n' : '') + msg));
           break;
         }
         case 'start':
@@ -433,9 +432,9 @@ async function sendMessage() {
     if (cancelled && !full.trim()) {
       body.innerHTML = '';
       body.appendChild(renderMarkdown('⏹️ Generation stopped.'));
-    } else if (!cancelled && !full.trim()) {
+    } else if (!cancelled && !hadError && !full.trim()) {
       body.innerHTML = '';
-      body.appendChild(renderMarkdown('⚠️ No response was generated. Please try again.'));
+      body.appendChild(renderMarkdown('AI Notebook isn\'t responding right now.\n\nPlease try again in a moment.'));
     }
 
     refreshTitle();
@@ -448,7 +447,7 @@ async function sendMessage() {
       }
     } else {
       body.innerHTML = '';
-      body.appendChild(renderMarkdown('⚠️ ' + ((err && err.message) || 'Network error. Please try again.')));
+      body.appendChild(renderMarkdown('AI Notebook isn\'t responding right now.\n\nPlease try again in a moment.'));
     }
   } finally {
     // Release the reader to avoid leaking the underlying stream.
@@ -469,12 +468,18 @@ async function sendMessage() {
 function friendlyError(e) {
   const type = (e && e.type) || 'error';
   switch (type) {
-    case 'timeout': return 'The AI took too long to respond. Please try again.';
-    case 'network': return 'Could not reach the AI service. Check your connection and retry.';
-    case 'http': return 'The AI service returned an error. Please try again shortly.';
-    case 'not_configured': return e.message || 'AI is not configured yet.';
-    case 'unavailable': return 'All AI providers are busy right now. Please try again in a moment.';
-    default: return (e && e.message) || 'Something went wrong. Please try again.';
+    case 'timeout':
+    case 'network':
+    case 'http':
+    case 'auth':
+    case 'provider_error':
+    case 'invalid_response':
+    case 'unavailable':
+      return 'AI Notebook isn\'t responding right now.\n\nPlease try again in a moment.';
+    case 'not_configured':
+      return 'AI Notebook is getting ready. Please try again in a moment.';
+    default:
+      return 'AI Notebook isn\'t responding right now.\n\nPlease try again in a moment.';
   }
 }
 

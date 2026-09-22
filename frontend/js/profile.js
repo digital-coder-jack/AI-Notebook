@@ -162,7 +162,7 @@ async function loadSettings() {
     // ---- AI ----
     const ai = data.ai_settings || {};
     let model = (ai.model || 'auto').toLowerCase();
-    if (!['auto', 'nvidia'].includes(model)) model = 'auto';
+    if (model !== 'auto') model = 'auto';
     setVal('aiModel', model);
     setSeg('lengthSeg', ai.length || 'medium');
     setSeg('creativitySeg', ai.creativity || 'balanced');
@@ -209,13 +209,13 @@ async function loadProviderStatus() {
   try {
     const data = await SS.api('/api/ai/status', { auth: false });
     box.innerHTML = (data.providers || []).map(p =>
-      `<span class="model-badge" title="${p.label}">` +
+      `<span class="model-badge" title="AI Notebook Light">` +
       `<span class="model-dot ${p.configured ? '' : 'off'}"></span>` +
-      `${p.label} ${p.configured ? '' : '(offline)'}</span>`
+      `AI Notebook Light ${p.configured ? '' : '(temporarily unavailable)'}</span>`
     ).join(' ');
-    if (!box.innerHTML) box.innerHTML = '<span class="model-badge">No providers</span>';
+    if (!box.innerHTML) box.innerHTML = '<span class="model-badge">AI Notebook Light · Checking availability</span>';
   } catch {
-    box.innerHTML = '<span class="model-badge"><span class="model-dot off"></span> Status unavailable</span>';
+    box.innerHTML = '<span class="model-badge"><span class="model-dot off"></span> AI Notebook Light · Try again later</span>';
   }
 }
 
