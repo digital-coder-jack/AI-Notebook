@@ -28,7 +28,12 @@ Nothing in the frontend logic or the database structure was rewritten.
 
 | Variable | Required? | Purpose |
 |----------|-----------|---------|
-| `BAZAARLINK_API_KEY` | **Yes (for AI)** | Server-side BazaarLink key — powers chat, notes, quiz, flashcards, plans, summaries, and topic generation. Without it, AI endpoints return a "not configured" message. |
+| `GEMINI_API_KEY` | **Yes for AI Notebook** | Server-side Gemini key for the default tier. |
+| `OPENROUTER_API_KEY` | Optional | Server-side OpenRouter key for AI Notebook Pro. |
+| `CEREBRAS_API_KEY` | Optional | Server-side Cerebras key for AI Notebook Pro Max. |
+| `GEMINI_MODEL` | Optional | Default `gemini-3.8-flash`. |
+| `OPENROUTER_MODEL` | Optional | Default `openrouter/free`; OpenRouter controls the free catalog. |
+| `CEREBRAS_MODEL` | Optional | Configured Cerebras model for AI Notebook Pro Max. |
 | `ALLOWED_ORIGINS` | **Yes (prod)** | Comma-separated frontend origins allowed by CORS, e.g. `https://your-app.vercel.app`. `*.vercel.app` preview URLs and `localhost` are always allowed automatically. |
 | `JWT_SECRET` | **Strongly recommended** | Stable secret for signing login tokens. Without it, logins break across restarts/instances. (Render `render.yaml` auto-generates one.) |
 | `DB_PATH` | Recommended (prod) | Absolute path to the SQLite file on a **persistent disk** (e.g. `/data/ai_notebook.db`). Without a persistent disk, data resets on each redeploy. |
@@ -97,7 +102,7 @@ Your backend URL will look like `https://ai-notebook.onrender.com`.
    - Start: the gunicorn command above.
    - Health check: `/api/health`.
 3. **Variables** tab → add the env vars from section 1
-   (`BAZAARLINK_API_KEY`, `ALLOWED_ORIGINS`, `JWT_SECRET`, …).
+   (`GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `CEREBRAS_API_KEY`, `ALLOWED_ORIGINS`, `JWT_SECRET`, …).
 4. For persistent data: add a **Volume**, mount it at `/data`, and set
    `DB_PATH=/data/ai_notebook.db`.
 5. Railway sets `$PORT` automatically; the start command already uses it.

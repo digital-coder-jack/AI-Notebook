@@ -17,17 +17,17 @@
 
 - **Name**: AI Notebook
 - **Goal**: An AI-powered study assistant that works as a **modern installable web app (PWA)**, the original **Telegram bot**, sharing the **same FastAPI backend and SQLite database**.
-- **AI**: **AI Notebook with automatic free-model fallback** — the server routes through BazaarLink and tries two configured free models in order. If a model fails or is unavailable, the next model is tried automatically; if all fail, a graceful error is returned.
+- **AI**: Three independent server-side product tiers: **AI Notebook**, **AI Notebook Pro**, and **AI Notebook Pro Max**. A failed tier never silently downgrades into another tier.
 
 The original Telegram bot is **fully preserved** — it now benefits from the same multi-provider fallback automatically. A complete web interface (landing page, auth, dashboard, ChatGPT-style chat, 6 study tools, settings) is provided alongside it, now as a **Progressive Web App** that installs to Android/desktop.
 
 ### 🧠 AI System (new)
-- **Provider**: AI Notebook — a server-side BazaarLink gateway with an ordered OpenAI-compatible free-model fallback chain.
-- **Auto fallback chain**: `qwen/qwen3.7-flash → deepseek/deepseek-v4-flash-0731free → graceful error`.
-- **Model selector**: the web and native clients expose one simple **AI Notebook** mode; gateway and model routing remain internal.
+- **Tiers**: AI Notebook uses Gemini, AI Notebook Pro uses OpenRouter, and AI Notebook Pro Max uses Cerebras. Upstream provider names and model IDs remain server-side.
+- **Models**: centralized through `GEMINI_MODEL`, `OPENROUTER_MODEL`, and `CEREBRAS_MODEL`; defaults are `gemini-3.8-flash`, `openrouter/free`, and `llama-3.3-70b`.
+- **Model selector**: the web and native clients expose only the three product tiers.
 - **Response caching** (in-process, TTL configurable via `AI_CACHE_TTL`), **streaming (SSE)**, **conversation memory**, **Markdown + code highlighting**.
-- **Status monitoring**: `GET /api/ai/status` and `/api/health` report which providers are configured.
-- **Security**: `BAZAARLINK_API_KEY` is read **only** from the server environment and **never** exposed to the frontend or native client — all AI calls go through server-side routes with paid fallback disabled.
+- **Status monitoring**: `GET /api/ai/status` and `/api/health` report only safe product-tier availability.
+- **Security**: `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, and `CEREBRAS_API_KEY` are read **only** from the server environment and **never** exposed to the frontend or native client.
 
 ### 📱 Progressive Web App (new)
 - `manifest.json` (icons, shortcuts, standalone display, theme/splash colors)
@@ -283,7 +283,7 @@ AINotebook/  (repo root)
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env        # fill in BAZAARLINK_API_KEY (and TELEGRAM_BOT_TOKEN if using the bot)
+cp .env.example .env        # fill in the AI tier keys (and TELEGRAM_BOT_TOKEN if using the bot)
 uvicorn backend.main:app --reload --port 3000
 # open http://localhost:3000
 ```
@@ -291,7 +291,9 @@ uvicorn backend.main:app --reload --port 3000
 ### Environment variables
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `BAZAARLINK_API_KEY` | yes (for AI) | Server-side BazaarLink gateway key; never expose to clients |
+| `GEMINI_API_KEY` | yes (for AI Notebook) | Server-side Gemini key; never expose to clients |
+| `OPENROUTER_API_KEY` | optional | Server-side AI Notebook Pro key |
+| `CEREBRAS_API_KEY` | optional | Server-side AI Notebook Pro Max key |
 | `JWT_SECRET` | recommended | stable token signing secret (set in prod) |
 | `TELEGRAM_BOT_TOKEN` | bot only | Telegram bot token |
 | `WEBHOOK_SECRET` | optional | verifies Telegram webhook calls |

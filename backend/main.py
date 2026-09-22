@@ -60,16 +60,21 @@ FRONTEND_DIR = os.path.join(PROJECT_ROOT, "frontend")
 # obvious in the platform logs. Set FAIL_FAST=1 to abort startup instead.
 def _validate_environment() -> None:
     """Validate and report on the environment configuration at boot."""
-    # AI uses BazaarLink's ordered free-model fallback chain.
+    # AI uses three independent product tiers. The default tier is required
+    # for AI features; Pro and Pro Max are optional upgrades.
     ai_providers = {
-        "BAZAARLINK_API_KEY": "BazaarLink server-side AI gateway key",
+        "GEMINI_API_KEY": "AI Notebook default tier",
+        "OPENROUTER_API_KEY": "AI Notebook Pro tier",
+        "CEREBRAS_API_KEY": "AI Notebook Pro Max tier",
     }
     recommended = {
         "JWT_SECRET": "stable session signing secret (logins break on restart without it)",
         "ALLOWED_ORIGINS": "comma-separated list of frontend origins allowed by CORS",
     }
     optional = {
-        "BAZAARLINK_BASE_URL": "optional BazaarLink API base URL override",
+        "GEMINI_MODEL": "default tier model override",
+        "OPENROUTER_MODEL": "Pro tier model override",
+        "CEREBRAS_MODEL": "Pro Max tier model override",
         "TELEGRAM_BOT_TOKEN": "Telegram bot integration",
         "WEBHOOK_SECRET": "verify Telegram webhook calls",
         "DB_PATH": "persistent SQLite path (set to a mounted disk in production)",
@@ -272,7 +277,7 @@ async def health() -> dict:
         "db_path": db.DB_PATH,
         "ai_configured": snapshot["any_configured"],
         "ai_providers": snapshot["providers"],
-        "ai_fallback_order": snapshot["order"],
+        "ai_fallback_order": [tier["label"] for tier in snapshot["tiers"]],
         "bot_configured": bool(os.environ.get("TELEGRAM_BOT_TOKEN")),
         "analytics_persistence": "process-local",
         "cors_allowed_origins": ALLOWED_ORIGINS,

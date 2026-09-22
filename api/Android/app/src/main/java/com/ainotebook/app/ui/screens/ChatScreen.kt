@@ -311,7 +311,11 @@ private fun ChatHeader(
             )
             Spacer(Modifier.size(4.dp))
             Text(
-                "AI Notebook Light",
+                when (model.lowercase()) {
+                    "pro" -> "AI Notebook Pro"
+                    "pro_max" -> "AI Notebook Pro Max"
+                    else -> "AI Notebook"
+                },
                 style = MaterialTheme.typography.labelMedium,
                 color = Indigo,
                 fontWeight = FontWeight.SemiBold

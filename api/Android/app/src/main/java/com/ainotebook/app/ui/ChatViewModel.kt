@@ -20,8 +20,8 @@ data class ChatUiState(
     val streaming: Boolean = false,
     val loading: Boolean = false,
     val error: String? = null,
-    val model: String = "auto",
-    val modelOptions: List<String> = listOf("auto"),
+    val model: String = "default",
+    val modelOptions: List<String> = listOf("default", "pro", "pro_max"),
     val pinnedChatIds: Set<Int> = emptySet(),
     val searchQuery: String = ""
 ) {
@@ -61,10 +61,10 @@ class ChatViewModel(private val repo: Repository) : ViewModel() {
             try {
                 val res = repo.aiModels()
                 _state.update {
-                    it.copy(
-                        model = "auto",
-                        modelOptions = listOf("auto")
-                    )
+                    val allowed = res.options.filter { option -> option in listOf("default", "pro", "pro_max") }
+                    val options = allowed.ifEmpty { listOf("default", "pro", "pro_max") }
+                    val selected = res.selected.takeIf { it in options } ?: "default"
+                    it.copy(model = selected, modelOptions = options)
                 }
             } catch (_: Exception) {
                 // Non-fatal — defaults already set in ChatUiState.
@@ -73,9 +73,10 @@ class ChatViewModel(private val repo: Repository) : ViewModel() {
     }
 
     fun selectModel(model: String) {
-        _state.update { it.copy(model = "auto") }
+        val selected = model.takeIf { it in listOf("default", "pro", "pro_max") } ?: "default"
+        _state.update { it.copy(model = selected) }
         viewModelScope.launch {
-            try { repo.setAiModel("auto") } catch (_: Exception) { /* best-effort persist */ }
+            try { repo.setAiModel(selected) } catch (_: Exception) { /* best-effort persist */ }
         }
     }
 

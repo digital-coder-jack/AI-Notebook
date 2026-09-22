@@ -145,15 +145,6 @@ object StreamClient {
                             AttemptResult.RETRY("AI Notebook is temporarily busy")
                         }
                         !response.isSuccessful -> {
-                            val errorBody = runCatching {
-                                response.body?.string()
-                            }.getOrNull()
-
-                            android.util.Log.e(
-                                "API_ERROR",
-                                "Code=${response.code} Body=$errorBody"
-                            )
-
                             emitTerminal(StreamEvent.Error("AI Notebook isn't responding right now. Please try again in a moment.", retryable = false))
                             AttemptResult.DONE
                         }
@@ -384,9 +375,9 @@ object StreamClient {
     private fun extractError(obj: JsonObject): String? {
         (obj["error"])?.let { el ->
             (el as? JsonObject)?.let { eo ->
-                return eo["message"]?.jsonPrimitive?.contentOrNull ?: "Provider error"
+                return "AI Notebook is temporarily unavailable. Please try again."
             }
-            el.jsonPrimitive.contentOrNull?.let { return it }
+            el.jsonPrimitive.contentOrNull?.let { return "AI Notebook is temporarily unavailable. Please try again." }
         }
         return null
     }

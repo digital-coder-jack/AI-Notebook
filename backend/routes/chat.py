@@ -59,7 +59,7 @@ def _user_model(user) -> str:
             ai_settings = json.loads(row["ai_settings"] or "{}")
             choice = str(ai_settings.get("model", "auto")).lower()
             if choice in providers.VALID_SELECTIONS:
-                return choice
+                return "default" if choice == "auto" else choice
     except Exception:
         pass
     return "auto"
@@ -219,8 +219,8 @@ async def stream_message(chat_id: int, body: StreamIn, user=Depends(auth.current
 
         return StreamingResponse(_superseded(), media_type="text/event-stream")
 
-    # Resolve which provider/model to use: an explicit per-message override
-    # (if valid) wins, otherwise the user's saved preference, otherwise auto.
+    # Resolve the selected product tier. Invalid legacy values fall back to the
+    # default tier; a selected tier is never silently downgraded.
     requested = (body.model or "").lower()
     selection = requested if requested in providers.VALID_SELECTIONS else _user_model(user)
 
@@ -387,10 +387,14 @@ async def ai_models(user=Depends(auth.current_user)):
     """List selectable providers + the user's current selection."""
     snapshot = providers.status_snapshot()
     return {
-        "selected": "auto",
-        "options": ["auto"],
+        "selected": _user_model(user),
+        "options": ["default", "pro", "pro_max"],
         "providers": snapshot["providers"],
-        "display_names": {"auto": "AI Notebook"},
+        "display_names": {
+            "default": "AI Notebook",
+            "pro": "AI Notebook Pro",
+            "pro_max": "AI Notebook Pro Max",
+        },
     }
 
 

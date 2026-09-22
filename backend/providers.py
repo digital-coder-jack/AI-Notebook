@@ -1,10 +1,14 @@
-"""
-AI Notebook provider routing.
+"""Centralized server-side AI tier routing.
 
-BazaarLink exposes an OpenAI-compatible Chat Completions API. This module is
-kept as the single server-side boundary for authentication, timeouts, model
-fallback, streaming, and response caching. The API key and model IDs never
-leave the backend.
+The public product exposes three product tiers, not upstream provider details:
+
+* ``default`` -> AI Notebook -> Gemini
+* ``pro`` -> AI Notebook Pro -> OpenRouter
+* ``pro_max`` -> AI Notebook Pro Max -> Cerebras
+
+Every tier is independent. A failed tier never silently consumes another tier's
+quota. Credentials, provider names, model IDs, upstream status codes, and
+upstream error bodies stay inside this module and its server logs.
 """
 from __future__ import annotations
 
@@ -20,77 +24,108 @@ import httpx
 
 logger = logging.getLogger("ai-notebook.providers")
 
-BAZAARLINK_BASE_URL = os.environ.get("BAZAARLINK_BASE_URL", "https://api.bazaarlink.ai/v1").rstrip("/")
-BAZAARLINK_URL = f"{BAZAARLINK_BASE_URL}/chat/completions"
-BAZAARLINK_ENV = "BAZAARLINK_API_KEY"
-AI_MODELS = [
-    "qwen/qwen3.7-flash",
-    "deepseek/deepseek-v4-flash-0731free",
-]
+# Centralized configuration. Model IDs are read once here and nowhere else.
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openrouter/free")
+CEREBRAS_BASE_URL = "https://api.cerebras.ai/v1"
+CEREBRAS_MODEL = os.environ.get("CEREBRAS_MODEL", "llama-3.3-70b")
 
-# The public product exposes one assistant mode. The gateway and model chain
-# are deliberately implementation details.
-PROVIDERS: dict[str, dict] = {
-    "ai_notebook": {
-        "label": "AI Notebook",
-        "env": BAZAARLINK_ENV,
-        "url": BAZAARLINK_URL,
-    }
+TIER_CONFIG: dict[str, dict[str, str]] = {
+    "default": {
+        "display_name": "AI Notebook",
+        "provider": "gemini",
+        "env": "GEMINI_API_KEY",
+        "model_env": "GEMINI_MODEL",
+        "model": GEMINI_MODEL,
+    },
+    "pro": {
+        "display_name": "AI Notebook Pro",
+        "provider": "openrouter",
+        "env": "OPENROUTER_API_KEY",
+        "model_env": "OPENROUTER_MODEL",
+        "model": OPENROUTER_MODEL,
+    },
+    "pro_max": {
+        "display_name": "AI Notebook Pro Max",
+        "provider": "cerebras",
+        "env": "CEREBRAS_API_KEY",
+        "model_env": "CEREBRAS_MODEL",
+        "model": CEREBRAS_MODEL,
+    },
 }
-DEFAULT_ORDER = ["ai_notebook"]
-VALID_SELECTIONS = ["auto", "ai_notebook"]
+VALID_SELECTIONS = ["auto", "default", "pro", "pro_max"]
+_LEGACY_SELECTIONS = {"ai_notebook": "default", "ai_notebook_light": "default"}
 
+_NOT_CONFIGURED = {
+    "default": "AI Notebook is not responding right now. Please try again.",
+    "pro": "AI Notebook Pro is temporarily unavailable. Please try again.",
+    "pro_max": "AI Notebook Pro Max is temporarily unavailable. Please try again.",
+}
 
-def provider_key(name: str = "ai_notebook") -> str:
-    if name not in PROVIDERS:
-        return ""
-    return os.environ.get(PROVIDERS[name]["env"], "").strip()
-
-
-def provider_available(name: str = "ai_notebook") -> bool:
-    return name in PROVIDERS and bool(provider_key(name))
-
-
-def available_providers() -> list[str]:
-    return [name for name in DEFAULT_ORDER if provider_available(name)]
-
-
-def resolve_order(selection: str | None) -> list[str]:
-    """Return the exact free model IDs to try once each, in order."""
-    choice = (selection or "auto").lower()
-    if choice not in VALID_SELECTIONS:
-        choice = "auto"
-    return AI_MODELS.copy() if provider_available("ai_notebook") else []
-
-
-def status_snapshot() -> dict:
-    """Return generic AI availability without exposing gateway/model details."""
-    configured = provider_available("ai_notebook")
-    return {
-        "available": configured,
-        "provider": "AI Notebook",
-        "providers": [
-            {
-                "id": "ai_notebook",
-                "label": "AI Notebook",
-                "configured": configured,
-            }
-        ],
-        "order": ["AI Notebook"],
-        "models": [],
-        "any_configured": configured,
-    }
-
-
-# Simple process-local response cache for non-streaming study-tool calls.
+_STREAM_TOTAL_TIMEOUT = int(os.environ.get("AI_STREAM_TIMEOUT", "75"))
+_STREAM_IDLE_TIMEOUT = int(os.environ.get("AI_STREAM_IDLE_TIMEOUT", "20"))
 _CACHE: dict[str, tuple[float, str]] = {}
 _CACHE_TTL = int(os.environ.get("AI_CACHE_TTL", "900"))
 _CACHE_MAX = 256
 
 
-def _cache_key(order, messages, temperature, max_tokens) -> str:
+def _normalize_selection(selection: str | None) -> str:
+    choice = (selection or "auto").strip().lower()
+    choice = _LEGACY_SELECTIONS.get(choice, choice)
+    return "default" if choice == "auto" else choice if choice in TIER_CONFIG else "default"
+
+
+def _tier(tier: str | None) -> dict[str, str]:
+    return TIER_CONFIG[_normalize_selection(tier)]
+
+
+def tier_display_name(tier: str | None) -> str:
+    return _tier(tier)["display_name"]
+
+
+def provider_key(tier: str | None = "default") -> str:
+    config = _tier(tier)
+    return os.environ.get(config["env"], "").strip()
+
+
+def provider_available(tier: str | None = "default") -> bool:
+    return bool(provider_key(tier))
+
+
+def available_tiers() -> list[str]:
+    return [tier for tier in TIER_CONFIG if provider_available(tier)]
+
+
+def resolve_order(selection: str | None) -> list[str]:
+    """Resolve one selected tier; this intentionally never downgrades."""
+    return [_normalize_selection(selection)]
+
+
+def status_snapshot() -> dict:
+    """Return only safe product-tier availability information."""
+    tiers = [
+        {
+            "id": tier,
+            "label": config["display_name"],
+            "configured": provider_available(tier),
+        }
+        for tier, config in TIER_CONFIG.items()
+    ]
+    available = any(item["configured"] for item in tiers)
+    return {
+        "available": available,
+        "name": "AI Notebook",
+        "providers": tiers,
+        "tiers": tiers,
+        "any_configured": available,
+    }
+
+
+def _cache_key(tier: str, messages: list[dict], temperature: float, max_tokens: int) -> str:
     raw = json.dumps(
-        {"o": order, "m": messages, "t": temperature, "k": max_tokens},
+        {"tier": tier, "m": messages, "t": temperature, "k": max_tokens},
         sort_keys=True,
         separators=(",", ":"),
     )
@@ -101,8 +136,8 @@ def _cache_get(key: str) -> str | None:
     hit = _CACHE.get(key)
     if not hit:
         return None
-    ts, value = hit
-    if time.time() - ts > _CACHE_TTL:
+    timestamp, value = hit
+    if time.time() - timestamp > _CACHE_TTL:
         _CACHE.pop(key, None)
         return None
     return value
@@ -110,22 +145,24 @@ def _cache_get(key: str) -> str | None:
 
 def _cache_set(key: str, value: str) -> None:
     if len(_CACHE) >= _CACHE_MAX:
-        oldest = min(_CACHE, key=lambda k: _CACHE[k][0])
+        oldest = min(_CACHE, key=lambda item: _CACHE[item][0])
         _CACHE.pop(oldest, None)
     _CACHE[key] = (time.time(), value)
 
 
-def _headers() -> dict[str, str]:
+def _timeout() -> httpx.Timeout:
+    return httpx.Timeout(connect=8.0, read=30.0, write=8.0, pool=8.0)
+
+
+def _openai_headers(key: str) -> dict[str, str]:
     return {
-        "Authorization": f"Bearer {provider_key()}",
+        "Authorization": f"Bearer {key}",
         "Content-Type": "application/json",
         "Accept": "application/json",
-        # Never allow the gateway to silently route to a paid model.
-        "X-Free-Fallback": "false",
     }
 
 
-def _payload(model: str, messages: list[dict], temperature: float, max_tokens: int, *, stream: bool = False) -> dict:
+def _openai_payload(model: str, messages: list[dict], temperature: float, max_tokens: int, stream: bool) -> dict:
     return {
         "model": model,
         "messages": messages,
@@ -135,195 +172,232 @@ def _payload(model: str, messages: list[dict], temperature: float, max_tokens: i
     }
 
 
-_NOT_CONFIGURED = "AI Notebook is getting ready. Please try again in a moment."
-_ALL_FAILED = "AI Notebook is temporarily unavailable. Please try again later."
-_RETRYABLE_STATUS = {401, 403, 408, 429, 500, 502, 503, 504}
+def _gemini_contents(messages: list[dict]) -> tuple[list[dict], dict | None]:
+    contents: list[dict] = []
+    system_parts: list[dict] = []
+    for message in messages:
+        role = message.get("role", "user")
+        text = str(message.get("content", ""))
+        if not text:
+            continue
+        if role == "system":
+            system_parts.append({"text": text})
+            continue
+        contents.append({"role": "model" if role == "assistant" else "user", "parts": [{"text": text}]})
+    system = {"parts": system_parts} if system_parts else None
+    return contents, system
 
 
-def _http_error(status: int) -> dict:
-    """Create a generic client-safe error while retaining status for logs."""
-    if status == 429:
-        message = "AI Notebook is temporarily busy"
-    else:
-        message = _ALL_FAILED
-    return {"type": "http", "message": message, "status": status}
+def _gemini_payload(messages: list[dict], temperature: float, max_tokens: int, stream: bool = False) -> dict:
+    contents, system = _gemini_contents(messages)
+    payload = {
+        "contents": contents,
+        "generationConfig": {
+            "temperature": temperature,
+            "maxOutputTokens": max_tokens,
+        },
+    }
+    if system:
+        payload["systemInstruction"] = system
+    return payload
 
 
-def _request_timeout() -> httpx.Timeout:
-    # A dead free model should fail quickly enough for the next model to run.
-    return httpx.Timeout(connect=8.0, read=30.0, write=8.0, pool=8.0)
+def _generic_error(tier: str, error_type: str = "unavailable") -> dict:
+    return {"type": error_type, "message": _NOT_CONFIGURED[tier]}
+
+
+def _log_upstream_failure(tier: str, status: int | None = None, error_type: str = "failure") -> None:
+    # Deliberately log only safe identifiers and status metadata; never keys or
+    # upstream response bodies.
+    logger.warning("tier=%s upstream_failure type=%s status=%s", tier, error_type, status)
+
+
+def _parse_openai_response(data: dict) -> str:
+    value = data["choices"][0]["message"]["content"]
+    if isinstance(value, list):
+        value = "".join(str(item.get("text", "")) if isinstance(item, dict) else str(item) for item in value)
+    return str(value or "").strip()
+
+
+def _parse_gemini_response(data: dict) -> str:
+    parts = data["candidates"][0]["content"]["parts"]
+    return "".join(str(part.get("text", "")) for part in parts if isinstance(part, dict)).strip()
+
+
+async def _complete_tier(
+    tier: str, messages: list[dict], temperature: float, max_tokens: int
+) -> str:
+    config = _tier(tier)
+    key = provider_key(tier)
+    if not key:
+        raise RuntimeError("not_configured")
+
+    async with httpx.AsyncClient(timeout=_timeout()) as client:
+        if config["provider"] == "gemini":
+            url = f"{GEMINI_BASE_URL}/models/{config['model']}:generateContent"
+            response = await client.post(url, params={"key": key}, json=_gemini_payload(messages, temperature, max_tokens))
+        else:
+            base = OPENROUTER_BASE_URL if config["provider"] == "openrouter" else CEREBRAS_BASE_URL
+            response = await client.post(
+                f"{base}/chat/completions",
+                json=_openai_payload(config["model"], messages, temperature, max_tokens, False),
+                headers=_openai_headers(key),
+            )
+
+    if response.status_code != 200:
+        _log_upstream_failure(tier, response.status_code, "http")
+        raise RuntimeError("upstream_http")
+    try:
+        data = response.json()
+        text = _parse_gemini_response(data) if config["provider"] == "gemini" else _parse_openai_response(data)
+    except (ValueError, KeyError, IndexError, TypeError):
+        _log_upstream_failure(tier, error_type="invalid_response")
+        raise RuntimeError("invalid_response")
+    if not text:
+        _log_upstream_failure(tier, error_type="empty_response")
+        raise RuntimeError("empty_response")
+    return text
 
 
 async def chat(
     messages: list[dict], *, selection: str | None = "auto", temperature: float = 0.7,
     max_tokens: int = 1024, use_cache: bool = True,
 ) -> tuple[str, str]:
-    order = resolve_order(selection)
-    if not order:
-        return ("none", _NOT_CONFIGURED)
-    key = _cache_key(order, messages, temperature, max_tokens)
+    tier = _normalize_selection(selection)
+    if not provider_available(tier):
+        return (tier, _NOT_CONFIGURED[tier])
+    cache_key = _cache_key(tier, messages, temperature, max_tokens)
     if use_cache:
-        cached = _cache_get(key)
+        cached = _cache_get(cache_key)
         if cached is not None:
-            return ("cache", cached)
-
-    last_error: dict | None = None
-    for model in order:
-        try:
-            async with httpx.AsyncClient(timeout=_request_timeout()) as client:
-                resp = await client.post(
-                    BAZAARLINK_URL,
-                    json=_payload(model, messages, temperature, max_tokens),
-                    headers=_headers(),
-                )
-            if resp.status_code != 200:
-                last_error = _http_error(resp.status_code)
-                logger.warning("gateway=bazaarlink model=%s status=%s", model, resp.status_code)
-                continue
-            try:
-                data = resp.json()
-                text = data["choices"][0]["message"]["content"].strip()
-            except (ValueError, KeyError, IndexError, TypeError):
-                last_error = {"type": "invalid_response", "message": _ALL_FAILED}
-                logger.warning("gateway=bazaarlink model=%s invalid_response", model)
-                continue
-            if text:
-                if use_cache:
-                    _cache_set(key, text)
-                logger.info("gateway=bazaarlink model=%s completion_succeeded", model)
-                return ("ai_notebook", text)
-            last_error = {"type": "invalid_response", "message": _ALL_FAILED}
-            logger.warning("gateway=bazaarlink model=%s empty_response", model)
-        except httpx.TimeoutException as exc:
-            last_error = {"type": "timeout", "message": _ALL_FAILED}
-            logger.warning("gateway=bazaarlink model=%s timeout=%s", model, type(exc).__name__)
-        except httpx.RequestError as exc:
-            last_error = {"type": "network", "message": _ALL_FAILED}
-            logger.warning("gateway=bazaarlink model=%s network_error=%s", model, type(exc).__name__)
-        except Exception as exc:  # noqa: BLE001
-            last_error = {"type": "network", "message": _ALL_FAILED}
-            logger.warning("gateway=bazaarlink model=%s error=%s", model, type(exc).__name__)
-
-    logger.error(
-        "gateway=bazaarlink all_models_failed last_type=%s last_status=%s",
-        (last_error or {}).get("type"),
-        (last_error or {}).get("status"),
-    )
-    return ("error", (last_error or {}).get("message", _ALL_FAILED))
+            return (tier, cached)
+    try:
+        text = await _complete_tier(tier, messages, temperature, max_tokens)
+        if use_cache:
+            _cache_set(cache_key, text)
+        return (tier, text)
+    except httpx.TimeoutException as exc:
+        _log_upstream_failure(tier, error_type=type(exc).__name__)
+    except httpx.RequestError as exc:
+        _log_upstream_failure(tier, error_type=type(exc).__name__)
+    except Exception as exc:  # noqa: BLE001
+        if str(exc) not in {"not_configured", "upstream_http", "invalid_response", "empty_response"}:
+            _log_upstream_failure(tier, error_type=type(exc).__name__)
+    return (tier, _NOT_CONFIGURED[tier])
 
 
-_STREAM_TOTAL_TIMEOUT = int(os.environ.get("AI_STREAM_TIMEOUT", "75"))
-_STREAM_IDLE_TIMEOUT = int(os.environ.get("AI_STREAM_IDLE_TIMEOUT", "20"))
+async def _stream_tier(
+    tier: str, messages: list[dict], temperature: float, max_tokens: int,
+    cancel_event: "asyncio.Event | None",
+) -> AsyncGenerator[str, None]:
+    config = _tier(tier)
+    key = provider_key(tier)
+    if not key:
+        raise RuntimeError("not_configured")
+    timeout = httpx.Timeout(connect=8.0, read=_STREAM_IDLE_TIMEOUT, write=8.0, pool=8.0)
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        if config["provider"] == "gemini":
+            url = f"{GEMINI_BASE_URL}/models/{config['model']}:streamGenerateContent"
+            request = client.stream(
+                "POST", url, params={"alt": "sse", "key": key},
+                json=_gemini_payload(messages, temperature, max_tokens, True),
+            )
+        else:
+            base = OPENROUTER_BASE_URL if config["provider"] == "openrouter" else CEREBRAS_BASE_URL
+            request = client.stream(
+                "POST", f"{base}/chat/completions",
+                json=_openai_payload(config["model"], messages, temperature, max_tokens, True),
+                headers=_openai_headers(key),
+            )
+        async with request as response:
+            if response.status_code != 200:
+                await response.aread()
+                _log_upstream_failure(tier, response.status_code, "http")
+                raise RuntimeError("upstream_http")
+            line_iter = response.aiter_lines().__aiter__()
+            deadline = time.monotonic() + _STREAM_TOTAL_TIMEOUT
+            while True:
+                if cancel_event is not None and cancel_event.is_set():
+                    return
+                if time.monotonic() > deadline:
+                    raise httpx.ReadTimeout("stream deadline")
+                try:
+                    line = await asyncio.wait_for(line_iter.__anext__(), timeout=_STREAM_IDLE_TIMEOUT)
+                except StopAsyncIteration:
+                    return
+                except asyncio.TimeoutError as exc:
+                    raise httpx.ReadTimeout("stream idle timeout") from exc
+                line = line.strip()
+                if not line or not line.startswith("data:"):
+                    continue
+                raw = line[5:].strip()
+                if raw == "[DONE]":
+                    return
+                try:
+                    chunk = json.loads(raw)
+                except json.JSONDecodeError:
+                    continue
+                if chunk.get("error"):
+                    raise RuntimeError("upstream_stream_error")
+                try:
+                    if config["provider"] == "gemini":
+                        token = _parse_gemini_response(chunk)
+                    else:
+                        token = chunk["choices"][0]["delta"].get("content") or ""
+                except (KeyError, IndexError, TypeError):
+                    continue
+                if token:
+                    yield str(token)
 
 
 async def chat_stream(
     messages: list[dict], *, selection: str | None = "auto", temperature: float = 0.7,
     max_tokens: int = 1024, cancel_event: "asyncio.Event | None" = None,
 ) -> AsyncGenerator[tuple[str, str], None]:
-    """Yield generic meta/token/error events while trying each free model once."""
-    order = resolve_order(selection)
-    if not order:
-        yield ("error", {"type": "not_configured", "message": _NOT_CONFIGURED})
+    """Stream exactly one selected tier; never concatenate another tier."""
+    tier = _normalize_selection(selection)
+    if not provider_available(tier):
+        yield ("error", _generic_error(tier, "not_configured"))
         return
     if cancel_event is not None and cancel_event.is_set():
         yield ("cancelled", "cancelled before start")
         return
 
-    deadline = time.monotonic() + _STREAM_TOTAL_TIMEOUT
-    last_error: dict | None = None
-    for model in order:
-        produced = False
-        try:
-            timeout = httpx.Timeout(connect=8.0, read=_STREAM_IDLE_TIMEOUT, write=8.0, pool=8.0)
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                async with client.stream(
-                    "POST",
-                    BAZAARLINK_URL,
-                    json=_payload(model, messages, temperature, max_tokens, stream=True),
-                    headers=_headers(),
-                ) as resp:
-                    if resp.status_code != 200:
-                        await resp.aread()
-                        last_error = _http_error(resp.status_code)
-                        logger.warning("gateway=bazaarlink model=%s status=%s", model, resp.status_code)
-                        continue
-
-                    line_iter = resp.aiter_lines().__aiter__()
-                    while True:
-                        if cancel_event is not None and cancel_event.is_set():
-                            yield ("cancelled", "superseded by a newer request")
-                            return
-                        if time.monotonic() > deadline:
-                            last_error = {"type": "timeout", "message": _ALL_FAILED}
-                            logger.warning("gateway=bazaarlink model=%s total_timeout", model)
-                            break
-                        try:
-                            line = await asyncio.wait_for(
-                                line_iter.__anext__(), timeout=_STREAM_IDLE_TIMEOUT
-                            )
-                        except StopAsyncIteration:
-                            break
-                        except asyncio.TimeoutError:
-                            last_error = {"type": "timeout", "message": _ALL_FAILED}
-                            logger.warning("gateway=bazaarlink model=%s idle_timeout", model)
-                            break
-                        line = line.strip()
-                        if not line or not line.startswith("data:"):
-                            continue
-                        data = line[len("data:"):].strip()
-                        if data == "[DONE]":
-                            break
-                        try:
-                            chunk = json.loads(data)
-                        except json.JSONDecodeError:
-                            continue
-                        if chunk.get("error"):
-                            last_error = {"type": "provider_error", "message": _ALL_FAILED}
-                            logger.warning("gateway=bazaarlink model=%s stream_error", model)
-                            break
-                        try:
-                            token = chunk["choices"][0]["delta"].get("content")
-                        except (KeyError, IndexError, TypeError):
-                            continue
-                        if token:
-                            if not produced:
-                                produced = True
-                                # Never expose the gateway/model to clients.
-                                yield ("meta", "AI Notebook")
-                            yield ("token", token)
-
-            # A clean stream with no meaningful token is eligible for fallback.
-            if produced:
-                logger.info("gateway=bazaarlink model=%s stream_succeeded", model)
-                return
-        except httpx.TimeoutException as exc:
-            last_error = {"type": "timeout", "message": _ALL_FAILED}
-            logger.warning("gateway=bazaarlink model=%s timeout=%s", model, type(exc).__name__)
-        except httpx.RequestError as exc:
-            last_error = {"type": "network", "message": _ALL_FAILED}
-            logger.warning("gateway=bazaarlink model=%s network_error=%s", model, type(exc).__name__)
-        except Exception as exc:  # noqa: BLE001
-            last_error = {"type": "network", "message": _ALL_FAILED}
-            logger.warning("gateway=bazaarlink model=%s error=%s", model, type(exc).__name__)
-
-        # If tokens were already delivered, never append a second model stream.
-        if produced:
-            return
-
-    logger.error(
-        "gateway=bazaarlink all_models_stream_failed last_type=%s last_status=%s",
-        (last_error or {}).get("type"),
-        (last_error or {}).get("status"),
-    )
-    yield ("error", last_error or {"type": "unavailable", "message": _ALL_FAILED})
+    produced = False
+    try:
+        async for token in _stream_tier(tier, messages, temperature, max_tokens, cancel_event):
+            if not produced:
+                produced = True
+                yield ("meta", TIER_CONFIG[tier]["display_name"])
+            yield ("token", token)
+        if not produced and cancel_event is not None and cancel_event.is_set():
+            yield ("cancelled", "superseded by a newer request")
+        elif not produced:
+            _log_upstream_failure(tier, error_type="empty_stream")
+            yield ("error", _generic_error(tier, "empty_stream"))
+    except httpx.TimeoutException as exc:
+        _log_upstream_failure(tier, error_type=type(exc).__name__)
+        if not produced:
+            yield ("error", _generic_error(tier, "timeout"))
+    except httpx.RequestError as exc:
+        _log_upstream_failure(tier, error_type=type(exc).__name__)
+        if not produced:
+            yield ("error", _generic_error(tier, "network"))
+    except Exception as exc:  # noqa: BLE001
+        if str(exc) in {"not_configured", "upstream_http", "invalid_response", "empty_response", "upstream_stream_error"}:
+            _log_upstream_failure(tier, error_type=str(exc))
+        else:
+            _log_upstream_failure(tier, error_type=type(exc).__name__)
+        if not produced:
+            yield ("error", _generic_error(tier))
 
 
-# Backward-compatible convenience wrappers used by older callers.
+# Compatibility wrappers retained for older imports. They use the default tier.
 async def groq_chat(messages: list[dict], **kwargs) -> str:
-    _provider, text = await chat(messages, **kwargs)
+    _tier_id, text = await chat(messages, selection=kwargs.pop("selection", "default"), **kwargs)
     return text
 
 
 async def groq_chat_stream(messages: list[dict], **kwargs):
-    async for event, value in chat_stream(messages, **kwargs):
+    async for event, value in chat_stream(messages, selection=kwargs.pop("selection", "default"), **kwargs):
         yield event, value
