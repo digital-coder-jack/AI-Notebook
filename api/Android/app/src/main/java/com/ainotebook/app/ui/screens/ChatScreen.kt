@@ -311,9 +311,8 @@ private fun ChatHeader(
             )
             Spacer(Modifier.size(4.dp))
             Text(
-                when (model) {                                    // ✅ correct place
-                    "kimi" -> "AI Notebook Pro"
-                    "groq" -> "AI Notebook Lite"
+                when (model) {
+                    "nvidia" -> "NVIDIA NIM"
                     "auto" -> "Auto"
                     else   -> model.replaceFirstChar { it.uppercase() }
                 },

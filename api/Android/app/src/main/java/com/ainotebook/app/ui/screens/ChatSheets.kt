@@ -202,7 +202,7 @@ private fun ChatHistoryRow(
     }
 }
 
-/** Native bottom sheet for picking the AI provider (Auto / Kimi / Gemini / Groq). */
+/** Native bottom sheet for picking the AI provider (Auto / NVIDIA NIM). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelPickerSheet(
@@ -267,8 +267,6 @@ fun ModelPickerSheet(
 
 private fun modelDescription(model: String): String = when (model.lowercase()) {
     "auto" -> "Smart fallback across all providers"
-    "kimi" -> "Moonshot Kimi — fast, capable"
-    "gemini" -> "Google Gemini"
-    "groq" -> "Groq — ultra-low latency"
+    "nvidia" -> "NVIDIA NIM — ordered model fallback"
     else -> "AI provider"
 }

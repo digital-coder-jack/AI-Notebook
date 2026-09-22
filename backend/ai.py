@@ -2,7 +2,7 @@
 =====================================================================
  AI NOTEBOOK  -  backend/ai.py
 =====================================================================
-High-level AI study features built on top of groq_client.
+High-level AI study features built on top of the centralized NVIDIA NIM router.
 
 Shared by BOTH the web app and the Telegram bot:
   * answer_question()  -> the bot's "library first, AI fallback" logic.
@@ -66,7 +66,7 @@ async def answer_question(user_id: int, question: str) -> tuple[str, str]:
 async def chat_stream(history: list[dict], selection: str | None = "auto", cancel_event=None):
     """
     history is a list of {role, content}. We prepend the system prompt and
-    stream the assistant reply through the multi-provider layer.
+    stream the assistant reply through the NVIDIA NIM model router.
 
     ``cancel_event`` (asyncio.Event) lets the caller cooperatively stop the
     stream — used to cancel a previous request before starting a new one.

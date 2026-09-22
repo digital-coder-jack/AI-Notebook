@@ -390,10 +390,9 @@ async def ai_models(user=Depends(auth.current_user)):
         "selected": _user_model(user),
         "options": ["auto"] + [p["id"] for p in snapshot["providers"]],
         "providers": snapshot["providers"],
-        "display_names": {                      # ← ADD THESE 5 LINES
+        "display_names": {
             "auto": "Auto",
-            "kimi": "AI Notebook Pro",
-            "groq": "AI Notebook Lite",
+            "nvidia": "NVIDIA NIM",
         }
     }
 

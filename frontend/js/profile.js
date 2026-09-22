@@ -162,7 +162,7 @@ async function loadSettings() {
     // ---- AI ----
     const ai = data.ai_settings || {};
     let model = (ai.model || 'auto').toLowerCase();
-    if (!['auto', 'kimi', 'gemini', 'groq'].includes(model)) model = 'auto';
+    if (!['auto', 'nvidia'].includes(model)) model = 'auto';
     setVal('aiModel', model);
     setSeg('lengthSeg', ai.length || 'medium');
     setSeg('creativitySeg', ai.creativity || 'balanced');

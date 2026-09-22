@@ -9,7 +9,7 @@ The single FastAPI application that powers BOTH:
   3. The static frontend  (served from /frontend)
 
 Everything shares backend.database (one SQLite file) and backend.ai
-(one Groq client), so the bot and the website operate on the same data.
+(one NVIDIA NIM router), so the bot and the website operate on the same data.
 
 Run locally:
     uvicorn backend.main:app --reload --port 3000
@@ -63,16 +63,16 @@ def _validate_environment() -> None:
     # AI now uses a multi-provider fallback chain. At least ONE of these must
     # be set for AI features to work; the chat layer falls back automatically.
     ai_providers = {
-        "KIMI_API_KEY": "primary AI provider (Moonshot Kimi)",
-        "GROQ_API_KEY": "secondary AI provider (Groq)",
+        "NVIDIA_API_KEY": "NVIDIA NIM API key (ordered model fallback)",
     }
     recommended = {
         "JWT_SECRET": "stable session signing secret (logins break on restart without it)",
         "ALLOWED_ORIGINS": "comma-separated list of frontend origins allowed by CORS",
     }
     optional = {
-        "KIMI_MODEL": "override default Kimi model (moonshot-v1-8k)",
-        "GROQ_MODEL": "override default Groq model (llama-3.3-70b-versatile)",
+        "NVIDIA_MODEL_PRIMARY": "primary NVIDIA model override",
+        "NVIDIA_MODEL_FALLBACK_1": "first NVIDIA fallback model override",
+        "NVIDIA_MODEL_FALLBACK_2": "second NVIDIA fallback model override",
         "TELEGRAM_BOT_TOKEN": "Telegram bot integration",
         "WEBHOOK_SECRET": "verify Telegram webhook calls",
         "DB_PATH": "persistent SQLite path (set to a mounted disk in production)",
