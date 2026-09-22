@@ -3,8 +3,8 @@
  AI NOTEBOOK  -  backend/groq_client.py  (compatibility shim)
 =====================================================================
 This module used to call Groq directly. AI calls are now routed through
-the multi-provider layer in `backend.providers` (Kimi -> Gemini -> Groq
-with automatic fallback). These wrappers are kept so any existing import
+the centralized NVIDIA NIM model router in `backend.providers` with
+automatic fallback. These wrappers are kept so any existing import
 of `groq_chat` / `groq_chat_stream` keeps working unchanged.
 
 The API keys are read ONLY from environment variables inside

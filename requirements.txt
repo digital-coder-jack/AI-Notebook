@@ -12,7 +12,7 @@ python-multipart==0.0.20      # required by FastAPI for file uploads / forms
 # --- Telegram bot (optional; imported lazily) -----------------------
 python-telegram-bot==21.10
 
-# --- HTTP client used to call the Groq API --------------------------
+# --- HTTP client used to call the NVIDIA NIM API --------------------
 httpx==0.28.1
 
 # --- Data validation (FastAPI request models) -----------------------
