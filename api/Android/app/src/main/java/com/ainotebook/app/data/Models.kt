@@ -106,8 +106,8 @@ data class AiProvider(
 
 @Serializable
 data class ModelsResponse(
-    val selected: String = "auto",
-    val options: List<String> = listOf("auto"),
+    val selected: String = "default",
+    val options: List<String> = listOf("default", "pro", "pro_max"),
     val providers: List<AiProvider> = emptyList(),
     @SerialName("display_names")
     val displayNames: Map<String, String> = emptyMap()  // ← ADD THIS

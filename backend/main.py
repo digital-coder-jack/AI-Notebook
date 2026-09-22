@@ -9,7 +9,7 @@ The single FastAPI application that powers BOTH:
   3. The static frontend  (served from /frontend)
 
 Everything shares backend.database (one SQLite file) and backend.ai
-(one NVIDIA NIM router), so the bot and the website operate on the same data.
+(one AI Notebook gateway router), so the bot and the website operate on the same data.
 
 Run locally:
     uvicorn backend.main:app --reload --port 3000
@@ -60,19 +60,21 @@ FRONTEND_DIR = os.path.join(PROJECT_ROOT, "frontend")
 # obvious in the platform logs. Set FAIL_FAST=1 to abort startup instead.
 def _validate_environment() -> None:
     """Validate and report on the environment configuration at boot."""
-    # AI now uses a multi-provider fallback chain. At least ONE of these must
-    # be set for AI features to work; the chat layer falls back automatically.
+    # AI uses three independent product tiers. The default tier is required
+    # for AI features; Pro and Pro Max are optional upgrades.
     ai_providers = {
-        "NVIDIA_API_KEY": "NVIDIA NIM API key (ordered model fallback)",
+        "GEMINI_API_KEY": "AI Notebook default tier",
+        "OPENROUTER_API_KEY": "AI Notebook Pro tier",
+        "CEREBRAS_API_KEY": "AI Notebook Pro Max tier",
     }
     recommended = {
         "JWT_SECRET": "stable session signing secret (logins break on restart without it)",
         "ALLOWED_ORIGINS": "comma-separated list of frontend origins allowed by CORS",
     }
     optional = {
-        "NVIDIA_MODEL_PRIMARY": "primary NVIDIA model override",
-        "NVIDIA_MODEL_FALLBACK_1": "first NVIDIA fallback model override",
-        "NVIDIA_MODEL_FALLBACK_2": "second NVIDIA fallback model override",
+        "GEMINI_MODEL": "default tier model override",
+        "OPENROUTER_MODEL": "Pro tier model override",
+        "CEREBRAS_MODEL": "Pro Max tier model override",
         "TELEGRAM_BOT_TOKEN": "Telegram bot integration",
         "WEBHOOK_SECRET": "verify Telegram webhook calls",
         "DB_PATH": "persistent SQLite path (set to a mounted disk in production)",
@@ -275,7 +277,7 @@ async def health() -> dict:
         "db_path": db.DB_PATH,
         "ai_configured": snapshot["any_configured"],
         "ai_providers": snapshot["providers"],
-        "ai_fallback_order": snapshot["order"],
+        "ai_fallback_order": [tier["label"] for tier in snapshot["tiers"]],
         "bot_configured": bool(os.environ.get("TELEGRAM_BOT_TOKEN")),
         "analytics_persistence": "process-local",
         "cors_allowed_origins": ALLOWED_ORIGINS,

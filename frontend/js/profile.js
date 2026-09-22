@@ -161,8 +161,8 @@ async function loadSettings() {
 
     // ---- AI ----
     const ai = data.ai_settings || {};
-    let model = (ai.model || 'auto').toLowerCase();
-    if (model !== 'auto') model = 'auto';
+    let model = (ai.model || 'default').toLowerCase();
+    if (!['default', 'pro', 'pro_max'].includes(model)) model = 'default';
     setVal('aiModel', model);
     setSeg('lengthSeg', ai.length || 'medium');
     setSeg('creativitySeg', ai.creativity || 'balanced');
@@ -209,13 +209,13 @@ async function loadProviderStatus() {
   try {
     const data = await SS.api('/api/ai/status', { auth: false });
     box.innerHTML = (data.providers || []).map(p =>
-      `<span class="model-badge" title="AI Notebook Light">` +
+      `<span class="model-badge" title="${p.label || 'AI Notebook'}">` +
       `<span class="model-dot ${p.configured ? '' : 'off'}"></span>` +
-      `AI Notebook Light ${p.configured ? '' : '(temporarily unavailable)'}</span>`
+      `${p.label || 'AI Notebook'} ${p.configured ? '' : '(temporarily unavailable)'}</span>`
     ).join(' ');
-    if (!box.innerHTML) box.innerHTML = '<span class="model-badge">AI Notebook Light · Checking availability</span>';
+    if (!box.innerHTML) box.innerHTML = '<span class="model-badge">AI Notebook · Checking availability</span>';
   } catch {
-    box.innerHTML = '<span class="model-badge"><span class="model-dot off"></span> AI Notebook Light · Try again later</span>';
+    box.innerHTML = '<span class="model-badge"><span class="model-dot off"></span> AI Notebook · Try again later</span>';
   }
 }
 

@@ -37,13 +37,12 @@ async function loadModels() {
   if (!el.modelSelect) return;
   try {
     const data = await SS.api('/api/ai/models');
-    // The backend may retain the internal NVIDIA selection, but the product
-    // exposes one calm user-facing mode: AI Notebook Light.
-    state.model = 'auto';
+    const selected = ['default', 'pro', 'pro_max'].includes(data.selected) ? data.selected : 'default';
+    state.model = selected;
     state.providers = data.providers || [];
-    el.modelSelect.value = 'auto';
+    el.modelSelect.value = selected;
     updateModelDot();
-    // Disable options for providers that aren't configured (except Auto).
+    // Disable unavailable product tiers without exposing implementation details.
     state.providers.forEach((p) => {
       const opt = el.modelSelect.querySelector(`option[value="${p.id}"]`);
       if (opt && !p.configured) { opt.disabled = true; opt.textContent += ' (off)'; }
@@ -53,9 +52,7 @@ async function loadModels() {
 
 function updateModelDot() {
   if (!el.modelDot) return;
-  const anyOn = state.model === 'auto'
-    ? state.providers.some((p) => p.configured)
-    : state.providers.some((p) => p.id === state.model && p.configured);
+  const anyOn = state.providers.some((p) => p.id === state.model && p.configured);
   el.modelDot.classList.toggle('off', !anyOn);
 }
 
@@ -64,7 +61,8 @@ async function saveModel(model) {
   updateModelDot();
   try {
     await SS.api('/api/ai/model', { method: 'PUT', body: { model } });
-    SS.toast('AI Notebook Light is ready.');
+    const label = ({ default: 'AI Notebook', pro: 'AI Notebook Pro', pro_max: 'AI Notebook Pro Max' })[model] || 'AI Notebook';
+    SS.toast(`${label} is ready.`);
   } catch (err) { SS.toast(err.message, 'error'); }
 }
 

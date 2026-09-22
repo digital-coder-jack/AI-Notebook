@@ -202,7 +202,7 @@ private fun ChatHistoryRow(
     }
 }
 
-/** Native bottom sheet for picking the AI provider (Auto / NVIDIA NIM). */
+/** Native bottom sheet for picking an AI Notebook product tier. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelPickerSheet(
@@ -225,7 +225,7 @@ fun ModelPickerSheet(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                "AI Notebook Light automatically chooses the best available route.",
+                "Choose the AI Notebook tier for your next response.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MutedText
             )
@@ -243,7 +243,7 @@ fun ModelPickerSheet(
                 ) {
                     Column(Modifier.weight(1f)) {
                         Text(
-                            opt.replaceFirstChar { it.uppercase() },
+                            modelLabel(opt),
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -265,7 +265,16 @@ fun ModelPickerSheet(
     }
 }
 
+private fun modelLabel(model: String): String = when (model.lowercase()) {
+    "default", "auto" -> "AI Notebook"
+    "pro" -> "AI Notebook Pro"
+    "pro_max" -> "AI Notebook Pro Max"
+    else -> "AI Notebook"
+}
+
 private fun modelDescription(model: String): String = when (model.lowercase()) {
-    "auto" -> "Your calm, fast study assistant"
-    else -> "AI Notebook Light"
+    "default", "auto" -> "Your calm, fast study assistant"
+    "pro" -> "More capable study assistance"
+    "pro_max" -> "Advanced study assistance"
+    else -> "Your AI Notebook assistant"
 }

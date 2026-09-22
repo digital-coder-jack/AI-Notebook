@@ -35,18 +35,22 @@ services:
         value: "2"
 
       # ----- Secrets: set these in the Render dashboard (sync:false) -----
-      - key: NVIDIA_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: CEREBRAS_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
+      - key: OPENROUTER_MODEL
+        value: openrouter/free
+      - key: CEREBRAS_MODEL
+        value: llama-3.3-70b
       - key: JWT_SECRET
         generateValue: true                   # Render generates a strong secret
       - key: ALLOWED_ORIGINS
         sync: false                           # e.g. https://your-app.vercel.app
-      - key: NVIDIA_MODEL_PRIMARY
-        value: nvidia/nemotron-3.5-lightning-30b-a3b
-      - key: NVIDIA_MODEL_FALLBACK_1
-        value: z-ai/glm-5-3-flash
-      - key: NVIDIA_MODEL_FALLBACK_2
-        value: z-ai/glm-5-3
       - key: TELEGRAM_BOT_TOKEN
         sync: false                           # optional (bot)
       - key: WEBHOOK_SECRET

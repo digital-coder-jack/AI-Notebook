@@ -59,7 +59,7 @@ def _user_model(user) -> str:
             ai_settings = json.loads(row["ai_settings"] or "{}")
             choice = str(ai_settings.get("model", "auto")).lower()
             if choice in providers.VALID_SELECTIONS:
-                return choice
+                return "default" if choice == "auto" else choice
     except Exception:
         pass
     return "auto"
@@ -180,11 +180,11 @@ async def stream_message(chat_id: int, body: StreamIn, user=Depends(auth.current
 
     SSE frame shapes (each a single `data:` JSON object):
         {"event":"start",     "message_id":N, "generation":G}
-        {"event":"provider",  "provider":"kimi"}
+        {"event":"provider",  "provider":"AI Notebook"}
         {"event":"token",     "token":"..."}
         {"event":"cancelled", "reason":"...", "message_id":N}
         {"event":"error",     "error":{"type":"timeout","message":"..."}}
-        {"event":"done",      "message_id":N, "provider":"kimi"}
+        {"event":"done",      "message_id":N, "provider":"AI Notebook"}
     """
     chat = db.get_chat(user["id"], chat_id)
     if chat is None:
@@ -219,8 +219,8 @@ async def stream_message(chat_id: int, body: StreamIn, user=Depends(auth.current
 
         return StreamingResponse(_superseded(), media_type="text/event-stream")
 
-    # Resolve which provider/model to use: an explicit per-message override
-    # (if valid) wins, otherwise the user's saved preference, otherwise auto.
+    # Resolve the selected product tier. Invalid legacy values fall back to the
+    # default tier; a selected tier is never silently downgraded.
     requested = (body.model or "").lower()
     selection = requested if requested in providers.VALID_SELECTIONS else _user_model(user)
 
@@ -388,12 +388,13 @@ async def ai_models(user=Depends(auth.current_user)):
     snapshot = providers.status_snapshot()
     return {
         "selected": _user_model(user),
-        "options": ["auto"] + [p["id"] for p in snapshot["providers"]],
+        "options": ["default", "pro", "pro_max"],
         "providers": snapshot["providers"],
         "display_names": {
-            "auto": "Auto",
-            "nvidia": "NVIDIA NIM",
-        }
+            "default": "AI Notebook",
+            "pro": "AI Notebook Pro",
+            "pro_max": "AI Notebook Pro Max",
+        },
     }
 
 

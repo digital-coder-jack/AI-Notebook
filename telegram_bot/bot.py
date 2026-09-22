@@ -99,7 +99,7 @@ The part before <code>|</code> is the question, the part after is the answer.
 <b>4️⃣ Ask anything</b>
 Send any text message (no command needed):
 • If the question is in your library → you get <i>your</i> saved answer 📒
-• If not → I ask the Groq AI and send you its answer 🤖
+• If not → I ask AI Notebook and send you its answer 🤖
 
 <b>Notes</b>
 • Duplicate questions are rejected automatically.
@@ -221,7 +221,7 @@ async def cmd_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """AI fallback: library first, then Groq AI (shared logic)."""
+    """AI fallback: library first, then AI Notebook (shared logic)."""
     user = update.effective_user
     analytics.track_user(user.id, user.username, user.first_name)
     user_id = user.id

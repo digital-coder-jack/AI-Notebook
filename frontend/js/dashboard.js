@@ -327,13 +327,13 @@ async function loadProvidersMini() {
   try {
     const data = await SS.api('/api/ai/status', { auth: false });
     box.innerHTML = (data.providers || []).map((p) =>
-      '<span class="model-badge" title="AI Notebook Light">' +
+      `<span class="model-badge" title="${p.label || 'AI Notebook'}">` +
       `<span class="model-dot ${p.configured ? '' : 'off'}"></span>` +
-      `AI Notebook Light${p.configured ? '' : ' (temporarily unavailable)'}</span>`
+      `${p.label || 'AI Notebook'}${p.configured ? '' : ' (temporarily unavailable)'}</span>`
     ).join(' ');
-    if (!box.innerHTML) box.innerHTML = '<span class="model-badge">AI Notebook Light</span>';
+    if (!box.innerHTML) box.innerHTML = '<span class="model-badge">AI Notebook</span>';
   } catch {
-    box.innerHTML = '<span class="model-badge"><span class="model-dot off"></span> AI Notebook Light · Try again later</span>';
+    box.innerHTML = '<span class="model-badge"><span class="model-dot off"></span> AI Notebook · Try again later</span>';
   }
 }
 
