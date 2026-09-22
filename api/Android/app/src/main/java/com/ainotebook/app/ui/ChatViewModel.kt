@@ -62,8 +62,8 @@ class ChatViewModel(private val repo: Repository) : ViewModel() {
                 val res = repo.aiModels()
                 _state.update {
                     it.copy(
-                        model = res.selected.ifBlank { "auto" },
-                        modelOptions = res.options.ifEmpty { listOf("auto") }
+                        model = "auto",
+                        modelOptions = listOf("auto")
                     )
                 }
             } catch (_: Exception) {
@@ -73,9 +73,9 @@ class ChatViewModel(private val repo: Repository) : ViewModel() {
     }
 
     fun selectModel(model: String) {
-        _state.update { it.copy(model = model) }
+        _state.update { it.copy(model = "auto") }
         viewModelScope.launch {
-            try { repo.setAiModel(model) } catch (_: Exception) { /* best-effort persist */ }
+            try { repo.setAiModel("auto") } catch (_: Exception) { /* best-effort persist */ }
         }
     }
 
@@ -271,7 +271,7 @@ class ChatViewModel(private val repo: Repository) : ViewModel() {
                         loadChats()
                     }
                     is StreamEvent.Error -> {
-                        if (sb.isEmpty()) updateLastAssistant("⚠️ ${event.message}")
+                        if (sb.isEmpty()) updateLastAssistant("AI Notebook isn't responding right now.\n\nPlease try again in a moment.")
                         _state.update { it.copy(streaming = false) }
                     }
                 }
@@ -313,7 +313,7 @@ class ChatViewModel(private val repo: Repository) : ViewModel() {
                 msg.contains("timeout", true) ||
                 msg.contains("failed to connect", true) ->
                 "Cannot reach the server. Check your connection and try again."
-            else -> msg
+            else -> "AI Notebook isn't responding right now. Please try again in a moment."
         }
     }
 }

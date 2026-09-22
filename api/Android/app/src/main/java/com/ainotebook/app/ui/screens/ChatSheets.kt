@@ -219,13 +219,13 @@ fun ModelPickerSheet(
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Text(
-                "Choose AI model",
+                "Choose assistant mode",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                "\"Auto\" picks the best available provider automatically.",
+                "AI Notebook Light automatically chooses the best available route.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MutedText
             )
@@ -266,7 +266,6 @@ fun ModelPickerSheet(
 }
 
 private fun modelDescription(model: String): String = when (model.lowercase()) {
-    "auto" -> "Smart fallback across all providers"
-    "nvidia" -> "NVIDIA NIM — ordered model fallback"
-    else -> "AI provider"
+    "auto" -> "Your calm, fast study assistant"
+    else -> "AI Notebook Light"
 }

@@ -311,11 +311,7 @@ private fun ChatHeader(
             )
             Spacer(Modifier.size(4.dp))
             Text(
-                when (model) {
-                    "nvidia" -> "NVIDIA NIM"
-                    "auto" -> "Auto"
-                    else   -> model.replaceFirstChar { it.uppercase() }
-                },
+                "AI Notebook Light",
                 style = MaterialTheme.typography.labelMedium,
                 color = Indigo,
                 fontWeight = FontWeight.SemiBold
