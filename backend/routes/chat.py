@@ -180,11 +180,11 @@ async def stream_message(chat_id: int, body: StreamIn, user=Depends(auth.current
 
     SSE frame shapes (each a single `data:` JSON object):
         {"event":"start",     "message_id":N, "generation":G}
-        {"event":"provider",  "provider":"kimi"}
+        {"event":"provider",  "provider":"AI Notebook"}
         {"event":"token",     "token":"..."}
         {"event":"cancelled", "reason":"...", "message_id":N}
         {"event":"error",     "error":{"type":"timeout","message":"..."}}
-        {"event":"done",      "message_id":N, "provider":"kimi"}
+        {"event":"done",      "message_id":N, "provider":"AI Notebook"}
     """
     chat = db.get_chat(user["id"], chat_id)
     if chat is None:
@@ -387,13 +387,10 @@ async def ai_models(user=Depends(auth.current_user)):
     """List selectable providers + the user's current selection."""
     snapshot = providers.status_snapshot()
     return {
-        "selected": _user_model(user),
-        "options": ["auto"] + [p["id"] for p in snapshot["providers"]],
+        "selected": "auto",
+        "options": ["auto"],
         "providers": snapshot["providers"],
-        "display_names": {
-            "auto": "Auto",
-            "nvidia": "NVIDIA NIM",
-        }
+        "display_names": {"auto": "AI Notebook"},
     }
 
 

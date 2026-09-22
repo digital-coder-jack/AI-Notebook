@@ -243,7 +243,7 @@ async def get_settings(user=Depends(auth.current_user)):
             "appearance": {"theme": "system", "accentColor": "#3b82f6"},
             "dashboard": {"compactSidebar": False, "showWelcome": True, "showStreak": True, "defaultPage": "dashboard"},
             "notifications": {"email": True, "reminders": True, "dailyGoal": True},
-            "ai_settings": {"model": "groq", "length": "medium", "difficulty": "intermediate"},
+            "ai_settings": {"model": "auto", "length": "medium", "difficulty": "intermediate"},
             "onboarding": None,
         }
 

@@ -9,7 +9,7 @@ The single FastAPI application that powers BOTH:
   3. The static frontend  (served from /frontend)
 
 Everything shares backend.database (one SQLite file) and backend.ai
-(one NVIDIA NIM router), so the bot and the website operate on the same data.
+(one AI Notebook gateway router), so the bot and the website operate on the same data.
 
 Run locally:
     uvicorn backend.main:app --reload --port 3000
@@ -60,19 +60,16 @@ FRONTEND_DIR = os.path.join(PROJECT_ROOT, "frontend")
 # obvious in the platform logs. Set FAIL_FAST=1 to abort startup instead.
 def _validate_environment() -> None:
     """Validate and report on the environment configuration at boot."""
-    # AI now uses a multi-provider fallback chain. At least ONE of these must
-    # be set for AI features to work; the chat layer falls back automatically.
+    # AI uses BazaarLink's ordered free-model fallback chain.
     ai_providers = {
-        "NVIDIA_API_KEY": "NVIDIA NIM API key (ordered model fallback)",
+        "BAZAARLINK_API_KEY": "BazaarLink server-side AI gateway key",
     }
     recommended = {
         "JWT_SECRET": "stable session signing secret (logins break on restart without it)",
         "ALLOWED_ORIGINS": "comma-separated list of frontend origins allowed by CORS",
     }
     optional = {
-        "NVIDIA_MODEL_PRIMARY": "primary NVIDIA model override",
-        "NVIDIA_MODEL_FALLBACK_1": "first NVIDIA fallback model override",
-        "NVIDIA_MODEL_FALLBACK_2": "second NVIDIA fallback model override",
+        "BAZAARLINK_BASE_URL": "optional BazaarLink API base URL override",
         "TELEGRAM_BOT_TOKEN": "Telegram bot integration",
         "WEBHOOK_SECRET": "verify Telegram webhook calls",
         "DB_PATH": "persistent SQLite path (set to a mounted disk in production)",

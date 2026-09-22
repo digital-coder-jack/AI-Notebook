@@ -2,8 +2,8 @@
 =====================================================================
  AI NOTEBOOK  -  backend/groq_client.py  (compatibility shim)
 =====================================================================
-This module used to call Groq directly. AI calls are now routed through
-the centralized NVIDIA NIM model router in `backend.providers` with
+This module used to call a provider directly. AI calls are now routed through
+the centralized AI Notebook router in `backend.providers` with
 automatic fallback. These wrappers are kept so any existing import
 of `groq_chat` / `groq_chat_stream` keeps working unchanged.
 

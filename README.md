@@ -17,18 +17,17 @@
 
 - **Name**: AI Notebook
 - **Goal**: An AI-powered study assistant that works as a **modern installable web app (PWA)**, the original **Telegram bot**, sharing the **same FastAPI backend and SQLite database**.
-- **AI**: **NVIDIA NIM with automatic model fallback** — Nemotron Lightning → GLM 5.3 Flash → GLM 5.3. If a model fails or is unavailable, the next model is tried automatically; if all fail, a graceful error is returned.
+- **AI**: **AI Notebook with automatic free-model fallback** — the server routes through BazaarLink and tries two configured free models in order. If a model fails or is unavailable, the next model is tried automatically; if all fail, a graceful error is returned.
 
 The original Telegram bot is **fully preserved** — it now benefits from the same multi-provider fallback automatically. A complete web interface (landing page, auth, dashboard, ChatGPT-style chat, 6 study tools, settings) is provided alongside it, now as a **Progressive Web App** that installs to Android/desktop.
 
 ### 🧠 AI System (new)
-- **Provider**: NVIDIA NIM — one server-side provider with an ordered OpenAI-compatible model fallback chain.
-- **Auto fallback chain**: `nvidia/nemotron-3.5-lightning-30b-a3b → z-ai/glm-5-3-flash → z-ai/glm-5-3 → graceful error`.
-- **Model selector**: choose **Auto / NVIDIA NIM** in the chat header and in Settings; the choice is **saved per user**.
-- **Active model display**: the chat shows which provider actually answered (badge next to the assistant name).
+- **Provider**: AI Notebook — a server-side BazaarLink gateway with an ordered OpenAI-compatible free-model fallback chain.
+- **Auto fallback chain**: `qwen/qwen3.7-flash → deepseek/deepseek-v4-flash-0731free → graceful error`.
+- **Model selector**: the web and native clients expose one simple **AI Notebook** mode; gateway and model routing remain internal.
 - **Response caching** (in-process, TTL configurable via `AI_CACHE_TTL`), **streaming (SSE)**, **conversation memory**, **Markdown + code highlighting**.
 - **Status monitoring**: `GET /api/ai/status` and `/api/health` report which providers are configured.
-- **Security**: `NVIDIA_API_KEY` is read **only** from the server environment and **never** exposed to the frontend or native client — all AI calls go through server-side routes.
+- **Security**: `BAZAARLINK_API_KEY` is read **only** from the server environment and **never** exposed to the frontend or native client — all AI calls go through server-side routes with paid fallback disabled.
 
 ### 📱 Progressive Web App (new)
 - `manifest.json` (icons, shortcuts, standalone display, theme/splash colors)
@@ -167,7 +166,7 @@ PDF (`pypdf`), DOCX (`python-docx`), TXT, and image storage — with server-side
 JWT auth · password hashing · Pydantic input validation · in-memory **rate limiting** · secret webhook verification · all secrets from environment variables.
 
 ### 8. Telegram Bot (unchanged)
-`/start`, `/help`, `/add`, `/list`, `/delete` + NVIDIA NIM model fallback. Shares the same DB `questions` table and the same AI router.
+`/start`, `/help`, `/add`, `/list`, `/delete` + AI Notebook model fallback. Shares the same DB `questions` table and the same AI router.
 
 ---
 
@@ -223,7 +222,7 @@ JWT auth · password hashing · Pydantic input validation · in-memory **rate li
   - `chats`, `messages` — AI conversations
   - `notes`, `quizzes` — saved study artefacts
   - `uploads` — file metadata + extracted text
-- **Data flow**: Browser → FastAPI API (JWT) → shared `backend.database` → SQLite; AI requests → `backend.ai` → NVIDIA NIM. The Telegram bot uses the **same** modules.
+- **Data flow**: Browser → FastAPI API (JWT) → shared `backend.database` → SQLite; AI requests → `backend.ai` → the server-side AI Notebook gateway. The Telegram bot uses the **same** modules.
 
 > Note: Vercel's `/tmp` is ephemeral. For persistent production storage, set `DB_PATH` to a mounted volume or a hosted SQLite service (e.g. Turso).
 
@@ -241,7 +240,7 @@ AINotebook/  (repo root)
 │   ├── database.py       # Shared SQLite layer (bot + web)
 │   ├── auth.py           # PBKDF2 hashing + JWT + FastAPI dependency
 │   ├── ai.py             # Study logic (notes/quiz/flashcards/plan/summary/hw)
-│   ├── groq_client.py    # Groq API (complete + streaming)
+│   ├── groq_client.py    # Backward-compatible AI router wrapper
 │   ├── ratelimit.py      # In-memory rate limiter
 │   └── routes/
 │       ├── users.py      # Auth & profile
@@ -284,7 +283,7 @@ AINotebook/  (repo root)
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env        # fill in NVIDIA_API_KEY (and TELEGRAM_BOT_TOKEN if using the bot)
+cp .env.example .env        # fill in BAZAARLINK_API_KEY (and TELEGRAM_BOT_TOKEN if using the bot)
 uvicorn backend.main:app --reload --port 3000
 # open http://localhost:3000
 ```
@@ -292,10 +291,7 @@ uvicorn backend.main:app --reload --port 3000
 ### Environment variables
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `NVIDIA_API_KEY` | yes (for AI) | NVIDIA NIM API key |
-| `NVIDIA_MODEL_PRIMARY` | no | defaults to `nvidia/nemotron-3.5-lightning-30b-a3b` |
-| `NVIDIA_MODEL_FALLBACK_1` | no | defaults to `z-ai/glm-5-3-flash` |
-| `NVIDIA_MODEL_FALLBACK_2` | no | defaults to `z-ai/glm-5-3` |
+| `BAZAARLINK_API_KEY` | yes (for AI) | Server-side BazaarLink gateway key; never expose to clients |
 | `JWT_SECRET` | recommended | stable token signing secret (set in prod) |
 | `TELEGRAM_BOT_TOKEN` | bot only | Telegram bot token |
 | `WEBHOOK_SECRET` | optional | verifies Telegram webhook calls |
@@ -320,7 +316,7 @@ uvicorn backend.main:app --reload --port 3000
 5. **Telegram bot** (optional): visit `https://<backend-url>/api/set-webhook` once.
 
 - **Platform**: Vercel (frontend) + Render/Railway (backend API) · **Status**: ✅ Ready
-- **Tech**: FastAPI + Gunicorn/Uvicorn + Vanilla JS + Chart.js + NVIDIA NIM + SQLite
+- **Tech**: FastAPI + Gunicorn/Uvicorn + Vanilla JS + Chart.js + AI Notebook gateway + SQLite
   (with process-local, privacy-preserving analytics counters)
 - **Last Updated**: 2026-06-21
 
