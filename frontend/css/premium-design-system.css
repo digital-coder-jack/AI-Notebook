@@ -613,3 +613,82 @@ select:focus-visible {
 
 .field-hint { display: block; margin-top: .35rem; font-size: .78rem; color: var(--text-muted, #6b7280); }
 .provider-status { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .35rem; }
+
+/* ==========================================================================
+   AI NOTEBOOK WORKSPACE LAYER
+   Shared visual language for the deployed static Web app. This layer is
+   intentionally class-preserving: it changes surfaces and states without
+   changing DOM hooks, routes, API contracts, or interaction scripts.
+   ========================================================================== */
+:root {
+  --workspace-canvas: #070a12;
+  --workspace-surface: #0e1420;
+  --workspace-surface-raised: #141c2a;
+  --workspace-surface-hover: #192437;
+  --workspace-line: rgba(184, 198, 224, 0.14);
+  --workspace-line-strong: rgba(184, 198, 224, 0.24);
+  --workspace-ink: #f4f7fb;
+  --workspace-ink-muted: #9eabc0;
+  --workspace-ink-soft: #718096;
+  --workspace-accent: #8ea2ff;
+  --workspace-accent-strong: #b6c1ff;
+  --workspace-focus: rgba(142, 162, 255, 0.42);
+  --workspace-radius-sm: 10px;
+  --workspace-radius-md: 14px;
+  --workspace-ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+body { background: var(--workspace-canvas); color: var(--workspace-ink); }
+
+.surface, .card, .panel, .modal-content, .dropdown-menu,
+.sidebar, .chat-sidebar, .composer, .message-card {
+  border-color: var(--workspace-line);
+}
+
+.card, .panel, .modal-content, .dropdown-menu, .message-card {
+  border-radius: var(--workspace-radius-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible,
+textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--workspace-focus);
+  outline-offset: 2px;
+}
+
+button, .btn, .button {
+  transition: transform 160ms var(--workspace-ease), background-color 160ms var(--workspace-ease),
+              border-color 160ms var(--workspace-ease), color 160ms var(--workspace-ease),
+              box-shadow 160ms var(--workspace-ease);
+}
+button:active, .btn:active, .button:active { transform: scale(0.98); }
+
+.tier-badge, .model-badge, .ai-tier-badge {
+  border: 1px solid var(--workspace-line-strong);
+  border-radius: 999px;
+  color: var(--workspace-accent-strong);
+  background: rgba(142, 162, 255, 0.1);
+  letter-spacing: 0.01em;
+}
+
+.chat-composer, .composer, .message-composer {
+  background: color-mix(in srgb, var(--workspace-surface) 94%, transparent);
+  border-color: var(--workspace-line-strong);
+  backdrop-filter: blur(18px);
+}
+
+@media (max-width: 720px) {
+  .card, .panel, .modal-content, .message-card { border-radius: var(--workspace-radius-sm); }
+  .chat-composer, .composer, .message-composer { border-radius: var(--workspace-radius-md); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
