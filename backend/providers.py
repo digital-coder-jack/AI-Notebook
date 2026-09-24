@@ -235,7 +235,15 @@ async def _complete_tier(
     async with httpx.AsyncClient(timeout=_timeout()) as client:
         if config["provider"] == "gemini":
             url = f"{GEMINI_BASE_URL}/models/{config['model']}:generateContent"
-            response = await client.post(url, params={"key": key}, json=_gemini_payload(messages, temperature, max_tokens))
+            response = await client.post(
+                url,
+                json=_gemini_payload(messages, temperature, max_tokens),
+                headers={
+                    "x-goog-api-key": key,
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+            )
         else:
             base = OPENROUTER_BASE_URL if config["provider"] == "openrouter" else CEREBRAS_BASE_URL
             response = await client.post(
@@ -299,8 +307,15 @@ async def _stream_tier(
         if config["provider"] == "gemini":
             url = f"{GEMINI_BASE_URL}/models/{config['model']}:streamGenerateContent"
             request = client.stream(
-                "POST", url, params={"alt": "sse", "key": key},
+                "POST",
+                url,
+                params={"alt": "sse"},
                 json=_gemini_payload(messages, temperature, max_tokens, True),
+                headers={
+                    "x-goog-api-key": key,
+                    "Content-Type": "application/json",
+                    "Accept": "text/event-stream",
+                },
             )
         else:
             base = OPENROUTER_BASE_URL if config["provider"] == "openrouter" else CEREBRAS_BASE_URL
