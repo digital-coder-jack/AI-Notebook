@@ -19,21 +19,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
-// Brand palette (mirrors the web app's indigo / violet / cyan gradient look).
-val Indigo = Color(0xFF6D7BFF)
-val Violet = Color(0xFFA855F7)
-val Cyan = Color(0xFF22D3EE)
+// Brand palette shared with the Web workspace: calm indigo with restrained
+// violet/cyan accents rather than high-intensity neon surfaces.
+val Indigo = Color(0xFF8EA2FF)
+val Violet = Color(0xFFB39DFF)
+val Cyan = Color(0xFF5FD7DF)
 
 // Deep, calm space backgrounds — tuned for a premium ChatGPT/Gemini/Perplexity
 // assistant feel: near-black canvas with subtly elevated surfaces.
-val SpaceBg = Color(0xFF080B16)
-val SpaceSurface = Color(0xFF11162A)
-val SpaceCard = Color(0xFF161C33)
+val SpaceBg = Color(0xFF070A12)
+val SpaceSurface = Color(0xFF0E1420)
+val SpaceCard = Color(0xFF141C2A)
 
 // Additional assistant-UI tokens (used by chat bubbles, dividers, hints).
-val AssistantBubble = Color(0xFF181E36)
-val HairlineOutline = Color(0xFF263052)
-val MutedText = Color(0xFF9AA3C7)
+val AssistantBubble = Color(0xFF192437)
+val HairlineOutline = Color(0xFF2A3850)
+val MutedText = Color(0xFF9EABC0)
 
 // Light-mode equivalents so chat/dashboard stay legible when the user opts in.
 val LightBg = Color(0xFFF6F7FC)
