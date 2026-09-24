@@ -692,3 +692,37 @@ button:active, .btn:active, .button:active { transform: scale(0.98); }
     transition-duration: 0.01ms !important;
   }
 }
+
+.eyebrow {
+  display: block;
+  margin: 0 0 0.45rem;
+  color: var(--workspace-ink-soft);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+}
+
+.topbar .eyebrow { margin-bottom: 0.6rem; }
+.chat-top .title > div { display: grid; gap: 0.15rem; }
+.chat-top .title .eyebrow { margin: 0; font-size: 0.58rem; }
+
+/* The rail is the spatial anchor; labels remain available on expansion. */
+@media (min-width: 881px) {
+  .sidebar.collapsed { width: 76px; }
+  .sidebar.collapsed .brand-text,
+  .sidebar.collapsed .cb-label,
+  .sidebar.collapsed .side-nav a > span,
+  .sidebar.collapsed .nav-section span,
+  .sidebar.collapsed .side-theme > span,
+  .sidebar.collapsed .side-user-trigger .meta,
+  .sidebar.collapsed .side-user-trigger .chev { display: none; }
+  .sidebar.collapsed .side-nav a { justify-content: center; padding-inline: 0.55rem; }
+  .sidebar.collapsed .side-nav a i { margin: 0; }
+  .sidebar.collapsed .side-theme,
+  .sidebar.collapsed .side-user-trigger { justify-content: center; padding-inline: 0.55rem; }
+}
+
+@media (max-width: 720px) {
+  .eyebrow { font-size: 0.6rem; letter-spacing: 0.12em; }
+}

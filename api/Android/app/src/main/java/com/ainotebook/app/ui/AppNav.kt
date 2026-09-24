@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -62,8 +62,8 @@ private data class NavItem(val route: String, val label: String, val icon: Image
 private val BOTTOM_ITEMS = listOf(
     NavItem(Routes.DASHBOARD, "Home", Icons.Default.Dashboard),
     NavItem(Routes.CHAT, "Chat", Icons.AutoMirrored.Filled.Chat),
-    NavItem(Routes.TOOLS, "Tools", Icons.Default.Widgets),
-    NavItem(Routes.PROFILE, "Profile", Icons.Default.Person),
+    NavItem(Routes.TOOLS, "Library", Icons.Default.AutoStories),
+    NavItem(Routes.PROFILE, "More", Icons.Default.Person),
 )
 
 @Composable
