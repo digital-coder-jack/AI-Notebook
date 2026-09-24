@@ -49,9 +49,9 @@
     { id: 'chat', href: '/chat', icon: 'fa-pen-to-square', label: 'New Chat', primary: true },
 
     { section: 'Workspace' },
-    { id: 'dashboard',  href: '/dashboard',              icon: 'fa-house',             label: 'Dashboard' },
-    { id: 'notes',      href: '/tools#notes',            icon: 'fa-note-sticky',       label: 'AI Notes' },
-    { id: 'summarizer', href: '/tools#summarizer',       icon: 'fa-file-lines',        label: 'AI Summarizer' },
+    { id: 'dashboard',  href: '/dashboard',              icon: 'fa-house',             label: 'Home' },
+    { id: 'notes',      href: '/tools#notes',            icon: 'fa-note-sticky',       label: 'Notes' },
+    { id: 'summarizer', href: '/tools#summarizer',       icon: 'fa-file-lines',        label: 'Summarize' },
     { id: 'mindmap',    href: '/dashboard#ai-workspace', icon: 'fa-diagram-project',   label: 'AI Mind Map' },
     { id: 'roadmap',    href: '/dashboard#ai-workspace', icon: 'fa-route',             label: 'AI Roadmap' },
 
@@ -62,7 +62,7 @@
     { id: 'homework',   href: '/tools#homework',         icon: 'fa-graduation-cap',    label: 'Homework Help' },
 
     { section: 'Library' },
-    { id: 'topics',     href: '/topics',                 icon: 'fa-folder-open',       label: 'Collections' },
+    { id: 'topics',     href: '/topics',                 icon: 'fa-folder-open',       label: 'Topics' },
     { id: 'history',    href: '/dashboard#history',      icon: 'fa-clock-rotate-left', label: 'History' },
 
     { section: 'Account' },
@@ -89,7 +89,9 @@
   }).join('');
 
   /* ---- Restore collapsed state ---- */
-  var isCollapsed = localStorage.getItem('ainb_sidebar_collapsed') === 'true';
+  /* The new workspace opens as a quiet rail; expansion remains persisted. */
+  var savedCollapse = localStorage.getItem('ainb_sidebar_collapsed');
+  var isCollapsed = savedCollapse === null ? true : savedCollapse === 'true';
   if (isCollapsed) aside.classList.add('collapsed');
 
   /* ---- Render shell ---- */
