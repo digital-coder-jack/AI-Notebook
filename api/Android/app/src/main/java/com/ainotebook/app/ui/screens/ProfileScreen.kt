@@ -57,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ainotebook.app.data.AccentTone
 import com.ainotebook.app.data.ThemeMode
 import com.ainotebook.app.ui.LocalAppPrefs
 import com.ainotebook.app.ui.ProfileViewModel
@@ -83,8 +84,10 @@ fun ProfileScreen(
     val themeMode by prefs.themeMode.collectAsState(initial = ThemeMode.DARK)
     val dynamicColor by prefs.dynamicColor.collectAsState(initial = false)
     val haptics by prefs.hapticsEnabled.collectAsState(initial = true)
+    val accent by prefs.accentTone.collectAsState(initial = AccentTone.INDIGO)
 
     var showThemeSheet by remember { mutableStateOf(false) }
+    var showAccentSheet by remember { mutableStateOf(false) }
     var showNameDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
 
@@ -161,6 +164,8 @@ fun ProfileScreen(
         SettingsGroup {
             SettingsRow(Icons.Default.Brightness6, "Theme", themeModeLabel(themeMode)) { showThemeSheet = true }
             Divider()
+            SettingsRow(Icons.Default.ColorLens, "Accent color", accentLabel(accent)) { showAccentSheet = true }
+            Divider()
             SettingsToggleRow(
                 Icons.Default.ColorLens,
                 "Dynamic color",
@@ -188,7 +193,7 @@ fun ProfileScreen(
         }
         Spacer(Modifier.height(8.dp))
         Text(
-            "AI Notebook · v1.1",
+            "AI Notebook · v1.2",
             style = MaterialTheme.typography.labelSmall,
             color = MutedText,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
@@ -221,6 +226,39 @@ fun ProfileScreen(
                     ) {
                         Text(themeModeLabel(mode), Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
                         if (selected) Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Indigo)
+                    }
+                    Spacer(Modifier.height(6.dp))
+                }
+                Spacer(Modifier.height(20.dp))
+            }
+        }
+    }
+
+    if (showAccentSheet) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = { showAccentSheet = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                Text("Accent color", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text("Personalize the workspace without changing your account.", color = MutedText, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp, bottom = 12.dp))
+                AccentTone.values().forEach { tone ->
+                    val selected = tone == accent
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(if (selected) accentColor(tone).copy(alpha = 0.15f) else Color.Transparent)
+                            .clickable { scope.launch { prefs.setAccentTone(tone) }; showAccentSheet = false }
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(Modifier.size(18.dp).clip(CircleShape).background(accentColor(tone)))
+                        Spacer(Modifier.size(12.dp))
+                        Text(accentLabel(tone), Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
+                        if (selected) Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = accentColor(tone))
                     }
                     Spacer(Modifier.height(6.dp))
                 }
@@ -281,6 +319,20 @@ private fun themeModeLabel(mode: ThemeMode) = when (mode) {
     ThemeMode.SYSTEM -> "System default"
     ThemeMode.LIGHT -> "Light"
     ThemeMode.DARK -> "Dark"
+}
+
+private fun accentLabel(tone: AccentTone) = when (tone) {
+    AccentTone.INDIGO -> "Indigo"
+    AccentTone.CYAN -> "Cyan"
+    AccentTone.VIOLET -> "Violet"
+    AccentTone.SUNSET -> "Sunset"
+}
+
+private fun accentColor(tone: AccentTone) = when (tone) {
+    AccentTone.INDIGO -> Indigo
+    AccentTone.CYAN -> Cyan
+    AccentTone.VIOLET -> Violet
+    AccentTone.SUNSET -> Color(0xFFFF8A65)
 }
 
 @Composable
