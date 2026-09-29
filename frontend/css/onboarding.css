@@ -369,3 +369,10 @@
 @media (prefers-reduced-motion: reduce) {
   .ob-overlay, .ob-modal, .ob-step, .ob-emoji, .ob-done .ob-check { transition: none !important; animation: none !important; }
 }
+
+
+/* Selection-gated Continue state */
+.ob-next[disabled] { opacity: .38; filter: grayscale(.35); cursor: not-allowed; pointer-events: none; }
+.ob-body.ob-needs-selection .ob-step { animation: obSelectionHint .28s ease; }
+.ob-body.ob-needs-selection::after { content: 'Select at least one option to continue'; display: block; margin: .8rem 0 0; color: var(--text-muted); font-size: var(--fs-xs); text-align: right; }
+@keyframes obSelectionHint { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }

@@ -231,6 +231,8 @@
     nextBtn.innerHTML = stepIdx === steps.length - 1
       ? 'Finish setup <i class="fas fa-check" aria-hidden="true"></i>'
       : 'Continue <i class="fas fa-arrow-right" aria-hidden="true"></i>';
+    nextBtn.disabled = !isStepComplete(s);
+    nextBtn.setAttribute('aria-disabled', String(nextBtn.disabled));
 
     // option handlers
     var s2 = steps[stepIdx];
@@ -249,11 +251,20 @@
             b.classList.toggle('selected', b === btn);
             b.setAttribute('aria-checked', b === btn);
           });
-          // auto-advance singles after a beat (feels snappy)
-          setTimeout(function () { if (steps[stepIdx] === s2) next(); }, 260);
         }
+        var nextBtn = document.getElementById('obNext');
+        nextBtn.disabled = !isStepComplete(s2);
+        nextBtn.setAttribute('aria-disabled', String(nextBtn.disabled));
       });
     });
+  }
+
+  function isStepComplete(step) {
+    if (!step || step.type === 'account') return true;
+    var answer = answers[step.key];
+    return step.type === 'multi'
+      ? Array.isArray(answer) && answer.length > 0
+      : typeof answer === 'string' && answer.trim().length > 0;
   }
 
   function sw(id, title, sub, on) {
@@ -285,6 +296,14 @@
 
   function next() {
     var s = steps[stepIdx];
+    if (!isStepComplete(s)) {
+      var body = document.getElementById('obBody');
+      if (body) body.classList.remove('ob-needs-selection');
+      requestAnimationFrame(function () {
+        if (body) body.classList.add('ob-needs-selection');
+      });
+      return;
+    }
     if (s.type === 'account') collectAccount();
     if (stepIdx === steps.length - 1) return finish(false);
     go(1);
