@@ -130,3 +130,27 @@
 }
 .back-home:hover { transform: translateX(-3px); color: var(--accent); }
 .theme-toggle.floating:hover { transform: scale(1.08); }
+
+
+/* 2026 workspace auth redesign — structure and API remain unchanged. */
+.auth-wrap {
+  width: min(1180px, calc(100% - 3rem)); min-height: 100vh; margin: 0 auto; padding: 5.5rem 0 3rem;
+  display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(390px, .72fr); align-items: center; gap: clamp(3rem, 8vw, 8rem);
+}
+.auth-visual { position: relative; z-index: 2; padding: 2rem 0; }
+.auth-visual-kicker { display: inline-flex; align-items: center; gap: .55rem; color: var(--accent); font-size: .72rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+.auth-visual h2 { max-width: 620px; margin: 1.15rem 0 1rem; color: var(--text); font-size: clamp(2.5rem, 5vw, 4.7rem); line-height: .98; letter-spacing: -.065em; }
+.auth-visual h2 em { color: var(--accent); font-style: normal; }
+.auth-visual > p { max-width: 490px; margin: 0; color: var(--text-dim); font-size: 1.02rem; line-height: 1.7; }
+.auth-preview { width: min(490px, 100%); margin-top: 2.7rem; padding: 1.15rem; border: 1px solid var(--border); border-radius: 18px; background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.025)); box-shadow: 0 25px 70px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.06); }
+.auth-preview-head { display: flex; align-items: center; gap: .55rem; color: var(--text); font-size: .8rem; }
+.preview-dot { width: .5rem; height: .5rem; flex: none; border-radius: 50%; background: #53d8a0; box-shadow: 0 0 0 4px rgba(83,216,160,.12); }
+.preview-status { margin-left: auto; color: #53d8a0; font-size: .68rem; font-weight: 700; }
+.preview-line { height: .5rem; margin-top: 1.2rem; border-radius: 99px; background: linear-gradient(90deg, var(--accent), rgba(255,255,255,.1)); opacity: .8; }
+.preview-line.wide { width: 78%; } .preview-line.medium { width: 52%; margin-top: .55rem; opacity: .35; } .preview-line.short { width: 38%; margin-top: .55rem; opacity: .35; }
+.preview-insight { display: flex; align-items: center; gap: .7rem; margin-top: 1.4rem; padding: .8rem; color: var(--accent); border: 1px solid var(--accent-ring); background: var(--accent-soft); border-radius: 11px; }
+.preview-insight span { display: grid; gap: .18rem; min-width: 0; } .preview-insight b { color: var(--text); font-size: .76rem; } .preview-insight small { color: var(--text-dim); font-size: .67rem; } .preview-insight > i:last-child { margin-left: auto; font-size: .7rem; }
+.auth-proof { display: flex; flex-wrap: wrap; gap: 1.2rem; margin-top: 1.5rem; color: var(--text-muted); font-size: .72rem; } .auth-proof i { margin-right: .35rem; color: #53d8a0; }
+.auth-card.glass { width: 100%; padding: 2.35rem; border-radius: 24px !important; } .auth-card .brand { justify-content: flex-start; margin-bottom: 2.5rem; } .auth-card h1 { text-align: left; font-size: 2rem; } .auth-card .sub { text-align: left; margin-bottom: 1.7rem; } .auth-card .field label { color: var(--text-muted); font-size: .75rem; letter-spacing: .03em; text-transform: uppercase; } .auth-card .field input { min-height: 52px; border-radius: 13px; background: rgba(255,255,255,.035); } .auth-card .auth-row { font-size: .78rem; } .auth-card .btn.block { min-height: 51px; border-radius: 13px; font-size: .9rem; } .auth-card .auth-or { margin: 1.35rem 0; } .auth-card .btn.ghost.block { min-height: 50px; border-radius: 13px; } .auth-foot { font-size: .78rem; }
+@media (max-width: 860px) { .auth-wrap { width: min(560px, calc(100% - 2rem)); display: block; padding-top: 5rem; } .auth-visual { padding: 1rem 0 2.5rem; } .auth-visual h2 { max-width: 540px; font-size: clamp(2.5rem, 10vw, 4rem); } .auth-preview { margin-top: 1.8rem; } .auth-card.glass { padding: 2rem; } }
+@media (max-width: 480px) { .auth-wrap { width: calc(100% - 1.25rem); padding-top: 4.5rem; } .auth-visual h2 { font-size: 2.45rem; } .auth-visual > p { font-size: .9rem; } .auth-proof { gap: .7rem; font-size: .67rem; } .auth-card.glass { padding: 1.4rem; border-radius: 18px !important; } .auth-card h1 { font-size: 1.65rem; } .back-home { top: .7rem; left: .7rem; } }
