@@ -34,6 +34,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val mode by prefs.themeMode.collectAsStateWithLifecycle(initialValue = ThemeMode.DARK)
             val dynamic by prefs.dynamicColor.collectAsStateWithLifecycle(initialValue = false)
+            val accent by prefs.accentTone.collectAsStateWithLifecycle(initialValue = com.ainotebook.app.data.AccentTone.INDIGO)
 
             val dark = when (mode) {
                 ThemeMode.LIGHT -> false
@@ -41,7 +42,7 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
             }
 
-            AiNotebookTheme(darkTheme = dark, dynamicColor = dynamic) {
+            AiNotebookTheme(darkTheme = dark, dynamicColor = dynamic, accentTone = accent) {
                 androidx.compose.runtime.CompositionLocalProvider(
                     LocalAppPrefs provides prefs,
                     LocalNetworkMonitor provides network
