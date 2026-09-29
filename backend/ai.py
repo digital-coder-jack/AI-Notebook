@@ -39,7 +39,7 @@ SYSTEM_BASE = (
 # ---------------------------------------------------------------------------
 # Shared bot logic: library first, AI fallback
 # ---------------------------------------------------------------------------
-async def answer_question(user_id: int, question: str) -> tuple[str, str]:
+async def answer_question(user_id: int, question: str, selection: str | None = "auto") -> tuple[str, str]:
     """
     Return (source, answer) where source is 'library' or 'ai'.
     Mirrors the original Telegram bot behaviour exactly.
@@ -56,6 +56,7 @@ async def answer_question(user_id: int, question: str) -> tuple[str, str]:
         ],
         temperature=0.7,
         max_tokens=512,
+        selection=selection,
     )
     return "ai", answer
 
