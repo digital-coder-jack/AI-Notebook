@@ -2,8 +2,8 @@
    AI Notebook  -  pwa.js
    ---------------------------------------------------------------------
    - Registers the service worker.
-   - Captures the `beforeinstallprompt` event and shows a custom
-     "Install app" button (floating, dismissable).
+   - Keeps the service worker and network status behavior without showing
+     an install CTA in the web UI.
    - Detects service-worker updates and shows an "Update available" toast.
    - Network status detection (online/offline banners).
    Loaded on every page AFTER app.js (so window.SS exists).
@@ -64,43 +64,15 @@
     });
   }
 
-  /* ---------- 2. Install prompt ---------- */
+  /* ---------- 2. Install prompt ----------
+     The web app intentionally does not surface an install CTA. Keep the
+     service worker and offline behavior, but never inject a floating button. */
   let deferredPrompt = null;
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (!isStandalone) showInstallButton();
-  });
-
-  function showInstallButton() {
-    if (document.getElementById('pwaInstallBtn')) return;
-    const btn = document.createElement('button');
-    btn.id = 'pwaInstallBtn';
-    btn.className = 'pwa-install-btn';
-    btn.innerHTML = '<i class="fas fa-download"></i> Install app';
-    btn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') notify('Installing AI Notebook…');
-      deferredPrompt = null;
-      btn.remove();
-    });
-    document.body.appendChild(btn);
-    requestAnimationFrame(() => btn.classList.add('show'));
-  }
-
-  window.addEventListener('appinstalled', () => {
-    notify('AI Notebook installed! 🎉');
-    const btn = document.getElementById('pwaInstallBtn');
-    if (btn) btn.remove();
-  });
 
   // Expose a manual trigger (e.g. a button in settings can call it).
   window.SSPWA = {
-    canInstall: () => !!deferredPrompt,
-    promptInstall: () => deferredPrompt && document.getElementById('pwaInstallBtn')?.click(),
+    canInstall: () => false,
+    promptInstall: () => false,
     isStandalone: () => isStandalone,
   };
 
