@@ -46,7 +46,7 @@
 
   /* ---- Navigation catalogue (grouped) ---- */
   var items = [
-    { id: 'chat', href: '/chat', icon: 'fa-pen-to-square', label: 'New Chat', primary: true },
+    { id: 'chat', href: '/chat?new=1', icon: 'fa-pen-to-square', label: 'New Chat', primary: true },
 
     { section: 'Workspace' },
     { id: 'dashboard',  href: '/dashboard',              icon: 'fa-house',             label: 'Home' },
@@ -90,8 +90,8 @@
 
   /* ---- Restore collapsed state ---- */
   /* The new workspace opens as a quiet rail; expansion remains persisted. */
-  var savedCollapse = localStorage.getItem('ainb_sidebar_collapsed');
-  var isCollapsed = savedCollapse === null ? true : savedCollapse === 'true';
+  var savedCollapse = localStorage.getItem('ainb_sidebar_collapsed_v2');
+  var isCollapsed = savedCollapse === 'true';
   if (isCollapsed) aside.classList.add('collapsed');
 
   /* ---- Render shell ---- */
@@ -118,7 +118,7 @@
   if (collBtn) {
     collBtn.addEventListener('click', function () {
       var collapsed = aside.classList.toggle('collapsed');
-      localStorage.setItem('ainb_sidebar_collapsed', collapsed);
+      localStorage.setItem('ainb_sidebar_collapsed_v2', collapsed);
       var icon = collBtn.querySelector('i');
       if (icon) icon.className = 'fas fa-angles-' + (collapsed ? 'right' : 'left');
       var lbl = collBtn.querySelector('.cb-label');

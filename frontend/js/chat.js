@@ -237,6 +237,8 @@ async function openChat(id) {
 }
 
 async function newChat() {
+  // Starting a new thread must never reuse the currently selected chat.
+  if (state.streaming) await cancelActiveStream('new-chat');
   try {
     const data = await SS.api('/api/chats', { method: 'POST', body: {} });
     state.chats.unshift(data.chat);
@@ -567,6 +569,10 @@ if (el.modelSelect) el.modelSelect.addEventListener('change', (e) => saveModel(e
     await loadModels();
     await loadChats();
     const params = new URLSearchParams(location.search);
+    if (params.get('new') === '1') {
+      await newChat();
+      return;
+    }
     const id = parseInt(params.get('id'), 10);
     if (id && state.chats.some((c) => c.id === id)) openChat(id);
     else if (state.chats.length) openChat(state.chats[0].id);
