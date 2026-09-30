@@ -65,7 +65,7 @@ def _validate_environment() -> None:
     ai_providers = {
         "GEMINI_API_KEY": "AI Notebook default tier",
         "OPENROUTER_API_KEY": "AI Notebook Pro tier",
-        "CEREBRAS_API_KEY": "AI Notebook Pro Max tier",
+        "GROQ_API_KEY": "AI Notebook Pro Max tier",
     }
     recommended = {
         "JWT_SECRET": "stable session signing secret (logins break on restart without it)",
@@ -74,7 +74,7 @@ def _validate_environment() -> None:
     optional = {
         "GEMINI_MODEL": "default tier model override",
         "OPENROUTER_MODEL": "Pro tier model override",
-        "CEREBRAS_MODEL": "Pro Max tier model override",
+        "GROQ_MODEL": "Pro Max tier model override",
         "TELEGRAM_BOT_TOKEN": "Telegram bot integration",
         "WEBHOOK_SECRET": "verify Telegram webhook calls",
         "DB_PATH": "persistent SQLite path (set to a mounted disk in production)",

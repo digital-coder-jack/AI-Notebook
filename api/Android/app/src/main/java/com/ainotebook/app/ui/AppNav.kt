@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AutoStories
@@ -131,7 +132,8 @@ private fun MainShell(factory: VMFactory) {
             bottomBar = {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-                    tonalElevation = 0.dp
+                    tonalElevation = 6.dp,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                 ) {
                     BOTTOM_ITEMS.forEach { item ->
                         val selected = current?.startsWith(item.route) == true
@@ -155,11 +157,11 @@ private fun MainShell(factory: VMFactory) {
                                 )
                             },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Indigo,
-                                selectedTextColor = Indigo,
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
                                 unselectedIconColor = MutedText,
                                 unselectedTextColor = MutedText,
-                                indicatorColor = Indigo.copy(alpha = 0.16f)
+                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
                             )
                         )
                     }

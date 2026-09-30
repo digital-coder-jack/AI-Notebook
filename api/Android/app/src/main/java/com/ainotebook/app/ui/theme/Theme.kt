@@ -22,15 +22,15 @@ import com.ainotebook.app.data.AccentTone
 
 // Brand palette shared with the Web workspace: calm indigo with restrained
 // violet/cyan accents rather than high-intensity neon surfaces.
-val Indigo = Color(0xFF8EA2FF)
-val Violet = Color(0xFFB39DFF)
-val Cyan = Color(0xFF5FD7DF)
+val Indigo = Color(0xFFA78BFA)
+val Violet = Color(0xFFE879F9)
+val Cyan = Color(0xFF67E8F9)
 
 // Deep, calm space backgrounds — tuned for a premium ChatGPT/Gemini/Perplexity
 // assistant feel: near-black canvas with subtly elevated surfaces.
-val SpaceBg = Color(0xFF070A12)
-val SpaceSurface = Color(0xFF0E1420)
-val SpaceCard = Color(0xFF141C2A)
+val SpaceBg = Color(0xFF08070F)
+val SpaceSurface = Color(0xFF12101C)
+val SpaceCard = Color(0xFF1A1727)
 
 // Additional assistant-UI tokens (used by chat bubbles, dividers, hints).
 val AssistantBubble = Color(0xFF192437)

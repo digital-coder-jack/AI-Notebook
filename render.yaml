@@ -39,13 +39,13 @@ services:
         sync: false
       - key: OPENROUTER_API_KEY
         sync: false
-      - key: CEREBRAS_API_KEY
+      - key: GROQ_API_KEY
         sync: false
       - key: GEMINI_MODEL
         value: gemini-3.8-flash
       - key: OPENROUTER_MODEL
         value: openrouter/free
-      - key: CEREBRAS_MODEL
+      - key: GROQ_MODEL
         value: llama-3.3-70b
       - key: JWT_SECRET
         generateValue: true                   # Render generates a strong secret

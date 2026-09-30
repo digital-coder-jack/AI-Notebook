@@ -22,12 +22,12 @@
 The original Telegram bot is **fully preserved** — it now benefits from the same multi-provider fallback automatically. A complete web interface (landing page, auth, dashboard, ChatGPT-style chat, 6 study tools, settings) is provided alongside it, now as a **Progressive Web App** that installs to Android/desktop.
 
 ### 🧠 AI System (new)
-- **Tiers**: AI Notebook uses Gemini, AI Notebook Pro uses OpenRouter, and AI Notebook Pro Max uses Cerebras. Upstream provider names and model IDs remain server-side.
-- **Models**: centralized through `GEMINI_MODEL`, `OPENROUTER_MODEL`, and `CEREBRAS_MODEL`; defaults are `gemini-3.8-flash`, `openrouter/free`, and `llama-3.3-70b`.
+- **Tiers**: AI Notebook uses Gemini, AI Notebook Pro uses OpenRouter, and AI Notebook Pro Max uses Groq. Upstream provider names and model IDs remain server-side.
+- **Models**: centralized through `GEMINI_MODEL`, `OPENROUTER_MODEL`, and `GROQ_MODEL`; defaults are `gemini-3.8-flash`, `openrouter/free`, and `openai/gpt-oss-20b`.
 - **Model selector**: the web and native clients expose only the three product tiers.
 - **Response caching** (in-process, TTL configurable via `AI_CACHE_TTL`), **streaming (SSE)**, **conversation memory**, **Markdown + code highlighting**.
 - **Status monitoring**: `GET /api/ai/status` and `/api/health` report only safe product-tier availability.
-- **Security**: `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, and `CEREBRAS_API_KEY` are read **only** from the server environment and **never** exposed to the frontend or native client.
+- **Security**: `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, and `GROQ_API_KEY` are read **only** from the server environment and **never** exposed to the frontend or native client.
 
 ### 📱 Progressive Web App (new)
 - `manifest.json` (icons, shortcuts, standalone display, theme/splash colors)
@@ -293,7 +293,7 @@ uvicorn backend.main:app --reload --port 3000
 |----------|----------|---------|
 | `GEMINI_API_KEY` | yes (for AI Notebook) | Server-side Gemini key; never expose to clients |
 | `OPENROUTER_API_KEY` | optional | Server-side AI Notebook Pro key |
-| `CEREBRAS_API_KEY` | optional | Server-side AI Notebook Pro Max key |
+| `GROQ_API_KEY` | optional | Server-side AI Notebook Pro Max key |
 | `JWT_SECRET` | recommended | stable token signing secret (set in prod) |
 | `TELEGRAM_BOT_TOKEN` | bot only | Telegram bot token |
 | `WEBHOOK_SECRET` | optional | verifies Telegram webhook calls |

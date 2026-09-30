@@ -4,7 +4,7 @@ The public product exposes three product tiers, not upstream provider details:
 
 * ``default`` -> AI Notebook -> Gemini
 * ``pro`` -> AI Notebook Pro -> OpenRouter
-* ``pro_max`` -> AI Notebook Pro Max -> Cerebras
+* ``pro_max`` -> AI Notebook Pro Max -> Groq
 
 Every tier is independent. A failed tier never silently consumes another tier's
 quota. Credentials, provider names, model IDs, upstream status codes, and
@@ -29,8 +29,8 @@ GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openrouter/free")
-CEREBRAS_BASE_URL = "https://api.cerebras.ai/v1"
-CEREBRAS_MODEL = os.environ.get("CEREBRAS_MODEL", "gpt-oss-120b")
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
 
 TIER_CONFIG: dict[str, dict[str, str]] = {
     "default": {
@@ -49,10 +49,10 @@ TIER_CONFIG: dict[str, dict[str, str]] = {
     },
     "pro_max": {
         "display_name": "AI Notebook Pro Max",
-        "provider": "cerebras",
-        "env": "CEREBRAS_API_KEY",
-        "model_env": "CEREBRAS_MODEL",
-        "model": CEREBRAS_MODEL,
+        "provider": "groq",
+        "env": "GROQ_API_KEY",
+        "model_env": "GROQ_MODEL",
+        "model": GROQ_MODEL,
     },
 }
 VALID_SELECTIONS = ["auto", "default", "pro", "pro_max"]
@@ -245,7 +245,7 @@ async def _complete_tier(
                 },
             )
         else:
-            base = OPENROUTER_BASE_URL if config["provider"] == "openrouter" else CEREBRAS_BASE_URL
+            base = OPENROUTER_BASE_URL if config["provider"] == "openrouter" else GROQ_BASE_URL
             response = await client.post(
                 f"{base}/chat/completions",
                 json=_openai_payload(config["model"], messages, temperature, max_tokens, False),
@@ -318,7 +318,7 @@ async def _stream_tier(
                 },
             )
         else:
-            base = OPENROUTER_BASE_URL if config["provider"] == "openrouter" else CEREBRAS_BASE_URL
+            base = OPENROUTER_BASE_URL if config["provider"] == "openrouter" else GROQ_BASE_URL
             request = client.stream(
                 "POST", f"{base}/chat/completions",
                 json=_openai_payload(config["model"], messages, temperature, max_tokens, True),
