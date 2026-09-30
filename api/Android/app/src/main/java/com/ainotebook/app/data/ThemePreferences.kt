@@ -13,6 +13,9 @@ private val Context.themeStore by preferencesDataStore(name = "ai_notebook_prefs
 /** User-selectable theme mode for the app (mirrors ChatGPT/Gemini appearance settings). */
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
+/** Accent presets exposed in the in-app Appearance settings. */
+enum class AccentTone { INDIGO, CYAN, VIOLET, SUNSET }
+
 /**
  * Persists user appearance + assistant preferences using Jetpack DataStore.
  * Purely additive — does not touch the existing session/auth flow.
@@ -24,6 +27,7 @@ class ThemePreferences(private val context: Context) {
         private val DYNAMIC_KEY = booleanPreferencesKey("pref_dynamic_color")
         private val HAPTICS_KEY = booleanPreferencesKey("pref_haptics")
         private val MODEL_KEY = stringPreferencesKey("pref_ai_model")
+        private val ACCENT_KEY = stringPreferencesKey("pref_accent_tone")
     }
 
     val themeMode: Flow<ThemeMode> = context.themeStore.data.map { prefs ->
@@ -43,6 +47,15 @@ class ThemePreferences(private val context: Context) {
     val aiModel: Flow<String> =
         context.themeStore.data.map { it[MODEL_KEY] ?: "auto" }
 
+    val accentTone: Flow<AccentTone> = context.themeStore.data.map {
+        when (it[ACCENT_KEY]) {
+            "CYAN" -> AccentTone.CYAN
+            "VIOLET" -> AccentTone.VIOLET
+            "SUNSET" -> AccentTone.SUNSET
+            else -> AccentTone.INDIGO
+        }
+    }
+
     suspend fun setThemeMode(mode: ThemeMode) {
         context.themeStore.edit { it[THEME_KEY] = mode.name }
     }
@@ -57,5 +70,9 @@ class ThemePreferences(private val context: Context) {
 
     suspend fun setAiModel(model: String) {
         context.themeStore.edit { it[MODEL_KEY] = model }
+    }
+
+    suspend fun setAccentTone(tone: AccentTone) {
+        context.themeStore.edit { it[ACCENT_KEY] = tone.name }
     }
 }
