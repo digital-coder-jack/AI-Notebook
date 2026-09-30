@@ -34,8 +34,16 @@ from telegram.ext.filters import User
 from telegram_bot.analytics import analytics
 
 
-from backend import database as db
-from backend.ai import answer_question
+from backend import database as db, providers
+from backend.ai import (
+    answer_question,
+    generate_flashcards,
+    generate_quiz,
+    generate_study_plan,
+    generate_notes,
+    homework_help,
+    summarize_text,
+)
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -73,6 +81,13 @@ anything else with AI. 📚🤖
 /list — Show your saved questions
 /delete — Delete a question
        <i>Format:</i> <code>/delete ID</code>
+/notes — Generate study notes
+/quiz — Generate a practice quiz
+/flashcards — Generate flashcards
+/plan — Generate a study plan
+/summarize — Summarize text
+/homework — Step-by-step help
+/model — Choose AI Notebook, Pro, or Pro Max
 
 💡 <b>Tip:</b> Just send me any question as a normal message.
 I'll check your saved answers first, and if I don't find one,
@@ -104,6 +119,15 @@ Send any text message (no command needed):
 <b>Notes</b>
 • Duplicate questions are rejected automatically.
 • Your library is private — each user has their own.
+
+<b>Study workspace commands</b>
+• <code>/notes topic</code> — structured study notes
+• <code>/quiz topic</code> — practice questions
+• <code>/flashcards topic</code> — revision cards
+• <code>/plan goal</code> — day-by-day plan
+• <code>/summarize text</code> — quick summary
+• <code>/homework question</code> — step-by-step help
+• <code>/model pro</code> — select an AI tier
 """
 
 
@@ -123,10 +147,10 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     stats = analytics.get_stats()
     message = (
         f"📊 <b>Analytics Stats:</b>\n\n"
-        f"Total Users: {stats["total_users"]}\n"
-        f"New Users Today: {stats["new_users_today"]}\n"
-        f"Active Users Today: {stats["active_users_today"]}\n"
-        f"Users This Week: {stats["users_this_week"]}"
+        f"Total Users: {stats['total_users']}\n"
+        f"New Users Today: {stats['new_users_today']}\n"
+        f"Active Users Today: {stats['active_users_today']}\n"
+        f"Users This Week: {stats['users_this_week']}"
     )
     await update.message.reply_text(message, parse_mode=ParseMode.HTML)
 
@@ -220,6 +244,86 @@ async def cmd_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         )
 
 
+def _tool_input(update: Update) -> str:
+    return update.message.text.partition(" ")[2].strip()
+
+
+def _selection(context: ContextTypes.DEFAULT_TYPE) -> str:
+    return context.user_data.get("ai_model", "auto")
+
+
+async def _require_input(update: Update, label: str) -> str | None:
+    value = _tool_input(update)
+    if not value:
+        await update.message.reply_text(f"Please add a topic after /{label}. Example: /{label} photosynthesis")
+        return None
+    return value
+
+
+async def cmd_model(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    choice = _tool_input(update).lower().replace("-", "_")
+    aliases = {"ai notebook": "default", "notebook": "default", "ai notebook pro": "pro", "ai notebook pro max": "pro_max"}
+    choice = aliases.get(choice, choice)
+    if choice not in providers.VALID_SELECTIONS:
+        await update.message.reply_text("Choose a model: /model auto, /model default, /model pro, or /model pro_max")
+        return
+    context.user_data["ai_model"] = choice
+    await update.message.reply_text(f"Model set to: {providers.tier_display_name(choice)}")
+
+
+async def cmd_notes(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    topic = await _require_input(update, "notes")
+    if topic:
+        await update.message.chat.send_action("typing")
+        await update.message.reply_text(await generate_notes(topic, selection=_selection(context)))
+
+
+async def cmd_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    topic = await _require_input(update, "quiz")
+    if not topic:
+        return
+    await update.message.chat.send_action("typing")
+    questions = await generate_quiz(topic, selection=_selection(context))
+    if not questions:
+        await update.message.reply_text("I couldn't create that quiz. Try a clearer topic.")
+        return
+    lines = [f"QUIZ: {topic}", ""]
+    for i, item in enumerate(questions, 1):
+        lines.append(f"{i}. {item['question']}")
+        lines.extend(f"   {chr(65 + n)}. {option}" for n, option in enumerate(item["options"]))
+        lines.append(f"   Answer: {chr(65 + int(item.get('answer', 0)))}")
+    await update.message.reply_text("\n".join(lines))
+
+
+async def cmd_flashcards(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    topic = await _require_input(update, "flashcards")
+    if topic:
+        await update.message.chat.send_action("typing")
+        cards = await generate_flashcards(topic, selection=_selection(context))
+        await update.message.reply_text("\n\n".join(f"CARD {i}: {card['front']}\n→ {card['back']}" for i, card in enumerate(cards, 1)) or "No cards generated.")
+
+
+async def cmd_plan(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    goal = await _require_input(update, "plan")
+    if goal:
+        await update.message.chat.send_action("typing")
+        await update.message.reply_text(await generate_study_plan(goal, selection=_selection(context)))
+
+
+async def cmd_summarize(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    text = await _require_input(update, "summarize")
+    if text:
+        await update.message.chat.send_action("typing")
+        await update.message.reply_text(await summarize_text(text, selection=_selection(context)))
+
+
+async def cmd_homework(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    question = await _require_input(update, "homework")
+    if question:
+        await update.message.chat.send_action("typing")
+        await update.message.reply_text(await homework_help(question, selection=_selection(context)))
+
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """AI fallback: library first, then AI Notebook (shared logic)."""
     user = update.effective_user
@@ -227,7 +331,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user_id = user.id
     question = update.message.text.strip()
 
-    source, answer = await answer_question(user_id, question)
+    source, answer = await answer_question(user_id, question, selection=_selection(context))
     if source == "library":
         await update.message.reply_text(f"📒 From your library:\n\n{answer}")
     else:
@@ -261,6 +365,13 @@ def build_application() -> Application:
     application.add_handler(CommandHandler("add", cmd_add))
     application.add_handler(CommandHandler("list", cmd_list))
     application.add_handler(CommandHandler("delete", cmd_delete))
+    application.add_handler(CommandHandler("model", cmd_model))
+    application.add_handler(CommandHandler("notes", cmd_notes))
+    application.add_handler(CommandHandler("quiz", cmd_quiz))
+    application.add_handler(CommandHandler("flashcards", cmd_flashcards))
+    application.add_handler(CommandHandler("plan", cmd_plan))
+    application.add_handler(CommandHandler("summarize", cmd_summarize))
+    application.add_handler(CommandHandler("homework", cmd_homework))
 
     admin_id = os.environ.get("TELEGRAM_ADMIN_ID")
     if admin_id:
