@@ -340,7 +340,20 @@ const SS = (() => {
   }
 
   /* ---------- boot common UI ---------- */
+  function initBootTransition() {
+    if (document.querySelector('.ainb-boot')) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'ainb-boot';
+    overlay.setAttribute('aria-label', 'Loading AI Notebook');
+    overlay.innerHTML = '<div class="ainb-boot-card"><img src="/assets/logo.png" alt="" /><span>AI Notebook<small>Preparing your workspace</small></span></div>';
+    document.body.prepend(overlay);
+    requestAnimationFrame(() => {
+      window.setTimeout(() => overlay.classList.add('is-out'), 120);
+      window.setTimeout(() => overlay.remove(), 460);
+    });
+  }
   function boot() {
+    initBootTransition();
     initTheme();
     initParticles();
     attachRipples();
