@@ -3,26 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <link rel="icon" type="image/svg+xml" href="/assets/logo.png" />
-  <link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/png" href="/assets/logo-192.png">
-<link rel="apple-touch-icon" href="/assets/logo-192.png">
-<meta name="theme-color" content="#4F46E5">
-  <script>
-    (function () {
-      try {
-        var t = localStorage.getItem('ss_theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', t);
-      } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
-    })();
-  </script>
   <title>Dashboard · AI Notebook</title>
+  <meta name="description" content="Your personal AI knowledge desk: notes, chats, quizzes and learning paths in one place." />
+  <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#4F46E5" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="AI Notebook" />
   <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" href="/assets/logo-192.png" />
   <link rel="apple-touch-icon" href="/assets/logo-192.png" />
+
+  <!-- Apply saved theme before first paint (prevents flash) -->
+  <script>
+    (function () {
+      try {
+        document.documentElement.setAttribute('data-theme', localStorage.getItem('ss_theme') || 'dark');
+      } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+    })();
+  </script>
+  <style>
+    .skip-link{position:absolute;left:12px;top:-60px;z-index:10000;padding:10px 16px;border-radius:10px;background:#4F46E5;color:#fff;font-weight:600;text-decoration:none;transition:top .15s}
+    .skip-link:focus{top:max(12px,env(safe-area-inset-top))}
+  </style>
+
+  <!-- Faster third-party connections -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="/css/premium-design-system.css" />
@@ -30,12 +40,6 @@
   <link rel="stylesheet" href="/css/dashboard.css" />
   <link rel="stylesheet" href="/css/sidebar-mobile.css" />
   <link rel="stylesheet" href="/css/responsive.css" />
-  
-  <!-- Vercel Speed Insights -->
-  <script type="module">
-    import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights@2.0.0/dist/index.mjs';
-    injectSpeedInsights();
-  </script>
   <link rel="stylesheet" href="/css/theme.css" />
   <link rel="stylesheet" href="/css/components.css" />
   <link rel="stylesheet" href="/css/sidebar.css" />
@@ -46,46 +50,49 @@
   <link rel="stylesheet" href="/css/rescue.css" />
 </head>
 <body>
-  <div id="particles-js"></div>
-  <div id="toast-wrap"></div>
-  <div class="side-overlay" id="sideOverlay"></div>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <noscript><p style="padding:16px;text-align:center">AI Notebook needs JavaScript to run. Please enable it and reload.</p></noscript>
+
+  <div id="particles-js" aria-hidden="true"></div>
+  <div id="toast-wrap" role="status" aria-live="polite"></div>
+  <div class="side-overlay" id="sideOverlay" aria-hidden="true"></div>
 
   <div class="app-shell">
-    <aside class="sidebar" id="sidebar" data-active="dashboard"></aside>
+    <aside class="sidebar" id="sidebar" data-active="dashboard" aria-label="Main navigation"></aside>
 
-    <main class="content">
+    <main class="content" id="main-content" tabindex="-1">
       <div class="topbar">
         <div>
           <p class="eyebrow">PERSONAL KNOWLEDGE DESK</p>
-          <h1>Welcome back, <span id="userName">there</span> <span class="wave">👋</span></h1>
+          <h1>Welcome back, <span id="userName">there</span> <span class="wave" aria-hidden="true">👋</span></h1>
           <p class="sub" id="dashSubtitle">Pick up a thread, capture a thought, or start a new line of study.</p>
         </div>
         <div class="topbar-actions">
-          <button class="search-trigger" data-cmdk aria-label="Search">
-            <i class="fas fa-magnifying-glass"></i>
+          <button type="button" class="search-trigger" data-cmdk aria-label="Search or jump to (Ctrl or Cmd + K)">
+            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
             <span class="stxt">Search or jump to…</span>
-            <span class="kbd">⌘K</span>
+            <span class="kbd" aria-hidden="true">⌘K</span>
           </button>
-          <a class="btn" href="/chat"><i class="fas fa-plus"></i> New chat</a>
-          <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+          <a class="btn" href="/chat"><i class="fas fa-plus" aria-hidden="true"></i> New chat</a>
+          <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false"><i class="fas fa-bars" aria-hidden="true"></i></button>
         </div>
       </div>
 
       <!-- Learn anything launcher -->
-      <section class="learn-launcher glass" id="learn-launcher" data-reveal>
+      <section class="learn-launcher glass" id="learn-launcher" aria-labelledby="ll-title" data-reveal>
         <div class="ll-copy">
-          <h2><i class="fas fa-compass"></i> Open a new knowledge thread</h2>
+          <h2 id="ll-title"><i class="fas fa-compass" aria-hidden="true"></i> Open a new knowledge thread</h2>
           <p>Give a topic a starting point and AI Notebook will help you turn it into notes, practice, and a learning path.</p>
         </div>
-        <form class="ll-form" id="topicForm">
-          <i class="fas fa-wand-magic-sparkles"></i>
-          <input type="text" id="topicInput" placeholder="e.g. Machine Learning, Quantum Computing, World War II…" maxlength="200" autocomplete="off" />
-          <button type="submit" class="btn" id="topicGo">Start learning <i class="fas fa-arrow-right"></i></button>
+        <form class="ll-form" id="topicForm" role="search">
+          <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+          <input type="text" id="topicInput" name="topic" aria-label="Topic to learn" placeholder="e.g. Machine Learning, Quantum Computing, World War II…" maxlength="200" autocomplete="off" enterkeyhint="go" required />
+          <button type="submit" class="btn" id="topicGo">Start learning <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
         </form>
       </section>
 
       <!-- Stats -->
-      <section class="stats-grid" id="statsGrid" data-stagger>
+      <section class="stats-grid" id="statsGrid" aria-label="Your stats" aria-busy="true" data-stagger>
         <div class="stat-card glass"><div class="ic skeleton" style="width:46px;height:46px"></div><b class="skeleton" style="height:28px;width:60%">&nbsp;</b><span class="skeleton" style="height:14px;width:80%">&nbsp;</span></div>
         <div class="stat-card glass"><div class="ic skeleton" style="width:46px;height:46px"></div><b class="skeleton" style="height:28px;width:60%">&nbsp;</b><span class="skeleton" style="height:14px;width:80%">&nbsp;</span></div>
         <div class="stat-card glass"><div class="ic skeleton" style="width:46px;height:46px"></div><b class="skeleton" style="height:28px;width:60%">&nbsp;</b><span class="skeleton" style="height:14px;width:80%">&nbsp;</span></div>
@@ -93,41 +100,39 @@
       </section>
 
       <!-- My topics (continue learning) -->
-      <section class="dash-section" id="myTopicsSection" data-reveal hidden>
-        <div class="section-title"><h2><i class="fas fa-book-open-reader"></i> Continue learning</h2></div>
+      <section class="dash-section" id="myTopicsSection" aria-labelledby="h-continue" data-reveal hidden>
+        <div class="section-title"><h2 id="h-continue"><i class="fas fa-book-open-reader" aria-hidden="true"></i> Continue learning</h2></div>
         <div class="topics-grid" id="myTopics" data-stagger></div>
       </section>
 
       <!-- AI Workspace -->
-      <section class="dash-section" id="ai-workspace" data-reveal>
-        <div class="section-title"><h2><i class="fas fa-bolt"></i> AI Workspace</h2></div>
+      <section class="dash-section" id="ai-workspace" aria-labelledby="h-workspace" data-reveal>
+        <div class="section-title"><h2 id="h-workspace"><i class="fas fa-bolt" aria-hidden="true"></i> AI Workspace</h2></div>
         <div class="workspace-grid" id="workspaceGrid" data-stagger></div>
       </section>
 
       <!-- Trending topics -->
-      <section class="dash-section" id="trending-topics" data-reveal>
-        <div class="section-title"><h2><i class="fas fa-arrow-trend-up"></i> Trending topics</h2></div>
+      <section class="dash-section" id="trending-topics" aria-labelledby="h-trending" data-reveal>
+        <div class="section-title"><h2 id="h-trending"><i class="fas fa-arrow-trend-up" aria-hidden="true"></i> Trending topics</h2></div>
         <div class="trending-grid" id="trendingGrid" data-stagger></div>
       </section>
 
       <!-- Main grid -->
       <section class="dash-grid">
-        <!-- Activity chart -->
         <div class="panel glass dash-activity" data-reveal>
           <div class="panel-head">
-            <h3><i class="fas fa-chart-line"></i> Daily activity</h3>
+            <h3><i class="fas fa-chart-line" aria-hidden="true"></i> Daily activity</h3>
             <span class="chip" id="activityTotal">Last 7 days</span>
           </div>
-          <div class="chart-wrap"><canvas id="activityChart"></canvas></div>
+          <div class="chart-wrap"><canvas id="activityChart" role="img" aria-label="Line chart of your daily activity over the last 7 days"></canvas></div>
         </div>
 
-        <!-- Study progress -->
         <div class="panel glass dash-progress" data-reveal="right">
           <div class="panel-head">
-            <h3><i class="fas fa-bullseye"></i> Study progress</h3>
+            <h3><i class="fas fa-bullseye" aria-hidden="true"></i> Study progress</h3>
           </div>
           <div class="progress-ring-wrap">
-            <div class="progress-ring" id="progressRing" style="--p: 0">
+            <div class="progress-ring" id="progressRing" style="--p: 0" role="progressbar" aria-label="Weekly goal progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <div class="progress-ring-inner">
                 <b id="progressPct" data-count="0" data-count-suffix="%">0%</b>
                 <span>Weekly goal</span>
@@ -135,61 +140,58 @@
             </div>
           </div>
           <div class="progress-meta" id="progressMeta">
-            <div class="pm-row"><span><i class="fas fa-fire"></i> Streak</span><b id="streakVal">0 days</b></div>
-            <div class="pm-row"><span><i class="fas fa-comments"></i> This week</span><b id="weekMsgs">0 msgs</b></div>
+            <div class="pm-row"><span><i class="fas fa-fire" aria-hidden="true"></i> Streak</span><b id="streakVal">0 days</b></div>
+            <div class="pm-row"><span><i class="fas fa-comments" aria-hidden="true"></i> This week</span><b id="weekMsgs">0 msgs</b></div>
           </div>
         </div>
       </section>
 
       <!-- Secondary grid -->
       <section class="dash-grid-2">
-        <!-- Recent notes -->
         <div class="panel glass" id="recent-notes-panel" data-reveal="left">
           <div class="panel-head">
-            <h3><i class="fas fa-note-sticky"></i> Recent notes</h3>
+            <h3><i class="fas fa-note-sticky" aria-hidden="true"></i> Recent notes</h3>
             <a class="chip clickable" href="/tools#notes">View all</a>
           </div>
-          <div class="recent-list" id="recentNotes">
+          <div class="recent-list" id="recentNotes" aria-busy="true">
             <div class="recent-item skeleton" style="height:54px"></div>
             <div class="recent-item skeleton" style="height:54px"></div>
           </div>
         </div>
 
-        <!-- Recent chats -->
         <div class="panel glass" id="history" data-reveal="right">
           <div class="panel-head">
-            <h3><i class="fas fa-clock-rotate-left"></i> Recent chats</h3>
+            <h3><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> Recent chats</h3>
             <a class="chip clickable" href="/chat">View all</a>
           </div>
-          <div class="recent-list" id="recentChats">
+          <div class="recent-list" id="recentChats" aria-busy="true">
             <div class="recent-item skeleton" style="height:54px"></div>
             <div class="recent-item skeleton" style="height:54px"></div>
             <div class="recent-item skeleton" style="height:54px"></div>
           </div>
         </div>
-
       </section>
 
       <!-- AI usage -->
       <section class="panel glass dash-ai" data-reveal>
         <div class="panel-head">
-          <h3><i class="fas fa-robot"></i> AI usage</h3>
+          <h3><i class="fas fa-robot" aria-hidden="true"></i> AI usage</h3>
         </div>
         <div class="ai-usage" id="aiUsage">
           <div class="ai-usage-bar">
             <div class="aub-label"><span>AI generations</span><b id="aiResponses">0</b></div>
             <div class="progress"><span id="aiResponsesBar" style="width:0%"></span></div>
           </div>
-          <div class="ai-providers" id="aiProvidersMini">
+          <div class="ai-providers" id="aiProvidersMini" aria-live="polite">
             <span class="model-badge"><span class="model-dot off"></span> Checking…</span>
           </div>
         </div>
       </section>
 
       <!-- Achievements -->
-      <section class="dash-section" data-reveal>
-        <div class="section-title"><h2><i class="fas fa-trophy"></i> Achievements</h2></div>
-        <div class="achievements" id="achievements" data-stagger>
+      <section class="dash-section" aria-labelledby="h-ach" data-reveal>
+        <div class="section-title"><h2 id="h-ach"><i class="fas fa-trophy" aria-hidden="true"></i> Achievements</h2></div>
+        <div class="achievements" id="achievements" aria-busy="true" data-stagger>
           <div class="ach-card glass skeleton" style="height:96px"></div>
           <div class="ach-card glass skeleton" style="height:96px"></div>
           <div class="ach-card glass skeleton" style="height:96px"></div>
@@ -199,17 +201,24 @@
     </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="/js/config.js"></script>
-  <script src="/js/analytics-tracker.js"></script>
-  <script src="/js/app.js"></script>
-  <script src="/js/motion.js"></script>
-  <script src="/js/command-palette.js"></script>
-  <script src="/js/pwa.js"></script>
-  <script src="/js/sidebar.js"></script>
-  <script src="/js/dashboard.js"></script>
-  <script src="/js/onboarding.js"></script>
-  <script src="/js/confetti.js"></script>
+  <!-- Scripts: defer keeps execution order but stops them blocking first paint -->
+  <script defer src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script defer src="/js/config.js"></script>
+  <script defer src="/js/analytics-tracker.js"></script>
+  <script defer src="/js/app.js"></script>
+  <script defer src="/js/motion.js"></script>
+  <script defer src="/js/command-palette.js"></script>
+  <script defer src="/js/pwa.js"></script>
+  <script defer src="/js/sidebar.js"></script>
+  <script defer src="/js/dashboard.js"></script>
+  <script defer src="/js/onboarding.js"></script>
+  <script defer src="/js/confetti.js"></script>
+
+  <!-- Vercel Speed Insights -->
+  <script type="module">
+    import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights@2.0.0/dist/index.mjs';
+    injectSpeedInsights();
+  </script>
 </body>
 </html>
