@@ -3,19 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <link rel="icon" type="image/png" href="/assets/logo-192.png" />
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="apple-touch-icon" href="/assets/logo-192.png" />
+  <title>Topic Workspace · AI Notebook</title>
+  <meta name="description" content="Study any topic with AI: summary, notes, mind map, roadmap, quiz, flashcards and more." />
+  <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#4F46E5" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="AI Notebook" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" href="/assets/logo-192.png" />
+  <link rel="apple-touch-icon" href="/assets/logo-192.png" />
+
+  <!-- Apply saved theme before first paint (prevents flash) -->
   <script>
     (function () {
       try {
-        var t = localStorage.getItem('ss_theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', t);
+        document.documentElement.setAttribute('data-theme', localStorage.getItem('ss_theme') || 'dark');
       } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
     })();
   </script>
-  <title>Topic Workspace · AI Notebook</title>
+  <style>
+    .skip-link{position:absolute;left:12px;top:-60px;z-index:10000;padding:10px 16px;border-radius:10px;background:#4F46E5;color:#fff;font-weight:600;text-decoration:none;transition:top .15s}
+    .skip-link:focus{top:max(12px,env(safe-area-inset-top))}
+  </style>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" />
@@ -32,83 +48,92 @@
   <link rel="stylesheet" href="/css/rescue.css" />
 </head>
 <body>
-  <div id="toast-wrap"></div>
-  <div class="side-overlay" id="sideOverlay"></div>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <noscript><p style="padding:16px;text-align:center">AI Notebook needs JavaScript to run. Please enable it and reload.</p></noscript>
+
+  <div id="toast-wrap" role="status" aria-live="polite"></div>
+  <div class="side-overlay" id="sideOverlay" aria-hidden="true"></div>
 
   <div class="app-shell">
-    <aside class="sidebar" id="sidebar" data-active="topics"></aside>
+    <aside class="sidebar" id="sidebar" data-active="topics" aria-label="Main navigation"></aside>
 
-    <main class="content topic-content" id="main-content">
+    <main class="content topic-content" id="main-content" tabindex="-1">
       <!-- Topic header -->
       <header class="topic-header" id="topic-header">
         <div class="topic-title-row">
-          <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open navigation"><i class="fas fa-bars"></i></button>
-          <span class="topic-emoji" id="topicEmoji">📚</span>
+          <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false"><i class="fas fa-bars" aria-hidden="true"></i></button>
+          <span class="topic-emoji" id="topicEmoji" aria-hidden="true">📚</span>
           <div class="topic-title-meta">
-            <h1 id="topicTitle" class="skeleton" style="min-width:220px">&nbsp;</h1>
+            <h1 id="topicTitle" class="skeleton" style="min-width:220px" aria-live="polite">&nbsp;</h1>
             <p class="sub" id="topicSubtitle">AI-powered learning workspace</p>
           </div>
         </div>
         <div class="topic-header-actions">
-          <button class="icon-btn" id="pinTopicBtn" title="Pin topic" aria-label="Pin topic"><i class="fas fa-thumbtack"></i></button>
-          <button class="icon-btn" id="favTopicBtn" title="Favorite" aria-label="Favorite topic"><i class="far fa-star"></i></button>
+          <button type="button" class="icon-btn" id="pinTopicBtn" title="Pin topic" aria-label="Pin topic" aria-pressed="false"><i class="fas fa-thumbtack" aria-hidden="true"></i></button>
+          <button type="button" class="icon-btn" id="favTopicBtn" title="Favorite" aria-label="Favorite topic" aria-pressed="false"><i class="far fa-star" aria-hidden="true"></i></button>
           <div class="export-wrap">
-            <button class="btn btn-ghost" id="exportBtn"><i class="fas fa-download"></i> Export</button>
-            <div class="dropdown-menu export-menu" id="exportMenu" role="menu">
-              <button class="dropdown-item" data-export="md"><i class="fas fa-file-lines"></i> Markdown (.md)</button>
-              <button class="dropdown-item" data-export="html"><i class="fas fa-code"></i> HTML (.html)</button>
-              <button class="dropdown-item" data-export="doc"><i class="fas fa-file-word"></i> Word (.doc)</button>
-              <button class="dropdown-item" data-export="pdf"><i class="fas fa-file-pdf"></i> PDF (print)</button>
+            <button type="button" class="btn btn-ghost" id="exportBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="exportMenu"><i class="fas fa-download" aria-hidden="true"></i> Export</button>
+            <div class="dropdown-menu export-menu" id="exportMenu" role="menu" aria-labelledby="exportBtn">
+              <button type="button" class="dropdown-item" role="menuitem" data-export="md"><i class="fas fa-file-lines" aria-hidden="true"></i> Markdown (.md)</button>
+              <button type="button" class="dropdown-item" role="menuitem" data-export="html"><i class="fas fa-code" aria-hidden="true"></i> HTML (.html)</button>
+              <button type="button" class="dropdown-item" role="menuitem" data-export="doc"><i class="fas fa-file-word" aria-hidden="true"></i> Word (.doc)</button>
+              <button type="button" class="dropdown-item" role="menuitem" data-export="pdf"><i class="fas fa-file-pdf" aria-hidden="true"></i> PDF (print)</button>
             </div>
           </div>
-          <button class="search-trigger compact" data-cmdk aria-label="Search"><i class="fas fa-magnifying-glass"></i><span class="kbd">⌘K</span></button>
+          <button type="button" class="search-trigger compact" data-cmdk aria-label="Search (Ctrl or Cmd + K)"><i class="fas fa-magnifying-glass" aria-hidden="true"></i><span class="kbd" aria-hidden="true">⌘K</span></button>
         </div>
       </header>
 
       <!-- Tabs -->
       <nav class="topic-tabs" id="topicTabs" role="tablist" aria-label="Topic sections">
-        <button class="topic-tab active" data-tab="overview" role="tab"><i class="fas fa-eye"></i><span>Overview</span></button>
-        <button class="topic-tab" data-tab="summary" role="tab"><i class="fas fa-align-left"></i><span>Summary</span></button>
-        <button class="topic-tab" data-tab="notes" role="tab"><i class="fas fa-note-sticky"></i><span>Notes</span></button>
-        <button class="topic-tab" data-tab="mindmap" role="tab"><i class="fas fa-diagram-project"></i><span>Mind Map</span></button>
-        <button class="topic-tab" data-tab="roadmap" role="tab"><i class="fas fa-route"></i><span>Roadmap</span></button>
-        <button class="topic-tab" data-tab="timeline" role="tab"><i class="fas fa-timeline"></i><span>Timeline</span></button>
-        <button class="topic-tab" data-tab="quiz" role="tab"><i class="fas fa-clipboard-question"></i><span>Quiz</span></button>
-        <button class="topic-tab" data-tab="flashcards" role="tab"><i class="fas fa-layer-group"></i><span>Flashcards</span></button>
-        <button class="topic-tab" data-tab="compare" role="tab"><i class="fas fa-scale-balanced"></i><span>Compare</span></button>
-        <button class="topic-tab" data-tab="practice" role="tab"><i class="fas fa-dumbbell"></i><span>Practice</span></button>
-        <button class="topic-tab" data-tab="chat" role="tab"><i class="fas fa-comments"></i><span>AI Chat</span></button>
-        <button class="topic-tab" data-tab="resources" role="tab"><i class="fas fa-book-open"></i><span>Resources</span></button>
+        <button type="button" class="topic-tab active" id="tab-overview" data-tab="overview" role="tab" aria-selected="true" aria-controls="panel-overview"><i class="fas fa-eye" aria-hidden="true"></i><span>Overview</span></button>
+        <button type="button" class="topic-tab" id="tab-summary" data-tab="summary" role="tab" aria-selected="false" aria-controls="panel-summary" tabindex="-1"><i class="fas fa-align-left" aria-hidden="true"></i><span>Summary</span></button>
+        <button type="button" class="topic-tab" id="tab-notes" data-tab="notes" role="tab" aria-selected="false" aria-controls="panel-notes" tabindex="-1"><i class="fas fa-note-sticky" aria-hidden="true"></i><span>Notes</span></button>
+        <button type="button" class="topic-tab" id="tab-mindmap" data-tab="mindmap" role="tab" aria-selected="false" aria-controls="panel-mindmap" tabindex="-1"><i class="fas fa-diagram-project" aria-hidden="true"></i><span>Mind Map</span></button>
+        <button type="button" class="topic-tab" id="tab-roadmap" data-tab="roadmap" role="tab" aria-selected="false" aria-controls="panel-roadmap" tabindex="-1"><i class="fas fa-route" aria-hidden="true"></i><span>Roadmap</span></button>
+        <button type="button" class="topic-tab" id="tab-timeline" data-tab="timeline" role="tab" aria-selected="false" aria-controls="panel-timeline" tabindex="-1"><i class="fas fa-timeline" aria-hidden="true"></i><span>Timeline</span></button>
+        <button type="button" class="topic-tab" id="tab-quiz" data-tab="quiz" role="tab" aria-selected="false" aria-controls="panel-quiz" tabindex="-1"><i class="fas fa-clipboard-question" aria-hidden="true"></i><span>Quiz</span></button>
+        <button type="button" class="topic-tab" id="tab-flashcards" data-tab="flashcards" role="tab" aria-selected="false" aria-controls="panel-flashcards" tabindex="-1"><i class="fas fa-layer-group" aria-hidden="true"></i><span>Flashcards</span></button>
+        <button type="button" class="topic-tab" id="tab-compare" data-tab="compare" role="tab" aria-selected="false" aria-controls="panel-compare" tabindex="-1"><i class="fas fa-scale-balanced" aria-hidden="true"></i><span>Compare</span></button>
+        <button type="button" class="topic-tab" id="tab-practice" data-tab="practice" role="tab" aria-selected="false" aria-controls="panel-practice" tabindex="-1"><i class="fas fa-dumbbell" aria-hidden="true"></i><span>Practice</span></button>
+        <button type="button" class="topic-tab" id="tab-chat" data-tab="chat" role="tab" aria-selected="false" aria-controls="panel-chat" tabindex="-1"><i class="fas fa-comments" aria-hidden="true"></i><span>AI Chat</span></button>
+        <button type="button" class="topic-tab" id="tab-resources" data-tab="resources" role="tab" aria-selected="false" aria-controls="panel-resources" tabindex="-1"><i class="fas fa-book-open" aria-hidden="true"></i><span>Resources</span></button>
       </nav>
 
       <!-- Panels -->
       <section class="topic-panels" id="topicPanels">
-        <div class="topic-panel active" data-panel="overview" role="tabpanel"></div>
-        <div class="topic-panel" data-panel="summary" role="tabpanel"></div>
-        <div class="topic-panel" data-panel="notes" role="tabpanel"></div>
-        <div class="topic-panel" data-panel="mindmap" role="tabpanel"></div>
-        <div class="topic-panel" data-panel="roadmap" role="tabpanel"></div>
-        <div class="topic-panel" data-panel="timeline" role="tabpanel"></div>
-        <div class="topic-panel" data-panel="quiz" role="tabpanel"></div>
-        <div class="topic-panel" data-panel="flashcards" role="tabpanel"></div>
-        <div class="topic-panel" data-panel="compare" role="tabpanel"></div>
-        <div class="topic-panel" data-panel="practice" role="tabpanel"></div>
-        <div class="topic-panel" data-panel="chat" role="tabpanel"></div>
-        <div class="topic-panel" data-panel="resources" role="tabpanel"></div>
+        <div class="topic-panel active" id="panel-overview" data-panel="overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="0"></div>
+        <div class="topic-panel" id="panel-summary" data-panel="summary" role="tabpanel" aria-labelledby="tab-summary" tabindex="0"></div>
+        <div class="topic-panel" id="panel-notes" data-panel="notes" role="tabpanel" aria-labelledby="tab-notes" tabindex="0"></div>
+        <div class="topic-panel" id="panel-mindmap" data-panel="mindmap" role="tabpanel" aria-labelledby="tab-mindmap" tabindex="0"></div>
+        <div class="topic-panel" id="panel-roadmap" data-panel="roadmap" role="tabpanel" aria-labelledby="tab-roadmap" tabindex="0"></div>
+        <div class="topic-panel" id="panel-timeline" data-panel="timeline" role="tabpanel" aria-labelledby="tab-timeline" tabindex="0"></div>
+        <div class="topic-panel" id="panel-quiz" data-panel="quiz" role="tabpanel" aria-labelledby="tab-quiz" tabindex="0"></div>
+        <div class="topic-panel" id="panel-flashcards" data-panel="flashcards" role="tabpanel" aria-labelledby="tab-flashcards" tabindex="0"></div>
+        <div class="topic-panel" id="panel-compare" data-panel="compare" role="tabpanel" aria-labelledby="tab-compare" tabindex="0"></div>
+        <div class="topic-panel" id="panel-practice" data-panel="practice" role="tabpanel" aria-labelledby="tab-practice" tabindex="0"></div>
+        <div class="topic-panel" id="panel-chat" data-panel="chat" role="tabpanel" aria-labelledby="tab-chat" tabindex="0"></div>
+        <div class="topic-panel" id="panel-resources" data-panel="resources" role="tabpanel" aria-labelledby="tab-resources" tabindex="0"></div>
       </section>
     </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.9/dist/purify.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
-  <script src="/js/config.js"></script>
-  <script src="/js/analytics-tracker.js"></script>
-  <script src="/js/app.js"></script>
-  <script src="/js/motion.js"></script>
-  <script src="/js/command-palette.js"></script>
-  <script src="/js/pwa.js"></script>
-  <script src="/js/sidebar.js"></script>
-  <script src="/js/topic.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/dompurify@3.0.9/dist/purify.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  <script defer src="/js/config.js"></script>
+  <script defer src="/js/analytics-tracker.js"></script>
+  <script defer src="/js/app.js"></script>
+  <script defer src="/js/motion.js"></script>
+  <script defer src="/js/command-palette.js"></script>
+  <script defer src="/js/pwa.js"></script>
+  <script defer src="/js/sidebar.js"></script>
+  <script defer src="/js/topic.js"></script>
+
+  <!-- Vercel Speed Insights (added for parity with dashboard and chat) -->
+  <script type="module">
+    import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights@2.0.0/dist/index.mjs';
+    injectSpeedInsights();
+  </script>
 </body>
 </html>
