@@ -620,22 +620,56 @@ select.ui-input {
 :root[data-motion='reduced'] [data-stagger] > * { opacity: 1 !important; transform: none !important; }
 
 
-/* Site-wide visual rebuild: shared surfaces, geometry, and hierarchy. */
-:root { --site-bg: #0b0c11; --site-panel: #14151d; --site-panel-2: #191a24; --site-line: rgba(255,255,255,.09); --site-accent: #8b7cff; }
-body { background: var(--site-bg); }
-.app-shell, .page-shell, .tools-shell, .topic-shell, .settings-wrapper { background: radial-gradient(circle at 80% -10%, rgba(139,124,255,.1), transparent 32%), var(--site-bg); }
-.panel, .glass, .settings-card, .tool-card, .topic-card, .learn-launcher, .dash-ai, .ach-card, .settings-panel { border: 1px solid var(--site-line) !important; border-radius: 18px !important; background: linear-gradient(145deg, rgba(255,255,255,.065), rgba(255,255,255,.025)) !important; box-shadow: 0 18px 50px rgba(0,0,0,.18) !important; }
-.panel:hover, .settings-card:hover, .tool-card:hover, .topic-card:hover, .ach-card:hover { border-color: rgba(139,124,255,.44) !important; box-shadow: 0 22px 58px rgba(0,0,0,.25) !important; }
-.topbar, .topbar-inner, .settings-tabs { border-color: var(--site-line) !important; background: rgba(11,12,17,.78) !important; backdrop-filter: blur(18px); }
-.section-title h2, .panel-head h3, .settings-card h3, .tool-card h3 { font-family: Manrope, Inter, sans-serif; letter-spacing: -.035em; }
-.search-trigger, input, textarea, select { border-radius: 12px !important; border-color: var(--site-line) !important; background: rgba(255,255,255,.045) !important; }
-.search-trigger:focus-within, input:focus, textarea:focus, select:focus { border-color: var(--site-accent) !important; box-shadow: 0 0 0 4px rgba(139,124,255,.12) !important; }
-.btn { border-radius: 12px !important; background: linear-gradient(135deg, #9d91ff, #6676ee) !important; box-shadow: 0 10px 25px rgba(105,91,224,.2) !important; }
-.btn.ghost, .btn.secondary, .btn.outline { background: rgba(255,255,255,.045) !important; border-color: var(--site-line) !important; box-shadow: none !important; }
-.chip, .badge, .model-badge, .tag { border-radius: 8px !important; }
-.progress, .progress-track { height: 6px !important; border-radius: 99px !important; background: rgba(255,255,255,.08) !important; }
-.progress span, .progress-track span { border-radius: inherit; background: linear-gradient(90deg, #9d91ff, #5ee0aa) !important; }
-@media (max-width: 700px) { .panel, .glass, .settings-card, .tool-card, .topic-card { border-radius: 14px !important; } }
+/* Shared surface defaults use theme tokens; page sheets may refine them. */
+:root {
+  --site-bg: var(--bg-0);
+  --site-panel: var(--surface);
+  --site-panel-2: var(--surface-raised);
+  --site-line: var(--border);
+  --site-accent: var(--accent);
+}
+body { background: var(--page-bg); color: var(--text); }
+.app-shell, .page-shell, .tools-shell, .topic-shell, .settings-wrapper { background: var(--page-bg); }
+.panel, .glass, .settings-card, .tool-card, .topic-card, .learn-launcher, .dash-ai, .ach-card, .settings-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--glass);
+  box-shadow: var(--shadow-sm);
+}
+.panel:hover, .settings-card:hover, .tool-card:hover, .topic-card:hover, .ach-card:hover {
+  border-color: var(--accent-ring);
+  box-shadow: var(--shadow-md);
+}
+.topbar, .topbar-inner, .settings-tabs {
+  border-color: var(--border);
+  background: var(--nav-bg);
+  backdrop-filter: blur(18px);
+}
+.section-title h2, .panel-head h3, .settings-card h3, .tool-card h3 {
+  font-family: var(--font-family-ui);
+  letter-spacing: -0.02em;
+}
+.search-trigger, input, textarea, select {
+  border-radius: var(--radius-md);
+  border-color: var(--border);
+  background: var(--glass);
+}
+.search-trigger:focus-within, input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+.btn { border-radius: var(--radius-md); background: var(--grad); box-shadow: var(--shadow-accent); }
+.btn.ghost, .btn.secondary, .btn.outline {
+  background: var(--glass);
+  border-color: var(--border);
+  box-shadow: none;
+}
+.chip, .badge, .model-badge, .tag { border-radius: var(--radius-sm); }
+.progress, .progress-track { height: 6px; border-radius: var(--radius-full); background: var(--glass-strong); }
+.progress span, .progress-track span { border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--success)); }
+@media (max-width: 700px) {
+  .panel, .glass, .settings-card, .tool-card, .topic-card { border-radius: var(--radius-md); }
+}
 
 
 /* Install CTA is intentionally removed from the web product. */

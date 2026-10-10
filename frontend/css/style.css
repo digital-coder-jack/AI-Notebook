@@ -3,57 +3,6 @@
    Dark theme by default · Glassmorphism · Responsive
    ===================================================================== */
 
-/* ===== DARK THEME (default) ===== */
-:root,
-:root[data-theme='dark'] {
-  --bg-0: #060814;
-  --bg-1: #0b1022;
-  --bg-2: #11173a;
-  --glass: rgba(255, 255, 255, 0.06);
-  --glass-strong: rgba(255, 255, 255, 0.1);
-  --border: rgba(255, 255, 255, 0.12);
-  --text: #e8ecff;
-  --text-dim: #9aa3c7;
-  --primary: #6d7bff;
-  --primary-2: #a855f7;
-  --accent: #22d3ee;
-  --success: #34d399;
-  --danger: #fb7185;
-  --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
-  --radius: 18px;
-  --grad: linear-gradient(135deg, #6d7bff 0%, #a855f7 50%, #22d3ee 100%);
-  --nav-bg: rgba(6, 8, 20, 0.55);
-  --menu-bg: rgba(11, 16, 34, 0.96);
-  --page-bg:
-    radial-gradient(1200px 800px at 15% -10%, rgba(109, 123, 255, 0.18), transparent 55%),
-    radial-gradient(1000px 700px at 110% 10%, rgba(168, 85, 247, 0.16), transparent 55%),
-    var(--bg-0);
-}
-
-/* ===== LIGHT THEME ===== */
-:root[data-theme='light'] {
-  --bg-0: #eef1fb;
-  --bg-1: #ffffff;
-  --bg-2: #f4f6ff;
-  --glass: rgba(255, 255, 255, 0.72);
-  --glass-strong: rgba(255, 255, 255, 0.9);
-  --border: rgba(20, 30, 80, 0.12);
-  --text: #16203f;
-  --text-dim: #5a648a;
-  --primary: #5b67ff;
-  --primary-2: #9333ea;
-  --accent: #0891b2;
-  --success: #059669;
-  --danger: #e11d48;
-  --shadow: 0 20px 50px rgba(60, 70, 130, 0.18);
-  --nav-bg: rgba(255, 255, 255, 0.7);
-  --menu-bg: rgba(255, 255, 255, 0.97);
-  --page-bg:
-    radial-gradient(1200px 800px at 15% -10%, rgba(109, 123, 255, 0.20), transparent 55%),
-    radial-gradient(1000px 700px at 110% 10%, rgba(168, 85, 247, 0.16), transparent 55%),
-    var(--bg-0);
-}
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }

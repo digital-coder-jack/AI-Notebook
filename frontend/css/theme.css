@@ -1,9 +1,9 @@
 /* =====================================================================
    AI Notebook  —  theme.css  (2026 Premium Redesign)
    ---------------------------------------------------------------------
-   The single source of truth for the refreshed design language. Loaded
-   FIRST (before legacy stylesheets) so it can establish the premium
-   token system, then individual component files layer on top.
+   The single source of truth for the refreshed design language. Load this
+   file after shared and page stylesheets so tokens and global ergonomics
+   stay consistent while component and page styles remain scoped.
 
    Inspired by Notion · Linear · Vercel · Raycast · Apple · Framer · Stripe.
 
@@ -27,6 +27,10 @@
   --bg-1: #0c0e1a;          /* raised */
   --bg-2: #11142a;          /* card */
   --bg-3: #181c38;          /* elevated */
+  --background: var(--bg-0);
+  --surface: var(--bg-1);
+  --surface-raised: var(--bg-2);
+  --surface-elevated: var(--bg-3);
 
   /* ---- Glass ---- */
   --glass: rgba(255, 255, 255, 0.045);
@@ -48,6 +52,7 @@
   --accent-h: 252;
   --accent: hsl(var(--accent-h) 90% 66%);
   --accent-2: hsl(calc(var(--accent-h) + 38) 85% 65%);
+  --accent-light: hsl(var(--accent-h) 95% 78%);
   --accent-soft: hsl(var(--accent-h) 90% 66% / 0.14);
   --accent-ring: hsl(var(--accent-h) 90% 66% / 0.32);
 
@@ -77,6 +82,8 @@
   --grad: linear-gradient(135deg, var(--accent), var(--accent-2));
   --grad-primary: linear-gradient(135deg, var(--accent), var(--accent-2));
   --grad-accent: linear-gradient(135deg, var(--accent-2), var(--accent));
+  --grad-warm: linear-gradient(135deg, #f97316, #fb923c);
+  --grad-cool: linear-gradient(135deg, #3b82f6, #8b5cf6);
   --grad-mesh:
     radial-gradient(60% 80% at 50% 0%, hsl(var(--accent-h) 90% 60% / 0.16), transparent 60%);
   --grad-text: linear-gradient(120deg, var(--text) 0%, var(--accent) 60%, var(--accent-2) 100%);
@@ -90,6 +97,23 @@
     radial-gradient(1200px 760px at 12% -12%, hsl(var(--accent-h) 90% 55% / 0.16), transparent 55%),
     radial-gradient(1000px 680px at 112% 6%, hsl(calc(var(--accent-h) + 40) 85% 55% / 0.13), transparent 55%),
     var(--bg-0);
+
+  /* Compatibility aliases for the workspace layer. */
+  --workspace-canvas: var(--bg-0);
+  --workspace-surface: var(--bg-1);
+  --workspace-surface-raised: var(--bg-2);
+  --workspace-surface-hover: var(--bg-3);
+  --workspace-line: var(--border);
+  --workspace-line-strong: var(--border-strong);
+  --workspace-ink: var(--text);
+  --workspace-ink-muted: var(--text-dim);
+  --workspace-ink-soft: var(--text-muted);
+  --workspace-accent: var(--accent);
+  --workspace-accent-strong: var(--accent-light);
+  --workspace-focus: var(--accent-ring);
+  --workspace-radius-sm: var(--radius-sm);
+  --workspace-radius-md: var(--radius-lg);
+  --workspace-ease: var(--ease-smooth);
 }
 
 /* ===================================================================
@@ -100,6 +124,10 @@
   --bg-1: #ffffff;
   --bg-2: #ffffff;
   --bg-3: #f1f4ff;
+  --background: var(--bg-0);
+  --surface: var(--bg-1);
+  --surface-raised: var(--bg-2);
+  --surface-elevated: var(--bg-3);
 
   --glass: rgba(255, 255, 255, 0.7);
   --glass-2: rgba(255, 255, 255, 0.82);
@@ -116,6 +144,7 @@
 
   --accent: hsl(var(--accent-h) 80% 58%);
   --accent-2: hsl(calc(var(--accent-h) + 38) 72% 56%);
+  --accent-light: hsl(var(--accent-h) 88% 46%);
   --accent-soft: hsl(var(--accent-h) 80% 58% / 0.12);
   --accent-ring: hsl(var(--accent-h) 80% 58% / 0.26);
 
@@ -161,11 +190,35 @@
 :root[data-accent='rose']   { --accent-h: 346; }
 :root[data-accent='pink']   { --accent-h: 326; }
 
+/* Core violet and indigo ramps for accessible component states. */
+:root {
+  --violet-50: #f5f3ff;
+  --violet-100: #ede9fe;
+  --violet-200: #ddd6fe;
+  --violet-300: #c4b5fd;
+  --violet-400: #a78bfa;
+  --violet-500: #8b5cf6;
+  --violet-600: #7c3aed;
+  --violet-700: #6d28d9;
+  --violet-800: #5b21b6;
+  --violet-900: #4c1d95;
+  --indigo-50: #eef2ff;
+  --indigo-100: #e0e7ff;
+  --indigo-200: #c7d2fe;
+  --indigo-300: #a5b4fc;
+  --indigo-400: #818cf8;
+  --indigo-500: #6366f1;
+  --indigo-600: #4f46e5;
+  --indigo-700: #4338ca;
+  --indigo-800: #3730a3;
+  --indigo-900: #312e81;
+}
+
 /* ===================================================================
    4. SCALE TOKENS  (shared across themes)
    =================================================================== */
 :root {
-  /* Spacing (8px grid) */
+  /* Spacing (4px grid) */
   --space-2xs: 0.25rem;
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
@@ -175,37 +228,46 @@
   --space-2xl: 3rem;
   --space-3xl: 4rem;
 
-  /* Radius */
+  /* Radius scale */
   --radius-xs: 8px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-xl: 24px;
-  --radius-2xl: 30px;
+  --radius-2xl: 24px;
   --radius-full: 999px;
   --radius: var(--radius-lg);
 
   /* Typography scale (multiplied by --font-scale) */
   --font-scale: 1;
-  --fs-xs: calc(0.75rem * var(--font-scale));
-  --fs-sm: calc(0.875rem * var(--font-scale));
-  --fs-base: calc(1rem * var(--font-scale));
-  --fs-lg: calc(1.125rem * var(--font-scale));
-  --fs-xl: calc(1.35rem * var(--font-scale));
-  --fs-2xl: calc(1.75rem * var(--font-scale));
-  --fs-3xl: calc(2.25rem * var(--font-scale));
+  --type-12: calc(0.75rem * var(--font-scale));
+  --type-14: calc(0.875rem * var(--font-scale));
+  --type-16: calc(1rem * var(--font-scale));
+  --type-18: calc(1.125rem * var(--font-scale));
+  --type-24: calc(1.5rem * var(--font-scale));
+  --type-32: calc(2rem * var(--font-scale));
+  --type-48: calc(3rem * var(--font-scale));
+  --fs-xs: var(--type-12);
+  --fs-sm: var(--type-14);
+  --fs-base: var(--type-16);
+  --fs-lg: var(--type-18);
+  --fs-xl: var(--type-24);
+  --fs-2xl: var(--type-32);
+  --fs-3xl: var(--type-48);
+  --font-family-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --line-height-body: 1.6;
 
   /* Density (row paddings adapt) */
   --density-pad: 0.9rem;
   --density-gap: 1.1rem;
 
   /* Motion */
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --dur-fast: 130ms;
-  --dur-base: 240ms;
-  --dur-slow: 420ms;
+  --ease-smooth: cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring: var(--ease-smooth);
+  --ease-out: var(--ease-smooth);
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 400ms;
   --transition-fast: var(--dur-fast) var(--ease-smooth);
   --transition-base: var(--dur-base) var(--ease-smooth);
   --transition-smooth: var(--dur-slow) var(--ease-smooth);
@@ -268,9 +330,11 @@
 html { font-size: 100%; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-family-ui);
   font-size: var(--fs-base);
   letter-spacing: -0.011em;
+  color: var(--text);
+  line-height: var(--line-height-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -303,7 +367,7 @@ body {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
 }
 
 /* Animated gradient utility (for premium headings / borders) */
@@ -314,4 +378,24 @@ body {
 .animated-gradient {
   background-size: 200% 200%;
   animation: gradientShift 6s var(--ease-smooth) infinite;
+}
+
+/* Responsive refinements remain part of the canonical spacing scale. */
+@media (max-width: 1024px) {
+  :root { --space-3xl: 2.5rem; }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --space-2xl: 2rem;
+    --space-3xl: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --space-lg: 1rem;
+    --space-xl: 1.5rem;
+    --space-2xl: 2rem;
+  }
 }
