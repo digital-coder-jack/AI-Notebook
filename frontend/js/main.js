@@ -19,7 +19,7 @@ function init() {
   // to refresh here in case content/layout changed before main.js ran.
   if (window.AOS) {
     if (typeof AOS.refreshHard === 'function') AOS.refreshHard();
-    else AOS.init({ duration: 600, easing: 'ease-out-cubic', once: true, offset: 60 });
+    else AOS.init({ duration: 400, easing: 'ease-out-cubic', once: true, offset: 60 });
   }
 
   // If already logged in, swap "Get started" CTA to Dashboard
@@ -71,6 +71,10 @@ function typingEffect() {
     'Summarise PDFs with one click.',
     'Plan your study weeks with AI.',
   ];
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = phrases[0];
+    return;
+  }
   let p = 0, c = 0, deleting = false;
 
   function tick() {
@@ -88,6 +92,10 @@ function typingEffect() {
 function countUp() {
   const els = document.querySelectorAll('[data-count]');
   if (!els.length) return;
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    els.forEach((el) => { el.textContent = el.dataset.count; });
+    return;
+  }
   const obs = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       if (!e.isIntersecting) return;
@@ -112,15 +120,26 @@ function faqAccordion() {
     q.addEventListener('click', () => {
       const item = q.closest('.faq-item');
       const wasOpen = item.classList.contains('open');
-      document.querySelectorAll('.faq-item').forEach((i) => i.classList.remove('open'));
-      if (!wasOpen) item.classList.add('open');
+      document.querySelectorAll('.faq-item').forEach((i) => {
+        i.classList.remove('open');
+        const question = i.querySelector('.faq-q');
+        question?.setAttribute('aria-expanded', 'false');
+        const answerId = question?.getAttribute('aria-controls');
+        if (answerId) document.getElementById(answerId)?.setAttribute('aria-hidden', 'true');
+      });
+      if (!wasOpen) {
+        item.classList.add('open');
+        q.setAttribute('aria-expanded', 'true');
+        const answerId = q.getAttribute('aria-controls');
+        if (answerId) document.getElementById(answerId)?.setAttribute('aria-hidden', 'false');
+      }
     });
   });
 }
 
 /* ---------- GSAP hero entrance + scroll parallax ---------- */
 function gsapHero() {
-  if (!window.gsap) return;
+  if (!window.gsap || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
   gsap.from('.hero .badge', { y: -20, opacity: 0, duration: 0.7 });
   gsap.from('.hero h1', { y: 30, opacity: 0, duration: 0.9, delay: 0.1 });
   gsap.from('.hero .lead', { y: 24, opacity: 0, duration: 0.9, delay: 0.25 });

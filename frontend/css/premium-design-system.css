@@ -3,173 +3,7 @@
    Enhanced CSS variables, animations, and component foundations
    ===================================================================== */
 
-/* ===== PREMIUM DARK THEME ===== */
-:root,
-:root[data-theme='dark'] {
-  /* Base Colors */
-  --bg-0: #060814;
-  --bg-1: #0b1022;
-  --bg-2: #11173a;
-  --bg-3: #1a1f3a;
-  
-  /* Glass & Transparency */
-  --glass: rgba(255, 255, 255, 0.06);
-  --glass-strong: rgba(255, 255, 255, 0.1);
-  --glass-premium: rgba(255, 255, 255, 0.08);
-  --border: rgba(255, 255, 255, 0.12);
-  --border-light: rgba(255, 255, 255, 0.08);
-  
-  /* Text */
-  --text: #e8ecff;
-  --text-dim: #9aa3c7;
-  --text-muted: #6b7280;
-  
-  /* Primary Colors */
-  --primary: #6d7bff;
-  --primary-2: #a855f7;
-  --primary-light: #8b9eff;
-  --primary-dark: #4f5fd9;
-  
-  /* Accent & Status */
-  --accent: #22d3ee;
-  --accent-light: #67e8f9;
-  --success: #34d399;
-  --warning: #fbbf24;
-  --danger: #fb7185;
-  --info: #60a5fa;
-  
-  /* Shadows */
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.25);
-  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.45);
-  --shadow-xl: 0 30px 80px rgba(0, 0, 0, 0.55);
-  --shadow-glow: 0 0 30px rgba(109, 123, 255, 0.3);
-  
-  /* Gradients */
-  --grad: linear-gradient(135deg, #6d7bff 0%, #a855f7 50%, #22d3ee 100%);
-  --grad-primary: linear-gradient(135deg, #6d7bff, #a855f7);
-  --grad-accent: linear-gradient(135deg, #22d3ee, #06b6d4);
-  --grad-warm: linear-gradient(135deg, #f97316, #fb923c);
-  --grad-cool: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  
-  /* Navigation */
-  --nav-bg: rgba(6, 8, 20, 0.55);
-  --menu-bg: rgba(11, 16, 34, 0.96);
-  
-  /* Page Background */
-  --page-bg:
-    radial-gradient(1200px 800px at 15% -10%, rgba(109, 123, 255, 0.18), transparent 55%),
-    radial-gradient(1000px 700px at 110% 10%, rgba(168, 85, 247, 0.16), transparent 55%),
-    var(--bg-0);
-  
-  /* Spacing (8px grid) */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 3rem;
-  --space-3xl: 4rem;
-  
-  /* Border Radius */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-full: 999px;
-  
-  /* Transitions */
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.3s ease;
-  --transition-slow: 0.5s ease;
-  --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* ===== Premium Motion Tokens (smooth animation system) ===== */
-  /* Easing curves */
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);  /* overshoot / bouncy */
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);        /* material standard */
-
-  /* Standardised durations */
-  --dur-fast: 120ms;
-  --dur-base: 240ms;
-  --dur-slow: 420ms;
-}
-
-/* ===== PREMIUM LIGHT THEME ===== */
-:root[data-theme='light'] {
-  --bg-0: #eef1fb;
-  --bg-1: #ffffff;
-  --bg-2: #f4f6ff;
-  --bg-3: #f0f4ff;
-  
-  --glass: rgba(255, 255, 255, 0.72);
-  --glass-strong: rgba(255, 255, 255, 0.9);
-  --glass-premium: rgba(255, 255, 255, 0.85);
-  --border: rgba(20, 30, 80, 0.12);
-  --border-light: rgba(20, 30, 80, 0.08);
-  
-  --text: #16203f;
-  --text-dim: #5a648a;
-  --text-muted: #9ca3af;
-  
-  --primary: #5b67ff;
-  --primary-2: #9333ea;
-  --primary-light: #818cf8;
-  --primary-dark: #3730a3;
-  
-  --accent: #0891b2;
-  --accent-light: #06b6d4;
-  --success: #059669;
-  --warning: #d97706;
-  --danger: #e11d48;
-  --info: #2563eb;
-  
-  --shadow-sm: 0 4px 12px rgba(60, 70, 130, 0.08);
-  --shadow-md: 0 10px 30px rgba(60, 70, 130, 0.12);
-  --shadow-lg: 0 20px 50px rgba(60, 70, 130, 0.18);
-  --shadow-xl: 0 30px 80px rgba(60, 70, 130, 0.22);
-  --shadow-glow: 0 0 30px rgba(91, 103, 255, 0.25);
-  
-  --grad: linear-gradient(135deg, #5b67ff 0%, #9333ea 50%, #0891b2 100%);
-  --grad-primary: linear-gradient(135deg, #5b67ff, #9333ea);
-  --grad-accent: linear-gradient(135deg, #0891b2, #06b6d4);
-  --grad-warm: linear-gradient(135deg, #f97316, #fb923c);
-  --grad-cool: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  
-  --nav-bg: rgba(255, 255, 255, 0.7);
-  --menu-bg: rgba(255, 255, 255, 0.97);
-  
-  --page-bg:
-    radial-gradient(1200px 800px at 15% -10%, rgba(91, 103, 255, 0.15), transparent 55%),
-    radial-gradient(1000px 700px at 110% 10%, rgba(147, 51, 234, 0.12), transparent 55%),
-    var(--bg-0);
-  
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 3rem;
-  --space-3xl: 4rem;
-  
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-full: 999px;
-  
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.3s ease;
-  --transition-slow: 0.5s ease;
-  --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* ===== Premium Motion Tokens (inherit from dark, kept for explicitness) ===== */
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --dur-fast: 120ms;
-  --dur-base: 240ms;
-  --dur-slow: 420ms;
-}
+/* Theme values and compatibility aliases are centralized in theme.css. */
 
 /* ===== PREMIUM ANIMATIONS ===== */
 
@@ -434,11 +268,7 @@
 
 /* ===== PREMIUM COMPONENT FOUNDATIONS ===== */
 
-/* Smooth Transitions */
-* {
-  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
-}
-
+/* Shared controls use the duration and easing tokens from theme.css. */
 button, a, input, textarea, select {
   transition: all var(--transition-base);
 }
@@ -488,29 +318,6 @@ select:focus-visible {
 /* Placeholder */
 ::placeholder {
   color: var(--text-muted);
-}
-
-/* ===== RESPONSIVE UTILITIES ===== */
-
-@media (max-width: 1024px) {
-  :root {
-    --space-3xl: 2.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  :root {
-    --space-2xl: 2rem;
-    --space-3xl: 2.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  :root {
-    --space-lg: 1rem;
-    --space-xl: 1.5rem;
-    --space-2xl: 2rem;
-  }
 }
 
 /* Reduced Motion */
@@ -616,27 +423,9 @@ select:focus-visible {
 
 /* ==========================================================================
    AI NOTEBOOK WORKSPACE LAYER
-   Shared visual language for the deployed static Web app. This layer is
-   intentionally class-preserving: it changes surfaces and states without
-   changing DOM hooks, routes, API contracts, or interaction scripts.
+   Compatibility selectors now consume the shared theme tokens. Keep DOM
+   hooks and routes unchanged while page-specific styles remain in control.
    ========================================================================== */
-:root {
-  --workspace-canvas: #070a12;
-  --workspace-surface: #0e1420;
-  --workspace-surface-raised: #141c2a;
-  --workspace-surface-hover: #192437;
-  --workspace-line: rgba(184, 198, 224, 0.14);
-  --workspace-line-strong: rgba(184, 198, 224, 0.24);
-  --workspace-ink: #f4f7fb;
-  --workspace-ink-muted: #9eabc0;
-  --workspace-ink-soft: #718096;
-  --workspace-accent: #8ea2ff;
-  --workspace-accent-strong: #b6c1ff;
-  --workspace-focus: rgba(142, 162, 255, 0.42);
-  --workspace-radius-sm: 10px;
-  --workspace-radius-md: 14px;
-  --workspace-ease: cubic-bezier(0.23, 1, 0.32, 1);
-}
 
 html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
 body { background: var(--workspace-canvas); color: var(--workspace-ink); }
@@ -659,9 +448,9 @@ textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
 }
 
 button, .btn, .button {
-  transition: transform 160ms var(--workspace-ease), background-color 160ms var(--workspace-ease),
-              border-color 160ms var(--workspace-ease), color 160ms var(--workspace-ease),
-              box-shadow 160ms var(--workspace-ease);
+  transition: transform var(--dur-fast) var(--workspace-ease), background-color var(--dur-fast) var(--workspace-ease),
+              border-color var(--dur-fast) var(--workspace-ease), color var(--dur-fast) var(--workspace-ease),
+              box-shadow var(--dur-fast) var(--workspace-ease);
 }
 button:active, .btn:active, .button:active { transform: scale(0.98); }
 
