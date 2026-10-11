@@ -64,6 +64,60 @@ body:has(.app-shell), body:has(.chat-layout) {
 .app-shell .side-head {
   padding: 20px 14px 16px;
 }
+.app-shell .workspace-switcher {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 12px 13px;
+  padding: 10px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background: rgba(255, 255, 255, .035);
+  color: var(--ui-muted);
+}
+.app-shell .workspace-avatar {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 9px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  background: var(--ui-grad);
+}
+.app-shell .workspace-copy {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.app-shell .workspace-copy b {
+  overflow: hidden;
+  color: var(--ui-ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-shell .workspace-copy small {
+  color: var(--ui-subtle);
+  font-size: 9px;
+}
+.app-shell .workspace-switcher > i {
+  color: var(--ui-subtle);
+  font-size: 10px;
+}
+.app-shell .sidebar.collapsed .workspace-switcher {
+  justify-content: center;
+  margin-inline: 8px;
+  padding-inline: 6px;
+}
+.app-shell .sidebar.collapsed .workspace-copy,
+.app-shell .sidebar.collapsed .workspace-switcher > i {
+  display: none;
+}
 .app-shell .side-nav a {
   border-radius: 12px;
   color: var(--ui-muted);
@@ -132,6 +186,58 @@ body:has(.app-shell), body:has(.chat-layout) {
 .app-shell .ll-form input,
 .app-shell .search-trigger {
   border-radius: var(--ui-radius-sm);
+}
+.app-shell .quick-actions-section {
+  margin-top: 20px;
+}
+.app-shell .quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.app-shell .qa-card {
+  position: relative;
+  display: flex;
+  min-height: 132px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 17px;
+  color: var(--ui-ink);
+  text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+.app-shell .qa-card b {
+  margin-top: 4px;
+  font-size: 13px;
+  letter-spacing: -.015em;
+}
+.app-shell .qa-card > span:not(.qa-icon) {
+  color: var(--ui-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+.app-shell .qa-icon {
+  display: grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  border-radius: 10px;
+  color: #c1b6ff;
+  background: rgba(132, 115, 230, .16);
+}
+.app-shell .qa-icon.amber { color: #f3bd7b; background: rgba(243, 189, 123, .14); }
+.app-shell .qa-icon.blue { color: #83b8ff; background: rgba(131, 184, 255, .14); }
+.app-shell .qa-icon.green { color: #78d2ad; background: rgba(120, 210, 173, .14); }
+.app-shell .qa-arrow {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+  color: var(--ui-subtle);
+  font-size: 11px;
+}
+.app-shell .qa-card:hover {
+  background: linear-gradient(145deg, rgba(151, 130, 235, .12), rgba(255, 255, 255, .03));
 }
 .app-shell .ll-form {
   border-color: rgba(151, 130, 235, .42);
@@ -340,6 +446,10 @@ body:has(.app-shell), body:has(.chat-layout) {
   .app-shell .content > .section-title {
     width: min(100% - 30px, 720px);
   }
+  .app-shell .quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .app-shell .quick-actions { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .app-shell .side-nav a,
