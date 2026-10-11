@@ -3,340 +3,375 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="Study with AI Notebook: ask questions, make notes and quizzes, create flashcards, plan study time, and work with files in one learning workspace." />
-  <meta name="theme-color" content="#080a13" />
+  <meta name="description" content="AI Notebook is a calm workspace for conversations, notes, summaries, roadmaps, and ideas — think clearly, create freely." />
+  <meta name="theme-color" content="#08090d" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="AI Notebook" />
-  <title>AI Notebook — Make every study session count</title>
-  <link rel="icon" type="image/png" href="/assets/logo-192.png" />
+  <title>AI Notebook — Think clearly, create freely</title>
+  <link rel="icon" type="image/png" href="/assets/logo.png" />
   <link rel="apple-touch-icon" href="/assets/logo-192.png" />
   <link rel="manifest" href="/manifest.json" />
-  <script>
-    /* Apply saved theme + accent before paint to avoid a flash of the wrong theme. */
-    (function () {
-      try {
-        var root = document.documentElement;
-        root.setAttribute('data-theme', localStorage.getItem('ss_theme') || 'dark');
-        root.setAttribute('data-accent', localStorage.getItem('ss_accent') || 'violet');
-        root.setAttribute('data-font', localStorage.getItem('ss_font') || 'md');
-      } catch (error) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-    })();
-  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
-  <link rel="stylesheet" href="/css/premium-design-system.css" />
-  <link rel="stylesheet" href="/css/style.css" />
-  <link rel="stylesheet" href="/css/responsive.css" />
-  <link rel="stylesheet" href="/css/components.css" />
-  <link rel="stylesheet" href="/css/landing.css" />
-  <link rel="stylesheet" href="/css/theme.css" />
-  <script type="module">
-    import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights@2.0.0/dist/index.mjs';
-    injectSpeedInsights();
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Cinematic landing page styles (isolated from existing app CSS) -->
+  <link rel="stylesheet" href="/css/cinematic-landing.css" />
+
+  <!-- Shared app config + auth helpers (SS module) -->
+  <script src="/js/config.js"></script>
+  <script src="/js/app.js"></script>
+  <meta name="twitter:card" content="summary_large_image" />
 </head>
-<body class="landing-page">
-  <a class="skip-link" href="#main-content">Skip to content</a>
-  <div id="particles-js" aria-hidden="true"></div>
-  <div id="toast-wrap" aria-live="polite" aria-atomic="false"></div>
+<body class="cinematic-landing">
+  <a class="cl-skip-link" href="#main-content">Skip to main content</a>
 
-  <header class="nav">
-    <div class="container">
-      <a class="brand" href="/" aria-label="AI Notebook home">
-        <span class="logo"><img src="/assets/logo.png" alt="" class="logo-img" /></span>
-        <span>AI <span class="grad-text">Notebook</span></span>
+  <!-- Canvas-based animated background (video fallback) -->
+  <div class="cl-video-fallback" aria-hidden="true"></div>
+  <div class="cl-video-bg" aria-hidden="true">
+    <canvas id="cl-canvas" aria-hidden="true"></canvas>
+  </div>
+  <div class="cl-video-overlay" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <header class="cl-nav" role="banner">
+    <a class="cl-brand" href="/" aria-label="AI Notebook home">
+      <span class="cl-logo"><img src="/assets/logo.png" alt="AI Notebook logo" /></span>
+      <span>AI <em>Notebook</em></span>
+    </a>
+    <nav class="cl-links" id="public-navigation" aria-label="Public navigation">
+      <a href="#features">Features</a>
+      <a href="#workflow">How it works</a>
+      <a href="#workspace">Workspace</a>
+    </nav>
+    <div class="cl-actions">
+      <a class="cl-signin" href="/login">Sign in</a>
+      <a class="cl-cta small" href="/signup">Get started
+        <svg class="cl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
       </a>
-      <nav class="nav-links" id="navLinks" aria-label="Primary navigation">
-        <a class="link" href="#features">Features</a>
-        <a class="link" href="#how">How it works</a>
-        <a class="link" href="#testimonials">What’s included</a>
-        <a class="link" href="#faq">FAQ</a>
-        <div class="mobile-auth">
-          <a href="/login" class="btn small"><i class="fas fa-right-to-bracket" aria-hidden="true"></i> Sign In</a>
-          <a href="/signup" class="btn small primary"><i class="fas fa-user-plus" aria-hidden="true"></i> Sign Up</a>
-        </div>
-      </nav>
-      <div class="nav-actions">
-        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light or dark theme" title="Toggle light / dark">
-          <i class="fas fa-moon" aria-hidden="true"></i><i class="fas fa-sun" aria-hidden="true"></i>
-        </button>
-        <a href="/login" class="btn small"><i class="fas fa-right-to-bracket" aria-hidden="true"></i> Sign In</a>
-        <a href="/signup" class="btn small primary"><i class="fas fa-user-plus" aria-hidden="true"></i> Sign Up</a>
-        <button class="nav-toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
-          <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-        </button>
-      </div>
     </div>
+    <button class="cl-menu-button" type="button" aria-label="Open navigation" aria-controls="public-navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
   </header>
-  <div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div>
 
-  <main id="main-content">
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-glow hero-glow-1" aria-hidden="true"></div>
-      <div class="hero-glow hero-glow-2" aria-hidden="true"></div>
-      <div class="container">
-        <div class="hero-copy">
-          <span class="badge" data-aos="fade-down"><i class="fas fa-sparkles" aria-hidden="true"></i> Your study workspace, with AI built in</span>
-          <h1 id="hero-title" data-aos="fade-up">Make every study session <span class="grad-text">count.</span></h1>
-          <div class="typed-wrap" aria-hidden="true"><span id="typed"></span><span class="typed-cursor">&nbsp;</span></div>
-          <p class="lead" data-aos="fade-up" data-aos-delay="100">
-            Understand a tough topic, turn it into study materials, and keep your work together in one focused place.
-          </p>
-          <div class="cta-buttons">
-            <a href="/signup" class="btn primary"><i class="fas fa-arrow-right" aria-hidden="true"></i> Start learning</a>
-            <a href="#features" class="btn ghost"><i class="fas fa-grid-2" aria-hidden="true"></i> Explore the tools</a>
-          </div>
-          <p class="guest-note">Want to look around first? <button class="text-action" id="guestBtn" data-guest type="button">Try as a guest</button></p>
+  <main id="main-content" tabindex="-1">
+    <!-- Hero -->
+    <section class="cl-hero" aria-labelledby="hero-title">
+      <div class="cl-hero-noise" aria-hidden="true"></div>
+      <div class="cl-hero-light light-a" aria-hidden="true"></div>
+      <div class="cl-hero-light light-b" aria-hidden="true"></div>
+
+      <div class="cl-hero-copy">
+        <div class="cl-pill">
+          <span class="pill-spark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/></svg>
+          </span>
+          A quieter way to think with AI
         </div>
+        <h1 id="hero-title">Make space for<br /><span>better thinking.</span></h1>
+        <p>AI Notebook brings your questions, notes, research, and next steps into one calm, intelligent workspace.</p>
+        <div class="cl-hero-actions">
+          <a class="cl-cta" href="/signup">Enter your workspace
+            <svg class="cl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a class="cl-text-link" href="#features">Explore features
+            <svg class="cl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </a>
+        </div>
+        <div class="cl-hero-note">
+          <span class="note-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <span>Built for the thoughts that matter.</span>
+        </div>
+      </div>
 
-        <div class="hero-visual" data-aos="fade-left">
-          <div class="preview-window" role="img" aria-label="A preview of an AI Notebook study workspace with notes, an AI tutor, and a quick knowledge check">
-            <div class="preview-chrome" aria-hidden="true">
-              <span class="preview-dot"></span><span class="preview-dot"></span><span class="preview-dot"></span>
-              <span class="preview-url">app.ainotebook.local / workspace</span>
-            </div>
-            <div class="preview-app">
-              <aside class="preview-sidebar" aria-hidden="true">
-                <div class="preview-mini-brand"><span class="preview-mini-mark"><i class="fas fa-book-open"></i></span> AI Notebook</div>
+      <!-- Product preview -->
+      <div class="cl-hero-product" aria-label="Illustration of the AI Notebook workspace">
+        <div class="cl-product-shadow" aria-hidden="true"></div>
+        <div class="cl-product-window">
+          <div class="cl-product-top">
+            <span class="window-dots"><i></i><i></i><i></i></span>
+            <span class="window-title">
+              <span class="cl-mini-logo"><img src="/assets/logo.png" alt="" /></span>
+              AI Notebook
+              <span class="window-status">Personal space</span>
+            </span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+          </div>
+          <div class="cl-product-body">
+            <aside class="cl-mini-sidebar">
+              <span class="cl-mini-brand"><img src="/assets/logo.png" alt="" /></span>
+              <span class="cl-mini-side-line active"></span>
+              <span class="cl-mini-side-line"></span>
+              <span class="cl-mini-side-line"></span>
+              <span class="cl-mini-side-line short"></span>
+              <span class="cl-mini-side-line"></span>
+            </aside>
+            <div class="cl-mini-content">
+              <div class="cl-mini-kicker">SATURDAY, 11 OCTOBER</div>
+              <div class="cl-mini-heading">Good morning, Jordan</div>
+              <div class="cl-mini-subheading">What are you working through today?</div>
+              <div class="cl-mini-prompt">
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/></svg>
+                  Start with a question or a messy thought...
+                </span>
+                <span class="cl-mini-send">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+                </span>
+              </div>
+              <div class="cl-mini-cards">
                 <div>
-                  <p class="preview-nav-label">Workspace</p>
-                  <div class="preview-side-links">
-                    <div class="preview-side-link active"><i class="fas fa-book-open"></i> My notes</div>
-                    <div class="preview-side-link"><i class="fas fa-comments"></i> Ask AI</div>
-                    <div class="preview-side-link"><i class="fas fa-layer-group"></i> Flashcards</div>
-                    <div class="preview-side-link"><i class="fas fa-calendar-days"></i> Study plan</div>
-                  </div>
+                  <span class="cl-mini-card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  </span>
+                  <b>New conversation</b>
+                  <small>Think out loud with AI</small>
                 </div>
-                <div class="preview-streak"><strong><i class="fas fa-sparkles"></i> Study session</strong><span>Keep your notes and practice together</span></div>
-              </aside>
-              <div class="preview-main" aria-hidden="true">
-                <div class="preview-head">
-                  <div class="preview-title"><small>Biology · Study notes</small><strong>Cell structure</strong></div>
-                  <span class="preview-avatar"><i class="fas fa-user"></i></span>
-                </div>
-                <div class="preview-grid">
-                  <article class="preview-note">
-                    <h3>The cell membrane</h3>
-                    <p>A flexible boundary that separates the cell from its environment and regulates what enters and leaves.</p>
-                    <div class="preview-highlight"><strong>Key idea</strong><br />The membrane is selectively permeable: some substances pass through more easily than others.</div>
-                  </article>
-                  <aside class="preview-ai">
-                    <div class="preview-ai-head"><i class="fas fa-sparkles"></i> AI tutor</div>
-                    <p class="preview-message">Can you explain that in simpler terms?</p>
-                    <div class="preview-answer">Think of it like a gate: it lets useful things in and keeps other things out.</div>
-                  </aside>
-                </div>
-                <div class="preview-check">
-                  <div class="preview-check-copy"><strong>Quick check</strong><span>What does selective permeability mean?</span></div>
-                  <div class="preview-progress"><span></span></div>
+                <div>
+                  <span class="cl-mini-card-icon amber">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  </span>
+                  <b>Capture a note</b>
+                  <small>Save a thought before it wanders</small>
                 </div>
               </div>
             </div>
           </div>
-          <p class="preview-caption">A study flow that moves from questions to practice.</p>
         </div>
 
-        <div class="hero-stats" aria-label="AI Notebook product facts">
-          <div class="stat hero-card"><strong class="stat-number" data-count="6">0</strong><span>study tools in one workspace</span></div>
-          <div class="stat hero-card"><strong class="stat-number" data-count="3">0</strong><span>AI tiers to choose from</span></div>
-          <div class="stat hero-card"><strong class="stat-number" data-count="2">0</strong><span>ways to study: web and Telegram</span></div>
+        <!-- Floating chips -->
+        <div class="cl-floating-chip chip-top">
+          <span class="chip-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M12 5a3 3 0 0 0-3 3 3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3-3z"/><path d="M12 5v14"/></svg>
+          </span>
+          <span><b>Find the signal</b><small>AI-assisted thinking</small></span>
+        </div>
+        <div class="cl-floating-chip chip-bottom">
+          <span class="chip-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <span><b>Ideas, connected</b><small>Always in one place</small></span>
         </div>
       </div>
     </section>
 
-    <section class="section" id="features" aria-labelledby="features-title">
-      <div class="container">
-        <div class="section-head" data-aos="fade-up">
-          <span class="eyebrow">One place to learn</span>
-          <h2 id="features-title">From first question to confident recall</h2>
-          <p>Use the right tool for the moment, without losing the thread of what you’re learning.</p>
+    <!-- Intro -->
+    <section class="cl-intro" id="features">
+      <div class="cl-section-kicker">A workspace for your whole mind</div>
+      <h2>From scattered thoughts<br /><span>to clear direction.</span></h2>
+      <p>Keep the raw idea. Ask better questions. See what connects. AI Notebook gives every stage of your thinking a place to land.</p>
+    </section>
+
+    <!-- Feature: AI Chat -->
+    <section class="cl-feature-story" id="workflow">
+      <div class="cl-feature-inner">
+        <div class="cl-feature-copy">
+          <span class="cl-feature-number">01</span>
+          <span class="cl-section-kicker">AI CONVERSATIONS</span>
+          <h2>Think out loud, without losing the thread.</h2>
+          <p>A focused space for exploring an idea, untangling a problem, or asking the question behind the question.</p>
+          <a href="/chat" class="cl-feature-link">Explore in workspace
+            <svg class="cl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+          </a>
         </div>
-        <div class="grid cols-3">
-          <article class="feature glass" data-aos="fade-up">
-            <div class="feature-icon"><i class="fas fa-comments" aria-hidden="true"></i></div>
-            <h3>AI study chat</h3>
-            <p>Ask follow-up questions and work through a concept in a conversational study space.</p>
-          </article>
-          <article class="feature glass" data-aos="fade-up" data-aos-delay="60">
-            <div class="feature-icon"><i class="fas fa-note-sticky" aria-hidden="true"></i></div>
-            <h3>Study notes</h3>
-            <p>Turn a topic into structured notes you can review alongside your other study materials.</p>
-          </article>
-          <article class="feature glass" data-aos="fade-up" data-aos-delay="120">
-            <div class="feature-icon"><i class="fas fa-circle-question" aria-hidden="true"></i></div>
-            <h3>Quizzes</h3>
-            <p>Test what you remember with question sets built around the material you’re studying.</p>
-          </article>
-          <article class="feature glass" data-aos="fade-up">
-            <div class="feature-icon"><i class="fas fa-layer-group" aria-hidden="true"></i></div>
-            <h3>Flashcards</h3>
-            <p>Practice key terms and ideas with quick, repeatable recall sessions.</p>
-          </article>
-          <article class="feature glass" data-aos="fade-up" data-aos-delay="60">
-            <div class="feature-icon"><i class="fas fa-calendar-days" aria-hidden="true"></i></div>
-            <h3>Study planner</h3>
-            <p>Break a learning goal into a manageable plan and keep your next step visible.</p>
-          </article>
-          <article class="feature glass" data-aos="fade-up" data-aos-delay="120">
-            <div class="feature-icon"><i class="fas fa-file-arrow-up" aria-hidden="true"></i></div>
-            <h3>Work with files</h3>
-            <p>Bring documents into your study flow to make the material easier to review.</p>
-          </article>
+        <div class="cl-feature-visual">
+          <div class="cl-demo-window">
+            <div class="cl-demo-header">
+              <span><span class="cl-demo-dot pink"></span> AI conversation</span>
+              <span>DEMO</span>
+            </div>
+            <div class="cl-demo-chat">
+              <div class="cl-demo-message assistant">
+                <span class="cl-demo-avatar"><img src="/assets/logo.png" alt="" /></span>
+                <span>What are you trying to make clearer?</span>
+              </div>
+              <div class="cl-demo-message user">I have too many directions and no obvious next step.</div>
+              <div class="cl-demo-message assistant">
+                <span class="cl-demo-avatar"><img src="/assets/logo.png" alt="" /></span>
+                <span>Let&rsquo;s find the decision underneath the list. Which direction still feels important when you remove the deadline?</span>
+              </div>
+              <div class="cl-demo-input">Continue the thought
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section" id="how" aria-labelledby="how-title">
-      <div class="container">
-        <div class="section-head" data-aos="fade-up">
-          <span class="eyebrow">A simple study loop</span>
-          <h2 id="how-title">Learn it, shape it, practise it</h2>
-          <p>Start with what you need to understand, then turn that learning into something you can revisit.</p>
+    <!-- Feature: Smart Notes -->
+    <section class="cl-feature-story reverse">
+      <div class="cl-feature-inner">
+        <div class="cl-feature-copy">
+          <span class="cl-feature-number">02</span>
+          <span class="cl-section-kicker">SMART NOTES</span>
+          <h2>Give every good thought somewhere to go.</h2>
+          <p>Capture a flash of insight, shape it over time, and return to it when the moment is right.</p>
+          <a href="/tools" class="cl-feature-link">Explore in workspace
+            <svg class="cl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+          </a>
         </div>
-        <div class="grid cols-3">
-          <article class="feature glass step-card" data-aos="fade-up">
-            <span class="step-number">01 / ASK</span>
-            <div class="feature-icon"><i class="fas fa-lightbulb" aria-hidden="true"></i></div>
-            <h3>Start with a question</h3>
-            <p>Ask the AI tutor about a topic, a confusing passage, or the next concept in your course.</p>
-          </article>
-          <article class="feature glass step-card" data-aos="fade-up" data-aos-delay="60">
-            <span class="step-number">02 / BUILD</span>
-            <div class="feature-icon"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i></div>
-            <h3>Make study material</h3>
-            <p>Create notes, quizzes, flashcards, or a study plan from the things you’re working on.</p>
-          </article>
-          <article class="feature glass step-card" data-aos="fade-up" data-aos-delay="120">
-            <span class="step-number">03 / REVIEW</span>
-            <div class="feature-icon"><i class="fas fa-rotate" aria-hidden="true"></i></div>
-            <h3>Come back and practise</h3>
-            <p>Return to your saved material and use active recall to strengthen what you’ve learned.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section proof-section" id="testimonials" aria-labelledby="proof-title">
-      <div class="container">
-        <div class="section-head" data-aos="fade-up">
-          <span class="eyebrow">What’s included</span>
-          <h2 id="proof-title">A connected study toolkit</h2>
-          <p>AI Notebook brings its core study tools together, with options for how and where you use them.</p>
-        </div>
-        <div class="grid cols-3">
-          <article class="feature glass proof-card" data-aos="fade-up">
-            <div class="feature-icon"><i class="fas fa-cubes" aria-hidden="true"></i></div>
-            <h3>Six study tools</h3>
-            <p>Chat, notes, quizzes, flashcards, planning, and file-based study in one product.</p>
-          </article>
-          <article class="feature glass proof-card" data-aos="fade-up" data-aos-delay="60">
-            <div class="feature-icon"><i class="fas fa-sliders" aria-hidden="true"></i></div>
-            <h3>Three AI tiers</h3>
-            <p>Choose between the available model tiers to fit the kind of study task you have.</p>
-          </article>
-          <article class="feature glass proof-card" data-aos="fade-up" data-aos-delay="120">
-            <div class="feature-icon"><i class="fas fa-mobile-screen-button" aria-hidden="true"></i></div>
-            <h3>Web and Telegram</h3>
-            <p>Use the web workspace or continue with the Telegram bot when that suits you.</p>
-          </article>
+        <div class="cl-feature-visual">
+          <div class="cl-demo-window cl-notes-demo">
+            <div class="cl-demo-note-list">
+              <span class="cl-demo-list-title">NOTES</span>
+              <span class="cl-demo-note active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                A first, honest draft
+              </span>
+              <span class="cl-demo-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Questions for later
+              </span>
+              <span class="cl-demo-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Product launch
+              </span>
+            </div>
+            <div class="cl-demo-note-editor">
+              <span class="cl-demo-editor-status">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Saved
+              </span>
+              <h3>A first, honest draft</h3>
+              <p>The beginning does not need to be impressive. It only needs to be true enough to give the next thought somewhere to start.</p>
+              <div class="cl-demo-rule"></div>
+              <span class="cl-demo-editor-fade">Keep writing...</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="cta-band" aria-labelledby="cta-title">
-      <h2 id="cta-title">Ready for a more focused study session?</h2>
-      <p>Open your workspace and turn the next question into a useful next step.</p>
-      <div class="cta-buttons">
-        <a href="/signup" class="btn primary"><i class="fas fa-arrow-right" aria-hidden="true"></i> Start learning</a>
-        <button class="btn ghost" id="guestBtn2" data-guest type="button"><i class="fas fa-user-secret" aria-hidden="true"></i> Try as a guest</button>
+    <!-- Feature: Topic Summaries -->
+    <section class="cl-feature-story">
+      <div class="cl-feature-inner">
+        <div class="cl-feature-copy">
+          <span class="cl-feature-number">03</span>
+          <span class="cl-section-kicker">TOPIC SUMMARIES</span>
+          <h2>See the signal inside the noise.</h2>
+          <p>Turn dense source material into an outline you can understand, revisit, and act on.</p>
+          <a href="/topic" class="cl-feature-link">Explore in workspace
+            <svg class="cl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+          </a>
+        </div>
+        <div class="cl-feature-visual">
+          <div class="cl-demo-window cl-summary-demo">
+            <div class="cl-summary-source">
+              <span class="cl-demo-list-title">SOURCE MATERIAL</span>
+              <div class="cl-source-lines"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <span class="cl-source-tag">2,480 words</span>
+            </div>
+            <div class="cl-summary-result">
+              <span class="cl-demo-list-title">STRUCTURED SUMMARY</span>
+              <h3>The signal</h3>
+              <div class="cl-result-line strong"></div>
+              <div class="cl-result-line"></div>
+              <div class="cl-result-line"></div>
+              <h4>Key ideas</h4>
+              <div class="cl-result-bullet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 16 9"/></svg>
+                Three themes emerge from the source.
+              </div>
+              <div class="cl-result-bullet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 16 9"/></svg>
+                The most useful context, kept close.
+              </div>
+              <div class="cl-result-bullet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 16 9"/></svg>
+                A clear next step to carry forward.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="section" id="faq" aria-labelledby="faq-title">
-      <div class="container">
-        <div class="section-head" data-aos="fade-up">
-          <span class="eyebrow">Good to know</span>
-          <h2 id="faq-title">Frequently asked questions</h2>
+    <!-- Systems section: Roadmaps + Mind Maps -->
+    <section class="cl-systems">
+      <div class="cl-section-kicker">A connected way to move forward</div>
+      <h2>Your ideas do not live<br /><span>in separate boxes.</span></h2>
+      <div class="cl-systems-grid">
+        <div class="cl-system-card cl-roadmap-card">
+          <span class="cl-system-number">04</span>
+          <div class="cl-system-copy">
+            <h3>Learning roadmaps</h3>
+            <p>Give a meaningful goal a sequence, a shape, and a next step.</p>
+          </div>
+          <div class="cl-roadmap-demo">
+            <div class="cl-roadmap-progress">
+              <span class="cl-roadmap-complete"></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="cl-roadmap-labels">
+              <b>Start</b>
+              <span>Learn the landscape</span>
+              <span>Make the first thing</span>
+              <b>Share it</b>
+            </div>
+            <div class="cl-roadmap-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 16 9"/></svg>
+              1 milestone complete
+            </div>
+          </div>
         </div>
-        <div class="faq-list">
-          <article class="faq-item" data-aos="fade-up">
-            <button class="faq-q" id="faq-question-1" type="button" aria-expanded="false" aria-controls="faq-answer-1">
-              <span>What can I do with AI Notebook?</span><i class="fas fa-chevron-down" aria-hidden="true"></i>
-            </button>
-            <div class="faq-a" id="faq-answer-1" role="region" aria-labelledby="faq-question-1" aria-hidden="true">Use the study chat, notes, quizzes, flashcards, planner, and file-based tools to support different parts of your learning routine.</div>
-          </article>
-          <article class="faq-item" data-aos="fade-up" data-aos-delay="60">
-            <button class="faq-q" id="faq-question-2" type="button" aria-expanded="false" aria-controls="faq-answer-2">
-              <span>Which AI models are available?</span><i class="fas fa-chevron-down" aria-hidden="true"></i>
-            </button>
-            <div class="faq-a" id="faq-answer-2" role="region" aria-labelledby="faq-question-2" aria-hidden="true">The product offers three AI tiers. The available model and capabilities can depend on your plan and the task you’re doing.</div>
-          </article>
-          <article class="faq-item" data-aos="fade-up" data-aos-delay="120">
-            <button class="faq-q" id="faq-question-3" type="button" aria-expanded="false" aria-controls="faq-answer-3">
-              <span>Can I use it on my phone?</span><i class="fas fa-chevron-down" aria-hidden="true"></i>
-            </button>
-            <div class="faq-a" id="faq-answer-3" role="region" aria-labelledby="faq-question-3" aria-hidden="true">The web workspace is responsive, and AI Notebook also has a Telegram bot for study conversations.</div>
-          </article>
-          <article class="faq-item" data-aos="fade-up" data-aos-delay="180">
-            <button class="faq-q" id="faq-question-4" type="button" aria-expanded="false" aria-controls="faq-answer-4">
-              <span>Can I try it before creating an account?</span><i class="fas fa-chevron-down" aria-hidden="true"></i>
-            </button>
-            <div class="faq-a" id="faq-answer-4" role="region" aria-labelledby="faq-question-4" aria-hidden="true">Use “Try as a guest” to open the guest learning flow. Create an account from Sign Up if you’re ready to continue.</div>
-          </article>
-          <article class="faq-item" data-aos="fade-up" data-aos-delay="240">
-            <button class="faq-q" id="faq-question-5" type="button" aria-expanded="false" aria-controls="faq-answer-5">
-              <span>Can AI-generated material be wrong?</span><i class="fas fa-chevron-down" aria-hidden="true"></i>
-            </button>
-            <div class="faq-a" id="faq-answer-5" role="region" aria-labelledby="faq-question-5" aria-hidden="true">Yes. AI responses can make mistakes, so check important explanations and study notes against your course materials.</div>
-          </article>
+        <div class="cl-system-card cl-mindmap-card">
+          <span class="cl-system-number">05</span>
+          <div class="cl-system-copy">
+            <h3>Mind maps</h3>
+            <p>Connect the ideas hiding between the lines.</p>
+          </div>
+          <div class="cl-mindmap-demo">
+            <span class="cl-mind-line one"></span>
+            <span class="cl-mind-line two"></span>
+            <span class="cl-mind-line three"></span>
+            <span class="cl-mind-node root">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M12 5a3 3 0 0 0-3 3 3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3-3z"/><path d="M12 5v14"/></svg>
+            </span>
+            <span class="cl-mind-node node-left">Ideas</span>
+            <span class="cl-mind-node node-right">Research</span>
+            <span class="cl-mind-node node-bottom">Next step</span>
+          </div>
         </div>
       </div>
+    </section>
+
+    <!-- Invite / CTA -->
+    <section class="cl-invite" id="workspace">
+      <div class="cl-invite-orb orb-one" aria-hidden="true"></div>
+      <div class="cl-invite-orb orb-two" aria-hidden="true"></div>
+      <span class="cl-logo large"><img src="/assets/logo.png" alt="AI Notebook" /></span>
+      <div class="cl-section-kicker">Your next clear thought</div>
+      <h2>Start with the<br /><span>unfinished idea.</span></h2>
+      <p>The workspace is ready when you are.</p>
+      <a class="cl-cta" href="/signup">Open AI Notebook
+        <svg class="cl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+      </a>
     </section>
   </main>
 
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-copy">
-        <a class="brand" href="/" aria-label="AI Notebook home">
-          <span class="logo"><img src="/assets/logo.png" alt="" class="logo-img" /></span>
-          <span>AI <span class="grad-text">Notebook</span></span>
-        </a>
-        <p>One workspace for asking, making study material, and practising what you learn.</p>
-      </div>
-      <nav class="footer-links" aria-label="Footer navigation">
-        <a href="#features">Features</a>
-        <a href="#how">How it works</a>
-        <a href="#faq">FAQ</a>
-        <a href="/login">Sign in</a>
-        <a href="/signup">Create account</a>
-      </nav>
+  <!-- Footer -->
+  <footer class="cl-footer" role="contentinfo">
+    <a class="cl-brand" href="/">
+      <span class="cl-logo"><img src="/assets/logo.png" alt="AI Notebook logo" /></span>
+      <span>AI <em>Notebook</em></span>
+    </a>
+    <span>Think clearly. Create freely.</span>
+    <div>
+      <a href="/dashboard">Workspace</a>
+      <a href="#features">Features</a>
+      <a href="/login">Sign in</a>
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
-  <script>
-    (function () {
-      if (window.AOS) {
-        AOS.init({
-          duration: 400,
-          easing: 'ease-out-cubic',
-          once: true,
-          offset: 60,
-          disable: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        });
-      }
-    })();
-  </script>
-  <script src="/js/config.js"></script>
-  <script src="/js/main.js"></script>
+  <!-- Cinematic landing page JS -->
+  <script src="/js/cinematic-landing.js"></script>
   <script src="/js/pwa.js"></script>
 </body>
 </html>
