@@ -2,6 +2,8 @@
    Scoped under .cinematic-landing to stay isolated from existing dashboard/auth styles.
    Ported from the AINotebook1 landing source with class-prefix renames. */
 
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
 body.cinematic-landing {
   margin: 0;
   color-scheme: dark;
@@ -59,7 +61,6 @@ body.cinematic-landing {
 .pwa-net-banner.show { transform: translateY(0); }
 .pwa-net-banner.offline { background: #be3157; }
 .pwa-net-banner.online { background: #16795f; }
-
 
 /* Canvas video background */
 .cl-video-bg {

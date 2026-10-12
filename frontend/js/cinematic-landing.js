@@ -51,6 +51,7 @@
       }
     });
 
+    // Close menu on Escape and return focus to the toggle button
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && nav.classList.contains('menu-open')) closeMenu(true);
     });
