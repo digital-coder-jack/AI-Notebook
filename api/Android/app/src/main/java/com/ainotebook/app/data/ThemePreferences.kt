@@ -6,7 +6,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import java.io.IOException
 
 private val Context.themeStore by preferencesDataStore(name = "ai_notebook_prefs")
 
@@ -30,22 +32,28 @@ class ThemePreferences(private val context: Context) {
         private val ACCENT_KEY = stringPreferencesKey("pref_accent_tone")
     }
 
-    val themeMode: Flow<ThemeMode> = context.themeStore.data.map { prefs ->
-        when (prefs[THEME_KEY]) {
-            "LIGHT" -> ThemeMode.LIGHT
-            "DARK" -> ThemeMode.DARK
-            else -> ThemeMode.DARK // premium dark-first default, like Perplexity/Claude
+    val themeMode: Flow<ThemeMode> = context.themeStore.data
+        .catch { if (it is IOException) emit(androidx.datastore.preferences.core.emptyPreferences()) else throw it }
+        .map { prefs ->
+            when (prefs[THEME_KEY]) {
+                "LIGHT" -> ThemeMode.LIGHT
+                "DARK" -> ThemeMode.DARK
+                "SYSTEM" -> ThemeMode.SYSTEM
+                else -> ThemeMode.DARK // premium dark-first default
+            }
         }
-    }
 
-    val dynamicColor: Flow<Boolean> =
-        context.themeStore.data.map { it[DYNAMIC_KEY] ?: false }
+    val dynamicColor: Flow<Boolean> = context.themeStore.data
+        .catch { if (it is IOException) emit(androidx.datastore.preferences.core.emptyPreferences()) else throw it }
+        .map { it[DYNAMIC_KEY] ?: false }
 
-    val hapticsEnabled: Flow<Boolean> =
-        context.themeStore.data.map { it[HAPTICS_KEY] ?: true }
+    val hapticsEnabled: Flow<Boolean> = context.themeStore.data
+        .catch { if (it is IOException) emit(androidx.datastore.preferences.core.emptyPreferences()) else throw it }
+        .map { it[HAPTICS_KEY] ?: true }
 
-    val aiModel: Flow<String> =
-        context.themeStore.data.map { it[MODEL_KEY] ?: "auto" }
+    val aiModel: Flow<String> = context.themeStore.data
+        .catch { if (it is IOException) emit(androidx.datastore.preferences.core.emptyPreferences()) else throw it }
+        .map { it[MODEL_KEY] ?: "auto" }
 
     val accentTone: Flow<AccentTone> = context.themeStore.data.map {
         when (it[ACCENT_KEY]) {

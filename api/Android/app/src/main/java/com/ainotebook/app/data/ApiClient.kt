@@ -37,7 +37,13 @@ object ApiClient {
 
     fun init(session: SessionStore) {
         val authInterceptor = Interceptor { chain ->
-            val token = runBlocking { session.token() }
+            // DataStore access via runBlocking is generally safe in OkHttp Interceptors 
+            // as they run on background threads. Added try-catch for extra safety.
+            val token = try {
+                runBlocking { session.token() }
+            } catch (e: Exception) {
+                null
+            }
             val builder = chain.request().newBuilder()
             if (!token.isNullOrBlank()) {
                 builder.addHeader("Authorization", "Bearer $token")

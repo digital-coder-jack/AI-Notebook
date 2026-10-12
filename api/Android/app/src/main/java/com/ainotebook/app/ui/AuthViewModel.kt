@@ -7,6 +7,7 @@ import com.ainotebook.app.data.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class AuthUiState(
@@ -23,24 +24,24 @@ class AuthViewModel(private val repo: Repository) : ViewModel() {
     val userFlow = repo.userFlow
 
     fun clearError() {
-        _state.value = _state.value.copy(error = null)
+        _state.update { it.copy(error = null) }
     }
 
     private fun run(block: suspend () -> User) {
         viewModelScope.launch {
-            _state.value = AuthUiState(loading = true)
+            _state.update { AuthUiState(loading = true) }
             try {
                 block()
-                _state.value = AuthUiState(success = true)
+                _state.update { AuthUiState(success = true) }
             } catch (e: Exception) {
-                _state.value = AuthUiState(error = friendly(e))
+                _state.update { AuthUiState(error = friendly(e)) }
             }
         }
     }
 
     fun login(identifier: String, password: String) {
         if (identifier.isBlank() || password.isBlank()) {
-            _state.value = AuthUiState(error = "Please enter your email/username and password.")
+            _state.update { AuthUiState(error = "Please enter your email/username and password.") }
             return
         }
         run { repo.login(identifier.trim(), password) }
@@ -52,13 +53,13 @@ class AuthViewModel(private val repo: Repository) : ViewModel() {
 ) {
     when {
         name.isBlank() || username.isBlank() || email.isBlank() ->
-            _state.value = AuthUiState(error = "Please fill in all fields.")
-        !email.contains("@") || !email.contains(".") ->  // ← ADD THIS
-            _state.value = AuthUiState(error = "Please enter a valid email address.")
+            _state.update { AuthUiState(error = "Please fill in all fields.") }
+        !email.contains("@") || !email.contains(".") ->
+            _state.update { AuthUiState(error = "Please enter a valid email address.") }
         password.length < 6 ->
-            _state.value = AuthUiState(error = "Password must be at least 6 characters.")
+            _state.update { AuthUiState(error = "Password must be at least 6 characters.") }
         password != confirm ->
-            _state.value = AuthUiState(error = "Passwords do not match.")
+            _state.update { AuthUiState(error = "Passwords do not match.") }
         else -> run {
             repo.signup(name.trim(), username.trim(), email.trim(), password, confirm)
         }
