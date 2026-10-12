@@ -22,23 +22,38 @@
     var nav = document.querySelector('.cl-nav');
     if (!button || !nav) return;
 
+    function closeMenu(restoreFocus) {
+      nav.classList.remove('menu-open');
+      button.setAttribute('aria-expanded', 'false');
+      if (restoreFocus) button.focus();
+    }
+
     button.addEventListener('click', function () {
-      nav.classList.toggle('menu-open');
-      var expanded = nav.classList.contains('menu-open');
-      button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      var shouldOpen = !nav.classList.contains('menu-open');
+      if (shouldOpen) {
+        nav.classList.add('menu-open');
+        button.setAttribute('aria-expanded', 'true');
+      } else {
+        closeMenu(false);
+      }
     });
 
     // Close menu when a link is clicked
     var links = nav.querySelectorAll('a');
     links.forEach(function (link) {
-      link.addEventListener('click', function () { nav.classList.remove('menu-open'); });
+      link.addEventListener('click', function () { closeMenu(false); });
     });
 
     // Close menu on outside click
     document.addEventListener('click', function (e) {
       if (!nav.contains(e.target) && !button.contains(e.target)) {
-        nav.classList.remove('menu-open');
+        closeMenu(false);
       }
+    });
+
+    // Close menu on Escape and return focus to the toggle button
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && nav.classList.contains('menu-open')) closeMenu(true);
     });
   }
 
@@ -52,6 +67,10 @@
         var target = document.querySelector(href);
         if (!target) return;
         e.preventDefault();
+        if (href === '#main-content') {
+          target.focus({ preventScroll: true });
+          window.history.replaceState(null, '', href);
+        }
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
@@ -81,7 +100,7 @@
       height = canvas.clientHeight;
       canvas.width = width * dpr;
       canvas.height = height * dpr;
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     function Particle() {
@@ -128,16 +147,9 @@
       }
     }
 
-    var lastGradient = 0;
-
     function animate(time) {
       // Clear with subtle trail effect
       ctx.clearRect(0, 0, width, height);
-
-      // Draw flowing gradient waves (every 2 frames for performance)
-      if (time - lastGradient > 32) {
-        lastGradient = time;
-      }
 
       // Animated radial gradient orbs
       var t = time * 0.0002;
@@ -166,16 +178,16 @@
         particles[i].draw();
       }
 
-      requestAnimationFrame(animate);
+      if (animId !== null) animId = requestAnimationFrame(animate);
     }
 
     // Visibility-based pause for performance
     var animId = null;
     function startAnim() {
-      if (!animId) animId = requestAnimationFrame(animate);
+      if (animId === null) animId = requestAnimationFrame(animate);
     }
     function stopAnim() {
-      if (animId) { cancelAnimationFrame(animId); animId = null; }
+      if (animId !== null) { cancelAnimationFrame(animId); animId = null; }
     }
 
     // Pause when tab is hidden
