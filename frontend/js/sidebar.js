@@ -94,7 +94,10 @@
   var isCollapsed = savedCollapse === null ? true : savedCollapse === 'true';
   if (isCollapsed) aside.classList.add('collapsed');
 
-  /* ---- Render shell ---- */
+  /* ---- Render shell ----
+     This is the actual AINotebook1 workspace shell, adapted to the original
+     page/router contract. Navigation hrefs and auth controls remain owned by
+     the original application. */
   aside.setAttribute('role', 'complementary');
   aside.innerHTML =
     '<div class="side-head">' +
@@ -110,8 +113,17 @@
         '<span class="cb-label">' + (isCollapsed ? 'Expand' : 'Collapse') + '</span>' +
       '</button>' +
     '</div>' +
+    '<div class="workspace-switcher" aria-label="Current workspace">' +
+      '<span class="workspace-avatar">' + escapeHtml((nameForWorkspace(user) || 'P').charAt(0).toUpperCase()) + '</span>' +
+      '<span class="workspace-copy"><b>Personal space</b><small>' + ((!SS.isAuthed() || !!(user && user.is_guest)) ? 'Free workspace' : 'Private workspace') + '</small></span>' +
+      '<i class="fas fa-chevron-down" aria-hidden="true"></i>' +
+    '</div>' +
     '<nav class="side-nav" role="navigation" aria-label="Main navigation">' + navHtml + '</nav>' +
     '<div class="side-foot" id="sideFoot">' + footerHtml(user) + '</div>';
+
+  function nameForWorkspace(u) {
+    return (u && (u.name || u.username)) || 'Personal';
+  }
 
   /* ---- Collapse / expand ---- */
   var collBtn = document.getElementById('sidebarCollapse');

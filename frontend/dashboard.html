@@ -48,6 +48,7 @@
   <link rel="stylesheet" href="/css/onboarding.css" />
   <link rel="stylesheet" href="/css/rescue.css" />
   <link rel="stylesheet" href="/css/theme.css" />
+  <link rel="stylesheet" href="/css/full-redesign-ui.css" />
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -63,9 +64,9 @@
     <main class="content" id="main-content" tabindex="-1">
       <div class="topbar">
         <div>
-          <p class="eyebrow">PERSONAL KNOWLEDGE DESK</p>
-          <h1>Welcome back, <span id="userName">there</span> <span class="wave" aria-hidden="true">👋</span></h1>
-          <p class="sub" id="dashSubtitle">Pick up a thread, capture a thought, or start a new line of study.</p>
+          <p class="eyebrow">PERSONAL THINKING SPACE</p>
+          <h1>Good morning, <span id="userName">there</span> <span class="wave" aria-hidden="true">👋</span></h1>
+          <p class="sub" id="dashSubtitle">A clear mind starts with a place to put everything.</p>
         </div>
         <div class="topbar-actions">
           <button type="button" class="search-trigger" data-cmdk aria-label="Search or jump to (Ctrl or Cmd + K)">
@@ -78,17 +79,29 @@
         </div>
       </div>
 
-      <!-- Learn anything launcher -->
+      <!-- AINotebook1 hero launcher, backed by the original topic flow -->
       <section class="learn-launcher glass" id="learn-launcher" aria-labelledby="ll-title" data-reveal>
         <div class="ll-copy">
-          <h2 id="ll-title"><i class="fas fa-compass" aria-hidden="true"></i> Open a new knowledge thread</h2>
-          <p>Give a topic a starting point and AI Notebook will help you turn it into notes, practice, and a learning path.</p>
+          <p class="eyebrow">YOUR THINKING COMPANION</p>
+          <h2 id="ll-title"><i class="fas fa-sparkles" aria-hidden="true"></i> What are you working through today?</h2>
+          <p>Start with a question, an idea, or a messy thought. AI Notebook helps you find the shape inside it.</p>
         </div>
         <form class="ll-form" id="topicForm" role="search">
           <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
           <input type="text" id="topicInput" name="topic" aria-label="Topic to learn" placeholder="e.g. Machine Learning, Quantum Computing, World War II…" maxlength="200" autocomplete="off" enterkeyhint="go" required />
           <button type="submit" class="btn" id="topicGo">Start learning <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
         </form>
+      </section>
+
+      <!-- Quick actions from AINotebook1; each action uses an original route. -->
+      <section class="quick-actions-section dash-section" aria-labelledby="quick-actions-title" data-reveal>
+        <div class="section-title"><div><p class="eyebrow">QUICK ACTIONS</p><h2 id="quick-actions-title">Make something useful</h2></div></div>
+        <div class="quick-actions" data-stagger>
+          <a class="qa-card glass" href="/chat"><span class="qa-icon"><i class="fas fa-comments" aria-hidden="true"></i></span><b>New conversation</b><span>Think out loud with AI</span><i class="fas fa-arrow-up-right-from-square qa-arrow" aria-hidden="true"></i></a>
+          <a class="qa-card glass" href="/tools#notes"><span class="qa-icon amber"><i class="fas fa-note-sticky" aria-hidden="true"></i></span><b>Capture a note</b><span>Save a thought before it wanders</span><i class="fas fa-arrow-up-right-from-square qa-arrow" aria-hidden="true"></i></a>
+          <a class="qa-card glass" href="/tools#summarizer"><span class="qa-icon blue"><i class="fas fa-file-lines" aria-hidden="true"></i></span><b>Clarify a document</b><span>Turn source material into clarity</span><i class="fas fa-arrow-up-right-from-square qa-arrow" aria-hidden="true"></i></a>
+          <a class="qa-card glass" href="/topic"><span class="qa-icon green"><i class="fas fa-route" aria-hidden="true"></i></span><b>Build a learning path</b><span>Go from curious to capable</span><i class="fas fa-arrow-up-right-from-square qa-arrow" aria-hidden="true"></i></a>
+        </div>
       </section>
 
       <!-- Stats -->

@@ -1,0 +1,460 @@
+/*
+ * AI Notebook — full application redesign layer
+ *
+ * Visual language adapted from AINotebook1: calm dark workspace, soft glass
+ * surfaces, rose/indigo accents, generous hierarchy, compact controls, and
+ * responsive layouts. This file deliberately contains no application logic;
+ * existing FastAPI routes, page markup, auth helpers, and API clients remain
+ * authoritative.
+ */
+
+:root {
+  --ui-bg: #0f1016;
+  --ui-bg-deep: #0b0c11;
+  --ui-surface: rgba(25, 27, 36, .88);
+  --ui-surface-strong: #181a23;
+  --ui-surface-soft: rgba(255, 255, 255, .045);
+  --ui-border: rgba(255, 255, 255, .095);
+  --ui-border-strong: rgba(255, 255, 255, .16);
+  --ui-ink: #f1f2f6;
+  --ui-muted: #9297a8;
+  --ui-subtle: #6f7587;
+  --ui-accent: #d978a7;
+  --ui-accent-2: #756be8;
+  --ui-grad: linear-gradient(135deg, #ee8bb6 0%, #9b73dc 52%, #667cf0 100%);
+  --ui-radius-sm: 10px;
+  --ui-radius-md: 14px;
+  --ui-radius-lg: 20px;
+  --ui-shadow: 0 20px 65px rgba(0, 0, 0, .25);
+}
+
+body:has(.app-shell), body:has(.chat-layout) {
+  background: var(--ui-bg-deep);
+  color: var(--ui-ink);
+}
+
+.app-shell {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 78% -10%, rgba(119, 102, 232, .13), transparent 31rem),
+    radial-gradient(circle at 10% 100%, rgba(217, 120, 167, .08), transparent 28rem),
+    var(--ui-bg);
+}
+.app-shell .content {
+  background: transparent;
+}
+.app-shell .topbar {
+  min-height: 76px;
+  border-bottom: 1px solid var(--ui-border);
+  background: rgba(15, 16, 22, .78);
+  backdrop-filter: blur(18px);
+}
+.app-shell .content > .topbar,
+.app-shell .content > .page-wrap,
+.app-shell .content > .dash-section,
+.app-shell .content > section {
+  position: relative;
+  z-index: 1;
+}
+.app-shell .sidebar {
+  background: rgba(16, 17, 23, .94);
+  border-right: 1px solid var(--ui-border);
+  box-shadow: 12px 0 45px rgba(0, 0, 0, .12);
+}
+.app-shell .side-head {
+  padding: 20px 14px 16px;
+}
+.app-shell .workspace-switcher {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 12px 13px;
+  padding: 10px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background: rgba(255, 255, 255, .035);
+  color: var(--ui-muted);
+}
+.app-shell .workspace-avatar {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 9px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  background: var(--ui-grad);
+}
+.app-shell .workspace-copy {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.app-shell .workspace-copy b {
+  overflow: hidden;
+  color: var(--ui-ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-shell .workspace-copy small {
+  color: var(--ui-subtle);
+  font-size: 9px;
+}
+.app-shell .workspace-switcher > i {
+  color: var(--ui-subtle);
+  font-size: 10px;
+}
+.app-shell .sidebar.collapsed .workspace-switcher {
+  justify-content: center;
+  margin-inline: 8px;
+  padding-inline: 6px;
+}
+.app-shell .sidebar.collapsed .workspace-copy,
+.app-shell .sidebar.collapsed .workspace-switcher > i {
+  display: none;
+}
+.app-shell .side-nav a {
+  border-radius: 12px;
+  color: var(--ui-muted);
+  margin: 3px 8px;
+  min-height: 42px;
+  transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+.app-shell .side-nav a:hover {
+  color: var(--ui-ink);
+  background: var(--ui-surface-soft);
+  transform: translateX(2px);
+}
+.app-shell .side-nav a.active {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(147, 124, 232, .23), rgba(217, 120, 167, .08));
+  border: 1px solid rgba(151, 130, 235, .28);
+  box-shadow: 0 8px 22px rgba(91, 75, 193, .12);
+}
+.app-shell .side-nav a.active::before {
+  width: 3px;
+  border-radius: 3px;
+  background: var(--ui-grad);
+}
+.app-shell .nav-section {
+  color: #777d90;
+  letter-spacing: .13em;
+  font-size: 9px;
+  font-weight: 800;
+}
+.app-shell .side-foot {
+  border-top-color: var(--ui-border);
+}
+.app-shell .side-user-card,
+.app-shell .side-theme {
+  border-radius: var(--ui-radius-sm);
+}
+.app-shell .side-user-trigger:hover,
+.app-shell .side-theme:hover {
+  background: var(--ui-surface-soft);
+}
+
+/* Dashboard: AINotebook1's workspace-led composition. */
+.app-shell .content > .dash-section,
+.app-shell .content > .dash-grid,
+.app-shell .content > .dash-grid-2,
+.app-shell .content > .stats-grid,
+.app-shell .content > .learn-launcher,
+.app-shell .content > .section-title {
+  width: min(1180px, calc(100% - 48px));
+  margin-inline: auto;
+}
+.app-shell .learn-launcher {
+  border: 1px solid var(--ui-border-strong);
+  border-radius: var(--ui-radius-lg);
+  background:
+    radial-gradient(circle at 85% 25%, rgba(116, 104, 232, .22), transparent 25%),
+    linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+  box-shadow: var(--ui-shadow);
+}
+.app-shell .learn-launcher .ll-copy h2,
+.app-shell .section-title h2,
+.app-shell .dash-section h2 {
+  letter-spacing: -.035em;
+}
+.app-shell .ll-form,
+.app-shell .ll-form input,
+.app-shell .search-trigger {
+  border-radius: var(--ui-radius-sm);
+}
+.app-shell .quick-actions-section {
+  margin-top: 20px;
+}
+.app-shell .quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.app-shell .qa-card {
+  position: relative;
+  display: flex;
+  min-height: 132px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 17px;
+  color: var(--ui-ink);
+  text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+.app-shell .qa-card b {
+  margin-top: 4px;
+  font-size: 13px;
+  letter-spacing: -.015em;
+}
+.app-shell .qa-card > span:not(.qa-icon) {
+  color: var(--ui-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+.app-shell .qa-icon {
+  display: grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  border-radius: 10px;
+  color: #c1b6ff;
+  background: rgba(132, 115, 230, .16);
+}
+.app-shell .qa-icon.amber { color: #f3bd7b; background: rgba(243, 189, 123, .14); }
+.app-shell .qa-icon.blue { color: #83b8ff; background: rgba(131, 184, 255, .14); }
+.app-shell .qa-icon.green { color: #78d2ad; background: rgba(120, 210, 173, .14); }
+.app-shell .qa-arrow {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+  color: var(--ui-subtle);
+  font-size: 11px;
+}
+.app-shell .qa-card:hover {
+  background: linear-gradient(145deg, rgba(151, 130, 235, .12), rgba(255, 255, 255, .03));
+}
+.app-shell .ll-form {
+  border-color: rgba(151, 130, 235, .42);
+  background: rgba(15, 16, 24, .62);
+  box-shadow: 0 0 0 4px rgba(126, 111, 226, .055);
+}
+.app-shell .stat-card,
+.app-shell .panel.glass,
+.app-shell .qa-card,
+.app-shell .workspace-card,
+.app-shell .topic-card,
+.app-shell .ach-card {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.022));
+  box-shadow: 0 12px 35px rgba(0, 0, 0, .14);
+}
+.app-shell .stat-card:hover,
+.app-shell .qa-card:hover,
+.app-shell .workspace-card:hover,
+.app-shell .topic-card:hover {
+  border-color: rgba(151, 130, 235, .48);
+  transform: translateY(-3px);
+}
+.app-shell .stat-card .ic,
+.app-shell .qa-card .ic,
+.app-shell .workspace-card .ic {
+  background: rgba(151, 130, 235, .14);
+  color: #b9aaff;
+  border-radius: 11px;
+}
+.app-shell .dash-grid,
+.app-shell .dash-grid-2 {
+  gap: 14px;
+}
+.app-shell .panel-head,
+.app-shell .section-title {
+  border-color: var(--ui-border);
+}
+.app-shell .progress-ring {
+  filter: drop-shadow(0 0 14px rgba(136, 119, 232, .25));
+}
+.app-shell .guest-banner {
+  border-radius: var(--ui-radius-md) !important;
+  background: linear-gradient(90deg, rgba(217, 120, 167, .13), rgba(116, 104, 232, .05)) !important;
+}
+
+/* Tools: quiet tab bar and card-based generators. */
+.app-shell .tools-tabs {
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background: rgba(255, 255, 255, .025);
+}
+.app-shell .tools-tabs button {
+  border-color: transparent;
+  border-radius: 10px;
+  color: var(--ui-muted);
+  background: transparent;
+  min-height: 40px;
+}
+.app-shell .tools-tabs button:hover {
+  color: var(--ui-ink);
+  background: var(--ui-surface-soft);
+}
+.app-shell .tools-tabs button.active {
+  background: var(--ui-grad);
+  box-shadow: 0 8px 22px rgba(112, 96, 215, .25);
+}
+.app-shell .tool-card {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-lg);
+  background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.022));
+  box-shadow: var(--ui-shadow);
+}
+.app-shell .tool-card h2 {
+  letter-spacing: -.025em;
+}
+.app-shell .tool-form input,
+.app-shell .tool-form textarea,
+.app-shell .tool-form select,
+.app-shell .dropzone,
+.app-shell .result,
+.app-shell .quiz-q,
+.app-shell .saved-item,
+.app-shell .flashcard-face {
+  border-color: var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background: rgba(255, 255, 255, .035);
+}
+.app-shell .tool-form input:focus,
+.app-shell .tool-form textarea:focus,
+.app-shell .tool-form select:focus {
+  border-color: var(--ui-accent-2);
+  box-shadow: 0 0 0 3px rgba(117, 107, 232, .18);
+}
+
+/* Settings/profile: redesigned section navigation and cards. */
+.app-shell .settings-shell {
+  gap: 16px;
+}
+.app-shell .settings-nav,
+.app-shell .set-card {
+  border-color: var(--ui-border);
+  border-radius: var(--ui-radius-lg);
+  background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.022));
+  box-shadow: var(--ui-shadow);
+}
+.app-shell .settings-nav .snav-btn {
+  border-radius: 10px;
+  color: var(--ui-muted);
+}
+.app-shell .settings-nav .snav-btn:hover {
+  color: var(--ui-ink);
+  background: var(--ui-surface-soft);
+}
+.app-shell .settings-nav .snav-btn.active {
+  color: #fff;
+  background: rgba(132, 115, 230, .16);
+}
+.app-shell .set-field input,
+.app-shell .set-field textarea,
+.app-shell .set-field select {
+  border-color: var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background: rgba(255, 255, 255, .035);
+}
+.app-shell .set-field input:focus,
+.app-shell .set-field textarea:focus,
+.app-shell .set-field select:focus {
+  border-color: var(--ui-accent-2);
+  box-shadow: 0 0 0 3px rgba(117, 107, 232, .18);
+}
+.app-shell .avatar-preview {
+  background: var(--ui-grad);
+  box-shadow: 0 12px 32px rgba(120, 96, 213, .25);
+}
+
+/* Topic workspace: sticky glass tabs and focused artifact surfaces. */
+.app-shell .topic-tabs {
+  border-color: var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background: rgba(25, 27, 36, .78);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, .16);
+}
+.app-shell .topic-tab {
+  border-radius: 10px;
+  color: var(--ui-muted);
+}
+.app-shell .topic-tab:hover {
+  color: var(--ui-ink);
+  background: var(--ui-surface-soft);
+}
+.app-shell .topic-tab.active {
+  background: var(--ui-grad);
+  box-shadow: 0 7px 20px rgba(112, 96, 215, .25);
+}
+.app-shell .md-article,
+.app-shell .gen-empty,
+.app-shell .mindmap-shell,
+.app-shell .rm-level {
+  border-color: var(--ui-border);
+  border-radius: var(--ui-radius-lg);
+  background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.022));
+  box-shadow: var(--ui-shadow);
+}
+
+/* The standalone chat shell uses the same visual language. */
+.chat-layout {
+  --chat-panel: rgba(25, 27, 36, .9);
+  --chat-line: var(--ui-border);
+  background:
+    radial-gradient(circle at 75% 0%, rgba(116, 104, 232, .13), transparent 32rem),
+    var(--ui-bg-deep);
+}
+.chat-side {
+  background: rgba(16, 17, 23, .94);
+  border-right-color: var(--ui-border);
+}
+.chat-side-head .btn,
+.send-btn {
+  background: var(--ui-grad);
+  border-color: rgba(151, 130, 235, .38);
+}
+.chat-list-item.active {
+  background: rgba(132, 115, 230, .16);
+  border-color: rgba(151, 130, 235, .35);
+}
+.chat-top,
+.composer {
+  background: rgba(15, 16, 22, .78);
+  border-color: var(--ui-border);
+}
+.composer-inner {
+  border-color: rgba(151, 130, 235, .38);
+  background: rgba(25, 27, 36, .92);
+}
+
+@media (max-width: 900px) {
+  .app-shell .content > .dash-section,
+  .app-shell .content > .dash-grid,
+  .app-shell .content > .dash-grid-2,
+  .app-shell .content > .stats-grid,
+  .app-shell .content > .learn-launcher,
+  .app-shell .content > .section-title {
+    width: min(100% - 30px, 720px);
+  }
+  .app-shell .quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .app-shell .quick-actions { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .side-nav a,
+  .app-shell .stat-card,
+  .app-shell .qa-card,
+  .app-shell .workspace-card,
+  .app-shell .topic-card { transition: none; }
+}

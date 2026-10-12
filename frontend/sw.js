@@ -10,7 +10,7 @@
    trigger the in-app "update available" notification.
    ===================================================================== */
 
-const CACHE_VERSION = 'ss-cache-v4';
+const CACHE_VERSION = 'ss-cache-v6';
 const OFFLINE_URL = '/offline.html';
 
 const APP_SHELL = [
@@ -22,6 +22,7 @@ const APP_SHELL = [
   '/css/premium-design-system.css',
   '/css/style.css',
   '/css/responsive.css',
+  '/css/full-redesign-ui.css',
   '/js/config.js',
   '/js/app.js',
   '/js/pwa.js',
