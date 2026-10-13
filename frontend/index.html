@@ -12,22 +12,7 @@
   <link rel="icon" type="image/png" href="/assets/logo.png" />
   <link rel="apple-touch-icon" href="/assets/logo-192.png" />
   <link rel="manifest" href="/manifest.json" />
-  <script>
-    /* Preserve the shared theme preference behavior used by the existing app. */
-    (function () {
-      try {
-        var root = document.documentElement;
-        root.setAttribute('data-theme', localStorage.getItem('ss_theme') || 'dark');
-        root.setAttribute('data-accent', localStorage.getItem('ss_accent') || 'violet');
-        root.setAttribute('data-font', localStorage.getItem('ss_font') || 'md');
-      } catch (error) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-    })();
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/workspace-redesign.css" />
 
   <!-- Cinematic landing page styles (isolated from existing app CSS) -->
   <link rel="stylesheet" href="/css/cinematic-landing.css" />
@@ -35,10 +20,11 @@
   <!-- Shared app config + auth helpers (SS module) -->
   <script src="/js/config.js"></script>
   <script src="/js/app.js"></script>
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta property="og:image" content="https://bolt.new/static/og_default.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
 </head>
 <body class="cinematic-landing">
-  <a class="cl-skip-link" href="#main-content">Skip to main content</a>
 
   <!-- Canvas-based animated background (video fallback) -->
   <div class="cl-video-fallback" aria-hidden="true"></div>
@@ -53,7 +39,7 @@
       <span class="cl-logo"><img src="/assets/logo.png" alt="AI Notebook logo" /></span>
       <span>AI <em>Notebook</em></span>
     </a>
-    <nav class="cl-links" id="public-navigation" aria-label="Public navigation">
+    <nav class="cl-links" aria-label="Public navigation">
       <a href="#features">Features</a>
       <a href="#workflow">How it works</a>
       <a href="#workspace">Workspace</a>
@@ -64,12 +50,12 @@
         <svg class="cl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
       </a>
     </div>
-    <button class="cl-menu-button" type="button" aria-label="Open navigation" aria-controls="public-navigation" aria-expanded="false">
+    <button class="cl-menu-button" type="button" aria-label="Open navigation" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
   </header>
 
-  <main id="main-content" tabindex="-1">
+  <main>
     <!-- Hero -->
     <section class="cl-hero" aria-labelledby="hero-title">
       <div class="cl-hero-noise" aria-hidden="true"></div>
@@ -101,6 +87,7 @@
         </div>
       </div>
 
+      <!-- Product preview -->
       <div class="cl-hero-product" aria-label="Illustration of the AI Notebook workspace">
         <div class="cl-product-shadow" aria-hidden="true"></div>
         <div class="cl-product-window">
@@ -124,7 +111,7 @@
             </aside>
             <div class="cl-mini-content">
               <div class="cl-mini-kicker">SATURDAY, 11 OCTOBER</div>
-              <div class="cl-mini-heading">Good morning, Jack</div>
+              <div class="cl-mini-heading">Good morning, Jordan</div>
               <div class="cl-mini-subheading">What are you working through today?</div>
               <div class="cl-mini-prompt">
                 <span>
@@ -155,6 +142,7 @@
           </div>
         </div>
 
+        <!-- Floating chips -->
         <div class="cl-floating-chip chip-top">
           <span class="chip-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M12 5a3 3 0 0 0-3 3 3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3-3z"/><path d="M12 5v14"/></svg>
@@ -170,12 +158,14 @@
       </div>
     </section>
 
+    <!-- Intro -->
     <section class="cl-intro" id="features">
       <div class="cl-section-kicker">A workspace for your whole mind</div>
       <h2>From scattered thoughts<br /><span>to clear direction.</span></h2>
       <p>Keep the raw idea. Ask better questions. See what connects. AI Notebook gives every stage of your thinking a place to land.</p>
     </section>
 
+    <!-- Feature: AI Chat -->
     <section class="cl-feature-story" id="workflow">
       <div class="cl-feature-inner">
         <div class="cl-feature-copy">
@@ -212,6 +202,7 @@
       </div>
     </section>
 
+    <!-- Feature: Smart Notes -->
     <section class="cl-feature-story reverse">
       <div class="cl-feature-inner">
         <div class="cl-feature-copy">
@@ -255,6 +246,7 @@
       </div>
     </section>
 
+    <!-- Feature: Topic Summaries -->
     <section class="cl-feature-story">
       <div class="cl-feature-inner">
         <div class="cl-feature-copy">
@@ -298,6 +290,7 @@
       </div>
     </section>
 
+    <!-- Systems section: Roadmaps + Mind Maps -->
     <section class="cl-systems">
       <div class="cl-section-kicker">A connected way to move forward</div>
       <h2>Your ideas do not live<br /><span>in separate boxes.</span></h2>
@@ -348,6 +341,7 @@
       </div>
     </section>
 
+    <!-- Invite / CTA -->
     <section class="cl-invite" id="workspace">
       <div class="cl-invite-orb orb-one" aria-hidden="true"></div>
       <div class="cl-invite-orb orb-two" aria-hidden="true"></div>
@@ -361,6 +355,7 @@
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="cl-footer" role="contentinfo">
     <a class="cl-brand" href="/">
       <span class="cl-logo"><img src="/assets/logo.png" alt="AI Notebook logo" /></span>
@@ -374,8 +369,7 @@
     </div>
   </footer>
 
+  <!-- Cinematic landing page JS -->
   <script src="/js/cinematic-landing.js"></script>
-  <script src="/js/main.js"></script>
-  <script src="/js/pwa.js"></script>
 </body>
 </html>
