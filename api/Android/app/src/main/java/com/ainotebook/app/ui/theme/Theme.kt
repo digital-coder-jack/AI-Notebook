@@ -20,77 +20,76 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.ainotebook.app.data.AccentTone
 
-// Brand palette shared with the Web workspace: calm indigo with restrained
-// violet/cyan accents rather than high-intensity neon surfaces.
-val Indigo = Color(0xFFA78BFA)
+val BrandOrange = Color(0xFFFF9547)
+val BrandPink = Color(0xFFF053A0)
+val BrandViolet = Color(0xFF9B5CF5)
+val BrandBlue = Color(0xFF4B7BF5)
+val Indigo = Color(0xFF9B5CF5)
 val Violet = Color(0xFFE879F9)
 val Cyan = Color(0xFF67E8F9)
 
-// Deep, calm space backgrounds — tuned for a premium ChatGPT/Gemini/Perplexity
-// assistant feel: near-black canvas with subtly elevated surfaces.
 val SpaceBg = Color(0xFF08070F)
-val SpaceSurface = Color(0xFF12101C)
-val SpaceCard = Color(0xFF1A1727)
-
-// Additional assistant-UI tokens (used by chat bubbles, dividers, hints).
-val AssistantBubble = Color(0xFF192437)
-val HairlineOutline = Color(0xFF2A3850)
-val MutedText = Color(0xFF9EABC0)
-
-// Light-mode equivalents so chat/dashboard stay legible when the user opts in.
-val LightBg = Color(0xFFF6F7FC)
+val SpaceSurface = Color(0xFF120E1E)
+val SpaceCard = Color(0xFF1C1730)
+val AssistantBubble = Color(0xFF181230)
+val HairlineOutline = Color(0xFF2A2050)
+val MutedText = Color(0xFF9A8EC0)
+val LightBg = Color(0xFFF5F4FC)
 val LightSurface = Color(0xFFFFFFFF)
-val LightCard = Color(0xFFEFF1FA)
-val LightHairline = Color(0xFFDDE1F0)
-val LightMuted = Color(0xFF5B647F)
+val LightCard = Color(0xFFEEEBFA)
+val LightHairline = Color(0xFFDDD9F0)
+val LightMuted = Color(0xFF6B617F)
 
 private val DarkColors = darkColorScheme(
-    primary = Indigo,
+    primary = BrandViolet,
     onPrimary = Color.White,
-    primaryContainer = Indigo.copy(alpha = 0.22f),
-    onPrimaryContainer = Color(0xFFD8DCFF),
-    secondary = Violet,
+    primaryContainer = BrandViolet.copy(alpha = 0.22f),
+    onPrimaryContainer = Color(0xFFE4D9FF),
+    secondary = BrandPink,
     onSecondary = Color.White,
+    secondaryContainer = BrandPink.copy(alpha = 0.18f),
+    onSecondaryContainer = Color.White,
     tertiary = Cyan,
     onTertiary = Color(0xFF062A30),
     background = SpaceBg,
-    onBackground = Color(0xFFEDEFFA),
+    onBackground = Color(0xFFEDEBFF),
     surface = SpaceSurface,
-    onSurface = Color(0xFFEDEFFA),
+    onSurface = Color(0xFFEDEBFF),
     surfaceVariant = SpaceCard,
     onSurfaceVariant = MutedText,
     surfaceContainer = SpaceCard,
-    surfaceContainerHigh = Color(0xFF1A2138),
+    surfaceContainerHigh = Color(0xFF231E3A),
     outline = HairlineOutline,
-    outlineVariant = Color(0xFF1C2440),
+    outlineVariant = Color(0xFF1C1638),
     error = Color(0xFFFB7185),
     onError = Color.White
 )
 
 private val LightColors = lightColorScheme(
-    primary = Indigo,
+    primary = BrandViolet,
     onPrimary = Color.White,
-    primaryContainer = Indigo.copy(alpha = 0.14f),
-    onPrimaryContainer = Color(0xFF2A2F66),
-    secondary = Violet,
+    primaryContainer = BrandViolet.copy(alpha = 0.14f),
+    onPrimaryContainer = Color(0xFF2A1F60),
+    secondary = BrandPink,
     onSecondary = Color.White,
+    secondaryContainer = BrandPink.copy(alpha = 0.12f),
+    onSecondaryContainer = Color(0xFF2A0F20),
     tertiary = Cyan,
     onTertiary = Color(0xFF062A30),
     background = LightBg,
-    onBackground = Color(0xFF131726),
+    onBackground = Color(0xFF130E26),
     surface = LightSurface,
-    onSurface = Color(0xFF131726),
+    onSurface = Color(0xFF130E26),
     surfaceVariant = LightCard,
     onSurfaceVariant = LightMuted,
     surfaceContainer = LightCard,
-    surfaceContainerHigh = Color(0xFFE7EAF6),
+    surfaceContainerHigh = Color(0xFFE4E0F6),
     outline = LightHairline,
-    outlineVariant = Color(0xFFE2E5F2),
+    outlineVariant = Color(0xFFE0DCF2),
     error = Color(0xFFDC2626),
     onError = Color.White
 )
 
-// Slightly tighter, more confident type scale (assistant-app feel).
 private val AppTypography = Typography().run {
     copy(
         displaySmall = displaySmall.copy(fontWeight = FontWeight.Bold, letterSpacing = (-0.6).sp),
@@ -119,9 +118,6 @@ fun AiNotebookTheme(
         darkTheme -> DarkColors.withAccent(accentTone, dark = true)
         else -> LightColors.withAccent(accentTone, dark = false)
     }
-
-    // Keep the system bars edge-to-edge and pick legible icon tints for the
-    // chosen scheme (premium native behaviour, never a "website" frame).
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -133,12 +129,7 @@ fun AiNotebookTheme(
             controller.isAppearanceLightNavigationBars = lightIcons
         }
     }
-
-    MaterialTheme(
-        colorScheme = colors,
-        typography = AppTypography,
-        content = content
-    )
+    MaterialTheme(colorScheme = colors, typography = AppTypography, content = content)
 }
 
 private fun androidx.compose.material3.ColorScheme.withAccent(
@@ -146,16 +137,16 @@ private fun androidx.compose.material3.ColorScheme.withAccent(
     dark: Boolean
 ): androidx.compose.material3.ColorScheme {
     val primary = when (tone) {
-        AccentTone.INDIGO -> Indigo
+        AccentTone.INDIGO -> BrandViolet
         AccentTone.CYAN -> Cyan
         AccentTone.VIOLET -> Violet
-        AccentTone.SUNSET -> Color(0xFFFF8A65)
+        AccentTone.SUNSET -> BrandOrange
     }
     return copy(
         primary = primary,
         primaryContainer = primary.copy(alpha = if (dark) 0.24f else 0.14f),
-        onPrimaryContainer = if (dark) Color.White else Color(0xFF20243F),
-        secondary = if (tone == AccentTone.SUNSET) Violet else primary,
-        tertiary = if (tone == AccentTone.CYAN) Indigo else Cyan
+        onPrimaryContainer = if (dark) Color.White else Color(0xFF20143F),
+        secondary = if (tone == AccentTone.SUNSET) BrandPink else primary,
+        tertiary = if (tone == AccentTone.CYAN) BrandViolet else Cyan
     )
 }
