@@ -15,27 +15,27 @@
   "categories": ["education", "productivity"],
   "icons": [
     {
-      "src": "/assets/logo-192.svg",
+      "src": "/assets/logo-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/logo-512.svg",
+      "src": "/assets/logo-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/logo-192.svg",
+      "src": "/assets/logo-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/assets/logo-512.svg",
+      "src": "/assets/logo-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ],
@@ -45,14 +45,14 @@
       "short_name": "Chat",
       "description": "Open the AI chat",
       "url": "/chat?source=pwa",
-      "icons": [{ "src": "/assets/logo-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+      "icons": [{ "src": "/assets/logo-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Study Tools",
       "short_name": "Tools",
       "description": "Notes, quizzes & flashcards",
       "url": "/tools?source=pwa",
-      "icons": [{ "src": "/assets/logo-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+      "icons": [{ "src": "/assets/logo-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ],
   "prefer_related_applications": false

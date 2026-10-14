@@ -99,7 +99,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   height: 31px !important;
   border-radius: 9px !important;
   overflow: hidden !important;
-  background: #fff !important;
+  background: transparent !important;
   flex: none !important;
   display: grid !important;
   place-items: center !important;
@@ -108,7 +108,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .sidebar .logo img, .sidebar .brand .logo img {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
 }
 
 .sidebar .brand-text, .sidebar .brand span:not(.logo) {

@@ -32,13 +32,13 @@ class MainActivity : ComponentActivity() {
         window.decorView.postDelayed({ keepSplash = false }, 350)
 
         setContent {
-            val mode by prefs.themeMode.collectAsStateWithLifecycle(initialValue = ThemeMode.DARK)
+            val mode by prefs.themeMode.collectAsStateWithLifecycle(initialValue = ThemeMode.LIGHT)
             val dynamic by prefs.dynamicColor.collectAsStateWithLifecycle(initialValue = false)
             val accent by prefs.accentTone.collectAsStateWithLifecycle(initialValue = com.ainotebook.app.data.AccentTone.INDIGO)
 
             val dark = when (mode) {
                 ThemeMode.LIGHT -> false
-                ThemeMode.DARK -> true
+                ThemeMode.DARK -> false
                 ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
             }
 

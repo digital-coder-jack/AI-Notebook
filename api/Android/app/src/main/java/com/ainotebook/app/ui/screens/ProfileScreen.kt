@@ -81,7 +81,7 @@ fun ProfileScreen(
     val scope = rememberCoroutineScope()
     val haptic = rememberHaptics()
 
-    val themeMode by prefs.themeMode.collectAsState(initial = ThemeMode.DARK)
+    val themeMode by prefs.themeMode.collectAsState(initial = ThemeMode.LIGHT)
     val dynamicColor by prefs.dynamicColor.collectAsState(initial = false)
     val haptics by prefs.hapticsEnabled.collectAsState(initial = true)
     val accent by prefs.accentTone.collectAsState(initial = AccentTone.INDIGO)

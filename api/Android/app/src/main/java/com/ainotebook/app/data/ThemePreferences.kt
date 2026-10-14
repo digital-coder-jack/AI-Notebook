@@ -34,7 +34,7 @@ class ThemePreferences(private val context: Context) {
         when (prefs[THEME_KEY]) {
             "LIGHT" -> ThemeMode.LIGHT
             "DARK" -> ThemeMode.DARK
-            else -> ThemeMode.DARK // premium dark-first default, like Perplexity/Claude
+            else -> ThemeMode.LIGHT // clean white default for the Android app
         }
     }
 
