@@ -50,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -64,6 +65,7 @@ import com.ainotebook.app.ui.components.ErrorBanner
 import com.ainotebook.app.ui.components.SpaceBackground
 import com.ainotebook.app.ui.components.rememberHaptics
 import com.ainotebook.app.ui.theme.BrandBlue
+import com.ainotebook.app.ui.theme.BrandOrange
 import com.ainotebook.app.ui.theme.BrandPink
 import com.ainotebook.app.ui.theme.BrandViolet
 import com.ainotebook.app.ui.theme.HairlineOutline

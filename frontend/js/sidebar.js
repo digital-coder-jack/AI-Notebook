@@ -104,6 +104,9 @@
         '</span>' +
         '<span class="brand-text">AI <span class="grad-text">Notebook</span></span>' +
       '</a>' +
+      '<button id="sidebarMobileClose" class="mobile-close" type="button" aria-label="Close navigation" title="Close navigation">' +
+        '<i class="fas fa-xmark" aria-hidden="true"></i>' +
+      '</button>' +
       '<button id="sidebarCollapse" class="collapse-btn" type="button" aria-label="Toggle sidebar" ' +
         'aria-expanded="' + (!isCollapsed) + '" aria-controls="sidebar" title="' + (isCollapsed ? 'Expand sidebar' : 'Collapse sidebar') + '">' +
         '<i class="fas fa-angles-' + (isCollapsed ? 'right' : 'left') + '" aria-hidden="true"></i>' +
@@ -238,7 +241,10 @@
   var overlay = document.getElementById('sideOverlay');
   var isMobile = function () { return window.innerWidth <= 880; };
 
+  var bodyScrollState = { overflow: '', touchAction: '' };
   function openSidebar() {
+    bodyScrollState.overflow = document.body.style.overflow;
+    bodyScrollState.touchAction = document.body.style.touchAction;
     aside.classList.add('open');
     aside.setAttribute('aria-hidden', 'false');
     if (toggle) toggle.setAttribute('aria-expanded', 'true');
@@ -254,11 +260,17 @@
     aside.setAttribute('aria-hidden', isMobile() ? 'true' : 'false');
     if (toggle) toggle.setAttribute('aria-expanded', 'false');
     if (overlay) overlay.classList.remove('show');
-    document.body.style.overflow = '';
-    document.body.style.touchAction = '';
+    document.body.style.overflow = bodyScrollState.overflow;
+    document.body.style.touchAction = bodyScrollState.touchAction;
     if (toggle && isMobile()) setTimeout(function () { toggle.focus(); }, 100);
   }
 
+  var mobileClose = document.getElementById('sidebarMobileClose');
+  if (mobileClose) mobileClose.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeSidebar();
+  });
   if (toggle) {
     toggle.setAttribute('aria-controls', 'sidebar');
     toggle.setAttribute('aria-expanded', 'false');
