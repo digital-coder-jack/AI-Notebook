@@ -92,7 +92,7 @@ fun DashboardScreen(vm: DashboardViewModel, userName: String, onOpenChat: (Int) 
 
 @Composable private fun Header(name: String) {
     Row(Modifier.fillMaxWidth().padding(top = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(48.dp).clip(RoundedCornerShape(16.dp)).background(Brush.linearGradient(listOf(Indigo, Violet))), contentAlignment = Alignment.Center) { BrandLogo(32.dp) }
+        BrandLogo(48.dp)
         Spacer(Modifier.width(12.dp)); Column(Modifier.weight(1f)) {
             Text("AI NOTEBOOK", color = Indigo, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 1.8.sp)
             Text(greeting(), color = MutedText, style = MaterialTheme.typography.bodySmall)

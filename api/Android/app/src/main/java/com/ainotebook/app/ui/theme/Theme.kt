@@ -28,17 +28,17 @@ val Indigo = Color(0xFF9B5CF5)
 val Violet = Color(0xFFE879F9)
 val Cyan = Color(0xFF67E8F9)
 
-val SpaceBg = Color(0xFF08070F)
-val SpaceSurface = Color(0xFF120E1E)
-val SpaceCard = Color(0xFF1C1730)
-val AssistantBubble = Color(0xFF181230)
-val HairlineOutline = Color(0xFF2A2050)
-val MutedText = Color(0xFF9A8EC0)
-val LightBg = Color(0xFFF5F4FC)
+val SpaceBg = Color.White
+val SpaceSurface = Color.White
+val SpaceCard = Color(0xFFF8F9FC)
+val AssistantBubble = Color(0xFFF1F3F8)
+val HairlineOutline = Color(0xFFE2E6EF)
+val MutedText = Color(0xFF5E6675)
+val LightBg = Color.White
 val LightSurface = Color(0xFFFFFFFF)
-val LightCard = Color(0xFFEEEBFA)
-val LightHairline = Color(0xFFDDD9F0)
-val LightMuted = Color(0xFF6B617F)
+val LightCard = Color(0xFFF8F9FC)
+val LightHairline = Color(0xFFE2E6EF)
+val LightMuted = Color(0xFF5E6675)
 
 private val DarkColors = darkColorScheme(
     primary = BrandViolet,

@@ -57,7 +57,7 @@ import com.ainotebook.app.ui.theme.SpaceCard
 
 @Composable
 fun SpaceBackground(content: @Composable () -> Unit) {
-    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(SpaceBg, Color(0xFF0C0A1A), SpaceBg)))) { content() }
+    Box(Modifier.fillMaxSize().background(Color.White)) { content() }
 }
 
 @Composable
@@ -74,7 +74,7 @@ fun GlassCard(modifier: Modifier = Modifier, elevated: Boolean = false, content:
 @Composable
 fun BrandLogo(size: Dp, modifier: Modifier = Modifier) {
     Image(
-        painter = painterResource(id = R.drawable.ss_logo),
+        painter = painterResource(id = R.drawable.official_logo),
         contentDescription = "AI Notebook",
         contentScale = ContentScale.Fit,
         modifier = modifier.size(size)
@@ -85,13 +85,12 @@ fun BrandLogo(size: Dp, modifier: Modifier = Modifier) {
 fun AssistantAvatar(size: Dp = 30.dp, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.size(size).clip(CircleShape)
-            .background(Brush.linearGradient(listOf(BrandOrange, BrandPink, BrandViolet, BrandBlue)))
             .border(1.dp, HairlineOutline, CircleShape),
         contentAlignment = Alignment.Center
     ) {
-        Box(Modifier.size(size - 3.dp).clip(CircleShape).background(SpaceCard), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(size - 3.dp).clip(CircleShape), contentAlignment = Alignment.Center) {
             Image(
-                painter = painterResource(id = R.drawable.ss_logo),
+                painter = painterResource(id = R.drawable.official_logo),
                 contentDescription = "AI Notebook",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.size(size * 0.60f)

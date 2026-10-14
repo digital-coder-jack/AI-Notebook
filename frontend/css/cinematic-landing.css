@@ -126,7 +126,7 @@ body.cinematic-landing {
   place-items: center;
   background: #fff;
 }
-.cl-logo img { width: 100%; height: 100%; object-fit: cover; }
+.cl-logo img { width: 100%; height: 100%; object-fit: contain; }
 .cl-logo.large { width: 47px; height: 47px; border-radius: 13px; margin-bottom: 33px; box-shadow: 0 0 33px rgba(213,91,191,.25); }
 .cl-links { display: flex; align-items: center; gap: 29px; flex: 1; }
 .cl-links a, .cl-signin, .cl-footer a {
@@ -235,7 +235,7 @@ body.cinematic-landing {
 .cl-product-top .window-dots i { width: 6px; height: 6px; background: #4c4b5b; border-radius: 50%; }
 .cl-product-top .window-title { display: flex; align-items: center; gap: 6px; flex: 1; color: #bdbac7; }
 .cl-mini-logo { width: 16px; height: 16px; border-radius: 4px; background: #fff; overflow: hidden; }
-.cl-mini-logo img { width: 100%; height: 100%; object-fit: cover; }
+.cl-mini-logo img { width: 100%; height: 100%; object-fit: contain; }
 .cl-product-top .window-status { color: #a09eaa; margin-left: 6px; }
 .cl-product-body { display: flex; min-height: 392px; }
 .cl-mini-sidebar {
@@ -243,7 +243,7 @@ body.cinematic-landing {
   display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 17px;
 }
 .cl-mini-brand { width: 20px; height: 20px; background: #fff; border-radius: 6px; overflow: hidden; margin-bottom: 13px; }
-.cl-mini-brand img { width: 100%; height: 100%; object-fit: cover; }
+.cl-mini-brand img { width: 100%; height: 100%; object-fit: contain; }
 .cl-mini-side-line { width: 15px; height: 5px; border-radius: 4px; background: #343543; }
 .cl-mini-side-line.active { background: linear-gradient(90deg, #e86da6, #8e68d6); }
 .cl-mini-side-line.short { width: 10px; margin-top: 12px; }
@@ -315,7 +315,7 @@ body.cinematic-landing {
 .cl-demo-message { display: flex; gap: 8px; max-width: 80%; color: #bcbac5; font-size: 11px; line-height: 1.6; margin-bottom: 21px; }
 .cl-demo-message.user { margin-left: auto; background: #282836; border-radius: 8px 2px 8px 8px; padding: 10px 12px; max-width: 67%; color: #dad8e1; }
 .cl-demo-avatar { width: 20px; height: 20px; overflow: hidden; background: #fff; flex: none; border-radius: 6px; }
-.cl-demo-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.cl-demo-avatar img { width: 100%; height: 100%; object-fit: contain; }
 .cl-demo-input { display: flex; justify-content: space-between; border: 1px solid #343541; color: #686977; padding: 11px 13px; border-radius: 7px; font-size: 10px; margin-top: 31px; }
 .cl-demo-input svg { color: #ea74ad; }
 

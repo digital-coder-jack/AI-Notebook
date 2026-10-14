@@ -12,8 +12,8 @@ const APP_SHELL = [
   '/js/app.js',
   '/js/cinematic-landing.js',
   '/js/pwa.js',
-  '/assets/logo.svg',
-  '/assets/logo-192.svg',
-  '/assets/logo-512.svg',
+  '/assets/logo.png',
+  '/assets/logo-192.png',
+  '/assets/logo-512.png',
   '/manifest.json',
 ];
