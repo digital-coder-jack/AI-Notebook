@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Search, PenLine, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Search, PenLine, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "./SidebarProvider";
 import type { SyncStatus } from "@/lib/types";
@@ -40,11 +40,8 @@ export function SidebarHeader({
           collapsed && "flex-col gap-3"
         )}
       >
-        <div
-          className="relative grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-accent-blue to-accent-purple shadow-glow-blue"
-          aria-hidden
-        >
-          <Sparkles className="h-5 w-5 text-white" strokeWidth={2} />
+        <div className="relative grid h-10 w-10 shrink-0 place-items-center" aria-hidden>
+          <img src="/icon.png" alt="" className="h-full w-full object-contain" />
         </div>
 
         <AnimatePresence initial={false}>

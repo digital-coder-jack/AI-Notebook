@@ -9,6 +9,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AutoStories
@@ -131,9 +132,9 @@ private fun MainShell(factory: VMFactory) {
             containerColor = androidx.compose.ui.graphics.Color.Transparent,
             bottomBar = {
                 NavigationBar(
+                    modifier = Modifier.clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
                     containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-                    tonalElevation = 6.dp,
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                    tonalElevation = 6.dp
                 ) {
                     BOTTOM_ITEMS.forEach { item ->
                         val selected = current?.startsWith(item.route) == true

@@ -25,6 +25,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,7 +63,9 @@ fun SignupScreen(vm: AuthViewModel, onSignedUp: () -> Unit, onGoLogin: () -> Uni
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
     val haptic = rememberHaptics()
-    if (state.success) onSignedUp()
+    LaunchedEffect(state.success) {
+        if (state.success) onSignedUp()
+    }
 
     SpaceBackground {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
