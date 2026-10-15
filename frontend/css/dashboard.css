@@ -1,561 +1,226 @@
 /* =====================================================================
-   AI Notebook  -  dashboard.css (app shell: sidebar + content)
-   Shared by dashboard, tools and profile pages.
-   REFACTORED: Fixed sidebar positioning, no content shift, responsive.
+   AI Notebook - dashboard.css (app shell: content area, topbar, stats, panels)
+   Sidebar rules live in sidebar-mobile.css.
    ===================================================================== */
 
-/* ========== APP SHELL LAYOUT ========== */
-.app-shell {
-  display: flex;
-  min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height for mobile */
-  position: relative;
-  z-index: 2;
-}
+.app-shell { display: flex; min-height: 100vh; min-height: 100dvh; position: relative; z-index: 2; }
 
-/* =====================================================================
-   NOTE: All .sidebar / .side-head / .brand / .side-nav / .side-foot /
-   .side-user / .logout-btn / .side-overlay layout rules now live in
-   sidebar-mobile.css (the single source of truth) to avoid the
-   specificity/order conflicts that previously broke desktop layout.
-   This file only styles the main content area, topbar, stats and panels.
-   ===================================================================== */
-
-/* ========== MAIN CONTENT ========== */
 .content {
-  flex: 1;
-  min-width: 0;
+  flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative; z-index: 2;
   padding: 1.6rem clamp(1rem, 3vw, 2.4rem) 3rem;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 2;
+  gap: 1.6rem;                       /* one spacing rhythm for every section */
 }
+.content > * { margin-bottom: 0; }
 
 /* ========== TOPBAR ========== */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.8rem;
-  gap: 1rem;
-}
-
-.topbar h1 {
-  font-size: clamp(1.4rem, 3vw, 1.9rem);
-  font-weight: 700;
-  margin: 0;
-  /* Drop-in from above */
-  opacity: 0;
-  animation: slideDown 0.5s var(--ease-smooth, ease) 0.1s both;
-}
-
-.topbar .sub {
-  color: var(--text-dim);
-  font-size: 0.92rem;
-  margin: 0;
-  opacity: 0;
-  animation: slideDown 0.5s var(--ease-smooth, ease) 0.2s both;
-}
-
-/* Topbar action buttons — lift on hover, press on active */
-.topbar .btn {
-  transition: transform var(--dur-base, 240ms) var(--ease-smooth, ease),
-              box-shadow var(--dur-base, 240ms) var(--ease-smooth, ease),
-              filter var(--dur-base, 240ms) var(--ease-smooth, ease);
-}
-.topbar .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(109, 123, 255, 0.45);
-}
-.topbar .btn:active {
-  transform: scale(0.96);
-}
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.topbar h1 { font-size: clamp(1.4rem, 3vw, 1.9rem); font-weight: 700; margin: 0; }
+.topbar .sub { color: var(--text-dim); font-size: .92rem; margin: .2rem 0 0; }
+.topbar .btn { transition: transform .2s ease, box-shadow .2s ease; }
+.topbar .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(109, 123, 255, .4); }
+.topbar .btn:active { transform: scale(.97); }
 
 .sidebar-toggle {
-  display: none;
-  background: var(--glass);
-  border: 1px solid var(--border);
-  color: var(--text);
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 1.1rem;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
+  display: none; background: var(--glass); border: 1px solid var(--border); color: var(--text);
+  width: 42px; height: 42px; border-radius: 12px; cursor: pointer; font-size: 1.1rem;
+  align-items: center; justify-content: center; flex-shrink: 0; transition: background .2s, transform .2s;
 }
+.sidebar-toggle:hover { background: var(--glass-strong); }
+.sidebar-toggle:active { transform: scale(.95); }
 
-.sidebar-toggle:hover {
-  background: var(--glass-strong);
-  transform: scale(1.05);
+/* ========== LAUNCHER HINT ========== */
+.ll-hint {
+  display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+  margin: .7rem 0 0; font-size: .88rem; color: var(--text-dim);
 }
-
-.sidebar-toggle:active {
-  transform: scale(0.95);
+.ll-hint[hidden] { display: none; }
+.ll-clear {
+  background: none; border: 0; padding: 0; font: inherit; color: var(--accent);
+  text-decoration: underline; cursor: pointer;
+}
+.learn-launcher .kbd {
+  display: inline-block; padding: 0 .4rem; border-radius: 6px; border: 1px solid var(--border); font-size: .8rem;
 }
 
 /* ========== STAT CARDS ========== */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.1rem;
-  margin-bottom: 1.8rem;
-}
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.1rem; }
 
 .stat-card {
-  padding: 1.4rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  transition: transform var(--dur-base, 240ms) var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)),
-              box-shadow var(--dur-base, 240ms) var(--ease-smooth, ease),
-              border-color var(--dur-base, 240ms) var(--ease-smooth, ease);
-  /* Entrance: fade + rise into place */
-  opacity: 0;
-  animation: fadeInUp var(--dur-slow, 420ms) var(--ease-smooth, ease) both;
+  padding: 1.4rem; display: flex; flex-direction: column; gap: .4rem;
+  color: inherit; text-decoration: none;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
-
-/* Staggered entrance — 0 / 80 / 160 / 240ms */
-.stat-card:nth-child(1) { animation-delay: 0ms; }
-.stat-card:nth-child(2) { animation-delay: 80ms; }
-.stat-card:nth-child(3) { animation-delay: 160ms; }
-.stat-card:nth-child(4) { animation-delay: 240ms; }
-
-.stat-card:hover {
-  transform: translateY(-6px);
-  /* Soft pulsing glow ring on hover */
-  animation: pulseGlow 0.28s ease;
-  border-color: rgba(109, 123, 255, 0.45);
-}
+a.stat-card:hover { transform: translateY(-4px); border-color: rgba(109, 123, 255, .45); }
+a.stat-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 .stat-card .ic {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  font-size: 1.15rem;
-  color: #fff;
-  background: var(--grad);
-  margin-bottom: 0.4rem;
-  /* Gentle perpetual float, alternating cadence per card */
-  animation: float 3s ease-in-out infinite;
-  will-change: transform;
+  width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center;
+  font-size: 1.15rem; color: #fff; background: var(--grad); margin-bottom: .4rem;
+}
+.stat-card b { font-size: 1.9rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.stat-card span { color: var(--text-dim); font-size: .88rem; }
+
+/* skeleton sizing (moved out of inline styles) */
+.stat-card .ic.skeleton { width: 46px; height: 46px; }
+.stat-card b.skeleton { height: 28px; width: 60%; }
+.stat-card span.skeleton { height: 14px; width: 80%; }
+.recent-list .recent-item.skeleton { height: 54px; }
+.achievements .ach-card.skeleton { height: 96px; }
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.12) 37%, rgba(255,255,255,.04) 63%);
+  background-size: 1200px 100%; animation: shimmerSweep 1.6s linear infinite; border-radius: 10px; display: block;
 }
 
-/* Alternate the float phase per card so they don't bob in unison */
-.stat-card:nth-child(1) .ic { animation-delay: 0s; }
-.stat-card:nth-child(2) .ic { animation-delay: 0.4s; }
-.stat-card:nth-child(3) .ic { animation-delay: 0.8s; }
-.stat-card:nth-child(4) .ic { animation-delay: 1.2s; }
-
-.stat-card b {
-  font-size: 1.9rem;
-  font-weight: 800;
+/* error state */
+.load-error {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 1.2rem 1.4rem;
 }
-
-.stat-card span {
-  color: var(--text-dim);
-  font-size: 0.88rem;
-}
+.load-error > i { font-size: 1.5rem; color: #f59e0b; }
+.load-error > div { flex: 1; min-width: 200px; }
+.load-error p { margin: .2rem 0 0; color: var(--text-dim); font-size: .9rem; }
 
 /* ========== PANELS ========== */
-.panels {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 1.1rem;
-}
+.panel { padding: 1.5rem; }
+.panel h3 { margin-bottom: 1rem; display: flex; align-items: center; gap: .6rem; font-size: 1.1rem; }
+.panel h3 i { color: var(--accent); }
 
-.panel {
-  padding: 1.5rem;
-}
-
-/* Glass panels gently scale into view on page load */
-.panel.glass {
-  opacity: 0;
-  animation: scaleIn var(--dur-slow, 420ms) var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
-}
-.panels .panel.glass:nth-child(1) { animation-delay: 280ms; }
-.panels .panel.glass:nth-child(2) { animation-delay: 360ms; }
-
-.panel h3 {
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 1.1rem;
-}
-
-.panel h3 i {
-  color: var(--accent);
-}
-
-.recent-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-}
-
+.recent-list { display: flex; flex-direction: column; gap: .7rem; }
 .recent-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.85rem 1rem;
-  border-radius: 12px;
-  background: var(--glass);
-  border: 1px solid var(--border);
-  transition: transform 0.2s, border-color 0.2s;
+  display: flex; align-items: center; justify-content: space-between; gap: .8rem;
+  padding: .85rem 1rem; border-radius: 12px; background: var(--glass); border: 1px solid var(--border);
+  color: inherit; text-decoration: none; transition: transform .2s, border-color .2s;
 }
+a.recent-item:hover { transform: translateX(4px); border-color: rgba(109, 123, 255, .5); }
+a.recent-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.recent-item .ttl { display: flex; align-items: center; gap: .7rem; overflow: hidden; }
+.recent-item .ttl i { color: var(--accent); }
+.recent-item .ttl b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-item small { color: var(--text-dim); flex-shrink: 0; }
 
-.recent-item:hover {
-  transform: translateX(4px);
-  border-color: rgba(109, 123, 255, 0.5);
+/* ========== NOTES ========== */
+.note-item {
+  display: flex; align-items: center; gap: .6rem; padding: .7rem .9rem; border-radius: 12px;
+  background: var(--glass); border: 1px solid var(--border);
+  transition: opacity .2s, transform .2s, border-color .2s;
 }
-
-/* Click micro-interaction: a subtle highlight ring that fades out (~300ms).
-   Toggled by dashboard.js on click. */
-.recent-item.flash-ring {
-  animation: recentFlash 0.3s var(--ease-smooth, ease);
+.note-item:hover, .note-item:focus-within { border-color: rgba(109, 123, 255, .5); }
+.note-item.removing { opacity: 0; transform: translateX(24px); }
+.note-item .ni-main {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .1rem; color: inherit; text-decoration: none;
 }
-
-@keyframes recentFlash {
-  0%   { box-shadow: 0 0 0 0 var(--accent); }
-  35%  { box-shadow: 0 0 0 2px var(--accent); }
-  100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+.note-item .ni-main b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note-item .ni-main small { color: var(--text-dim); }
+.ni-flags { color: var(--accent); display: flex; gap: .3rem; font-size: .8rem; }
+.note-actions { display: flex; gap: .2rem; }
+.note-actions button {
+  width: 34px; height: 34px; border-radius: 8px; border: 0; background: transparent;
+  color: var(--text-dim); cursor: pointer; transition: background .15s, color .15s;
 }
-
-.recent-item .ttl {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  overflow: hidden;
-}
-
-.recent-item .ttl i {
-  color: var(--accent);
-}
-
-.recent-item .ttl b {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.recent-item small {
-  color: var(--text-dim);
-  flex-shrink: 0;
-}
-
-.empty {
-  text-align: center;
-  color: var(--text-dim);
-  padding: 2rem 1rem;
-}
-
-.empty i {
-  font-size: 2.2rem;
-  opacity: 0.5;
-  margin-bottom: 0.6rem;
-  display: block;
+.note-actions button:hover { background: var(--glass-strong); color: var(--text); }
+.note-actions button.danger:hover { color: #ef4444; }
+.note-actions button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* Hover devices: reveal actions on hover/focus. Touch devices: always visible. */
+@media (hover: hover) and (pointer: fine) {
+  .note-actions { opacity: 0; transition: opacity .15s; }
+  .note-item:hover .note-actions, .note-item:focus-within .note-actions { opacity: 1; }
 }
 
 /* ========== CHART ========== */
-.chart-wrap {
-  position: relative;
-  height: 220px;
+.chart-wrap { position: relative; height: 220px; }
+.chart-empty {
+  position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+  padding: 1rem; margin: 0; color: var(--text-dim); font-size: .9rem; pointer-events: none;
 }
+.chart-empty[hidden] { display: none; }
 
-/* ========== SETTINGS ========== */
-.settings-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.1rem;
-}
+/* ========== PROGRESS META ========== */
+.progress-meta { display: flex; flex-direction: column; gap: .5rem; margin-top: 1rem; }
+.pm-row { display: flex; justify-content: space-between; gap: 1rem; font-size: .9rem; }
+.pm-row span { color: var(--text-dim); }
+.pm-row i { color: var(--accent); margin-right: .35rem; }
 
-.settings-card {
-  padding: 1.6rem;
-}
+/* ========== ACHIEVEMENTS ========== */
+.ach-card .ach-body { display: flex; flex-direction: column; gap: .15rem; min-width: 0; flex: 1; }
+.ach-card .ach-body small { color: var(--text-dim); font-size: .75rem; }
+.ach-bar { height: 5px; border-radius: 99px; background: var(--border); overflow: hidden; margin-top: .35rem; }
+.ach-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--grad); }
+.ach-card.locked .ach-ic { opacity: .65; }
 
-.settings-card h3 {
-  margin-bottom: 1.1rem;
-}
+/* ========== SETTINGS (shared with profile page) ========== */
+.settings-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.1rem; }
+.settings-card { padding: 1.6rem; }
+.settings-card h3 { margin-bottom: 1.1rem; }
+.settings-card .field input { padding-left: 1rem; }
+.settings-card .field input.with-icon { padding-left: 2.8rem; }
 
-.settings-card .field input {
-  padding-left: 1rem;
-}
+/* ========== GUEST BANNER ========== */
+.guest-banner { padding: 1rem 1.4rem; }
+.guest-banner-content { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
+.guest-banner-text { display: flex; align-items: center; gap: 1rem; flex: 1; }
+.guest-banner-text i { font-size: 1.4rem; color: var(--accent); }
+.guest-banner-text strong { display: block; font-size: 1rem; margin-bottom: .15rem; }
+.guest-banner-text p { font-size: .85rem; color: var(--text-dim); margin: 0; }
 
-.settings-card .field input.with-icon {
-  padding-left: 2.8rem;
-}
+/* ========== FOCUS (keyboard) ========== */
+.sidebar-toggle:focus-visible,
+.ws-card:focus-visible,
+.trend-card:focus-visible,
+.topic-card:focus-visible,
+.ni-main:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ========== SKELETON LOADER ========== */
-.skeleton {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.12) 37%, rgba(255, 255, 255, 0.04) 63%);
-  background-size: 1200px 100%;
-  /* Smooth continuous sweep using the global keyframe */
-  animation: shimmerSweep 1.6s linear infinite;
-  border-radius: 10px;
-  display: block;
-}
-
-/* Backdrop overlay (.side-overlay) is defined in sidebar-mobile.css */
-
-/* ========== RESPONSIVE: TABLET ========== */
+/* ========== TABLET ========== */
 @media (max-width: 1024px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .panels {
-    grid-template-columns: 1fr;
-  }
-
-  .settings-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .stat-card b {
-    font-size: 1.6rem;
-  }
-
-  .topbar h1 {
-    font-size: clamp(1.2rem, 2.5vw, 1.9rem);
-  }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .settings-grid { grid-template-columns: 1fr; }
+  .stat-card b { font-size: 1.6rem; }
 }
 
-/* ========== RESPONSIVE: MOBILE (880px and below) ========== */
-/* Sidebar drawer behaviour lives in sidebar-mobile.css. Here we only
-   stack the shell and offset content for the fixed mobile topbar. */
+/* ========== MOBILE ========== */
 @media (max-width: 880px) {
-  .app-shell {
-    flex-direction: column;
-  }
+  .app-shell { flex-direction: column; }
+  .content { width: 100%; padding: calc(64px + 1rem + env(safe-area-inset-top, 0px)) 1rem 2rem; gap: 1.2rem; }
 
-  /* Content layout — leave room for the 64px fixed topbar */
-  .content {
-    width: 100%;
-    padding-top: calc(64px + 1rem);
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  /* Topbar fixed positioning */
   .topbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: var(--nav-bg);
-    backdrop-filter: blur(12px);
-    z-index: 120;
-    padding: 0 1rem;
-    height: 64px;
-    margin-bottom: 0;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: nowrap;
-    gap: 0.75rem;
-    border-bottom: 1px solid var(--border);
+    position: fixed; top: 0; left: 0; right: 0; z-index: 120; height: calc(64px + env(safe-area-inset-top, 0px));
+    padding: env(safe-area-inset-top, 0px) 1rem 0; background: var(--nav-bg); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); flex-wrap: nowrap; gap: .75rem;
   }
+  .topbar > div:first-child { min-width: 0; flex: 1 1 auto; overflow: hidden; }
+  .topbar h1 { font-size: 1.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar .sub { font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sidebar-toggle { display: grid !important; place-items: center; order: 99; margin-left: auto; }
+  .topbar > div:last-child { display: flex; align-items: center; gap: .5rem; flex: 0 0 auto; }
 
-  .topbar > div:first-child {
-    min-width: 0;
-    flex: 1 1 auto;
-    overflow: hidden;
-  }
-
-  .topbar h1 {
-    font-size: 1.25rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .topbar .sub {
-    font-size: 0.78rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .sidebar-toggle {
-    display: grid !important;
-    place-items: center;
-    flex: 0 0 auto;
-    order: 99;
-    margin-left: auto;
-  }
-
-  .topbar > div:last-child {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex: 0 0 auto;
-    width: auto;
-  }
-
-  .stats-grid {
-    gap: 0.8rem;
-  }
-
-  .stat-card {
-    padding: 1rem;
-  }
-
-  .stat-card b {
-    font-size: 1.4rem;
-  }
-
-  .stat-card span {
-    font-size: 0.8rem;
-  }
-
-  .panel {
-    padding: 1.2rem;
-  }
-
-  .panel h3 {
-    font-size: 1rem;
-    margin-bottom: 0.8rem;
-  }
-
-  .recent-item {
-    padding: 0.7rem 0.8rem;
-  }
-
-  .recent-item .ttl b {
-    font-size: 0.9rem;
-  }
-
-  .recent-item small {
-    font-size: 0.75rem;
-  }
+  .stats-grid { gap: .8rem; }
+  .stat-card { padding: 1rem; }
+  .stat-card b { font-size: 1.4rem; }
+  .stat-card span { font-size: .8rem; }
+  .panel { padding: 1.2rem; }
+  .panel h3 { font-size: 1rem; margin-bottom: .8rem; }
+  .recent-item { padding: .7rem .8rem; }
 }
 
-/* ========== RESPONSIVE: SMALL MOBILE (480px and below) ========== */
+/* ========== SMALL MOBILE ========== */
 @media (max-width: 480px) {
-  .content {
-    padding: calc(60px + 0.9rem) 0.8rem 2rem;
-  }
-
-  .topbar {
-    padding: 0 0.8rem;
-    height: 60px;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .topbar h1 {
-    font-size: 1.1rem;
-  }
-
-  .topbar .sub {
-    display: none;
-  }
-
-  .topbar .btn {
-    padding: 0.55rem 0.8rem;
-    font-size: 0.82rem;
-  }
-
-  .sidebar-toggle {
-    width: 40px;
-    height: 40px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.7rem;
-    margin-bottom: 1.2rem;
-  }
-
-  .stat-card {
-    padding: 0.9rem;
-  }
-
-  .stat-card .ic {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-  }
-
-  .stat-card b {
-    font-size: 1.2rem;
-  }
-
-  .stat-card span {
-    font-size: 0.75rem;
-  }
-
-  .panels {
-    gap: 0.8rem;
-  }
-
-  .panel {
-    padding: 1rem;
-  }
-
-  .panel h3 {
-    font-size: 0.95rem;
-  }
-
-  .chart-wrap {
-    height: 180px;
-  }
-
-  .recent-item {
-    padding: 0.6rem 0.8rem;
-  }
-
-  .recent-item .ttl {
-    gap: 0.5rem;
-  }
-
-  .recent-item .ttl i {
-    font-size: 1rem;
-  }
-
-  .recent-item .ttl b {
-    font-size: 0.85rem;
-  }
-
-  .recent-item small {
-    font-size: 0.7rem;
-  }
-
-  .empty {
-    padding: 1.5rem 0.8rem;
-  }
-
-  .empty i {
-    font-size: 1.8rem;
-  }
-
-  .settings-grid {
-    gap: 0.8rem;
-  }
-
-  .settings-card {
-    padding: 1rem;
-  }
+  .content { padding: calc(60px + .9rem + env(safe-area-inset-top, 0px)) .8rem 2rem; }
+  .topbar { height: calc(60px + env(safe-area-inset-top, 0px)); padding-left: .8rem; padding-right: .8rem; }
+  .topbar h1 { font-size: 1.1rem; }
+  .topbar .sub { display: none; }
+  .topbar .btn { padding: .55rem .8rem; font-size: .82rem; }
+  .sidebar-toggle { width: 44px; height: 44px; }   /* 44px minimum touch target */
+  .stats-grid { gap: .7rem; }
+  .stat-card { padding: .9rem; }
+  .stat-card .ic { width: 40px; height: 40px; font-size: 1rem; }
+  .stat-card b { font-size: 1.2rem; }
+  .panel { padding: 1rem; }
+  .chart-wrap { height: 180px; }
+  .note-actions button { width: 38px; height: 38px; }
+  .note-item { flex-wrap: wrap; }
+  .note-actions { width: 100%; justify-content: flex-end; }
 }
 
-/* ========== ACCESSIBILITY (content area only) ========== */
+/* ========== REDUCED MOTION ========== */
 @media (prefers-reduced-motion: reduce) {
-  .stat-card,
-  .recent-item {
-    transition: none !important;
-  }
-}
-
-/* Focus visible for keyboard navigation */
-.sidebar-toggle:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  .stat-card, .recent-item, .note-item, .topbar .btn, .skeleton { transition: none !important; animation: none !important; }
 }
