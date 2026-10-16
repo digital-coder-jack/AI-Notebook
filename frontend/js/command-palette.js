@@ -33,6 +33,7 @@
   ];
 
   var ACTIONS = [
+    { icon: 'fa-plus', title: 'New chat', sub: 'Start a conversation with AI', cat: 'Actions', keys: 'ask ai message tutor', href: '/chat' },
     { icon: 'fa-circle-half-stroke', title: 'Toggle theme', sub: 'Switch light / dark mode', cat: 'Actions', keys: 'dark light mode appearance', run: function () { if (window.SS && SS.toggleTheme) SS.toggleTheme(); if (window.SSMotion) SSMotion.applyPreferences(); } },
     { icon: 'fa-note-sticky', title: 'New note', sub: 'Open the notes workspace', cat: 'Actions', keys: 'write notes', href: '/tools#notes' },
     { icon: 'fa-clipboard-question', title: 'Generate a quiz', sub: 'Open quiz generator', cat: 'Actions', keys: 'test exam questions', href: '/tools#quiz' },

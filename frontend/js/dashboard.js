@@ -10,7 +10,7 @@ let chartRef = null;
 document.addEventListener('DOMContentLoaded', () => {
   const user = (window.SS && SS.getUser && SS.getUser()) || {};
   const nameEl = document.getElementById('userName');
-  if (nameEl) nameEl.textContent = (user.name || 'there').split(' ')[0];
+  if (nameEl) nameEl.textContent = (user.name || 'Welcome back').split(' ')[0] || 'Welcome back';
 
   setSubtitle();
   if (user.is_guest) showGuestBanner();
@@ -47,6 +47,8 @@ async function loadDashboard() {
   try {
     const s = await SS.api('/api/stats');
     renderStats(s);
+    renderContinue(s);
+    renderFirstRun(s);
     renderRecent(s.recent_chats || []);
     renderRecentNotes(s.recent_notes || []);
     renderChart(s.daily_activity || []);
@@ -56,6 +58,38 @@ async function loadDashboard() {
   } catch (err) {
     showLoadError(err);
   }
+}
+
+function renderContinue(s) {
+  const card = document.getElementById('continueCard');
+  const action = document.getElementById('continueAction');
+  const description = document.getElementById('continueDescription');
+  if (!card || !action || !description) return;
+  const chat = (s.recent_chats || [])[0];
+  const note = (s.recent_notes || [])[0];
+  if (!chat && !note) { card.hidden = true; return; }
+  const item = chat || note;
+  const isChat = !!chat;
+  card.hidden = false;
+  action.href = isChat ? '/chat?id=' + encodeURIComponent(item.id) : '/tools#notes';
+  action.innerHTML = 'Continue <i class="fas fa-arrow-right" aria-hidden="true"></i>';
+  description.textContent = isChat ? (item.title || 'Your latest chat') : ('Note on ' + (item.topic || 'your latest topic'));
+}
+
+function renderFirstRun(s) {
+  const firstRun = document.getElementById('firstRun');
+  if (!firstRun) return;
+  const hasData = (s.total_chats || 0) + (s.total_messages || 0) + (s.notes || 0) + (s.quizzes || 0) + (s.topics || 0) > 0;
+  firstRun.hidden = hasData;
+  document.querySelectorAll('.first-run-steps li').forEach((step) => {
+    const complete = step.dataset.step === 'chat' ? (s.total_chats || 0) > 0 : step.dataset.step === 'note' ? (s.notes || 0) > 0 : (s.quizzes || 0) > 0;
+    step.classList.toggle('complete', complete);
+    step.setAttribute('aria-label', complete ? step.textContent.trim() + ', complete' : step.textContent.trim());
+  });
+  ['statsGrid', 'trending-topics'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('first-run-secondary', !hasData);
+  });
 }
 
 /* Replace endless skeletons with a clear message and a retry button */
@@ -405,7 +439,9 @@ async function loadProvidersMini() {
     }).join(' ');
     if (!box.innerHTML) box.innerHTML = '<span class="model-badge">AI Notebook</span>';
   } catch {
-    box.innerHTML = '<span class="model-badge"><span class="model-dot off"></span> AI status unavailable. Try again later.</span>';
+    box.innerHTML = '<span class="model-badge"><span class="model-dot off"></span> AI status unavailable</span> <button type="button" class="text-button" id="retryProviders">Retry</button>';
+    const retry = document.getElementById('retryProviders');
+    if (retry) retry.addEventListener('click', loadProvidersMini, { once: true });
   }
 }
 

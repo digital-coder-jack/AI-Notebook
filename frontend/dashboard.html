@@ -6,12 +6,11 @@
   <title>Dashboard · AI Notebook</title>
   <meta name="description" content="Your personal AI knowledge desk: notes, chats, quizzes and learning paths in one place." />
   <meta name="color-scheme" content="dark light" />
-  <meta name="theme-color" content="#4F46E5" />
+  <meta name="theme-color" content="#08090d" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="AI Notebook" />
-  <link rel="stylesheet" href="/css/workspace-redesign.css" />
   <link rel="stylesheet" href="/css/workspace-redesign.css" />
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" type="image/png" href="/assets/logo-192.png" />
@@ -91,6 +90,30 @@
           <input type="text" id="topicInput" name="topic" aria-label="Topic to learn" placeholder="e.g. Machine Learning, Quantum Computing, World War II…" maxlength="200" autocomplete="off" enterkeyhint="go" required />
           <button type="submit" class="btn" id="topicGo">Start learning <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
         </form>
+      </section>
+
+      <section class="continue-card glass" id="continueCard" aria-labelledby="continueTitle" hidden>
+        <div class="continue-icon"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></div>
+        <div class="continue-copy">
+          <p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p>
+          <h2 id="continueTitle">Continue where you left off</h2>
+          <p id="continueDescription">Your latest workspace will appear here.</p>
+        </div>
+        <a class="btn" id="continueAction" href="/chat">Continue</a>
+      </section>
+
+      <section class="first-run glass" id="firstRun" aria-labelledby="firstRunTitle" hidden>
+        <div>
+          <p class="eyebrow">YOUR FIRST SESSION</p>
+          <h2 id="firstRunTitle">Build your learning workspace</h2>
+          <p>Start with one question, then turn the answer into something you can revisit.</p>
+        </div>
+        <ol class="first-run-steps" aria-label="Getting started checklist">
+          <li data-step="chat"><span>1</span><div><b>Ask a question</b><small>Open a new chat</small></div></li>
+          <li data-step="note"><span>2</span><div><b>Save a note</b><small>Capture what matters</small></div></li>
+          <li data-step="quiz"><span>3</span><div><b>Generate a quiz</b><small>Practice your recall</small></div></li>
+        </ol>
+        <a class="btn primary" href="/chat"><i class="fas fa-plus" aria-hidden="true"></i> Start your first chat</a>
       </section>
 
       <!-- Stats -->
@@ -200,6 +223,7 @@
           <div class="ach-card glass skeleton" style="height:96px"></div>
         </div>
       </section>
+      <a class="mobile-quick-action btn primary" href="/chat"><i class="fas fa-plus" aria-hidden="true"></i> New chat</a>
     </main>
   </div>
 
