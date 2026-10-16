@@ -1,144 +1,81 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ComponentType } from "react";
+import { useState, type ComponentType } from "react";
 import {
-  Archive,
-  ArrowUpRight,
+  ArrowLeft,
+  ArrowRight,
   BookOpen,
-  BrainCircuit,
   Check,
   ChevronDown,
   ChevronRight,
-  Circle,
-  Command,
+  CircleHelp,
   FileText,
-  GitBranch,
-  LayoutDashboard,
+  Folder,
+  Headphones,
+  ListChecks,
   Menu,
-  MessageCircle,
-  Moon,
   MoreHorizontal,
-  PanelLeftClose,
-  PanelLeftOpen,
+  Paperclip,
+  PanelLeft,
+  PlayCircle,
   Plus,
   Search,
   Send,
-  Settings,
+  Share2,
   Sparkles,
-  Sun,
-  Tags,
+  SquarePen,
+  Upload,
   X,
-  Zap,
 } from "lucide-react";
 
-type View = "overview" | "chats" | "notes" | "topics" | "roadmaps" | "mindmaps" | "settings";
-type Icon = ComponentType<{ className?: string }>;
-
-const navItems: { id: View; label: string; icon: Icon }[] = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "chats", label: "Chats", icon: MessageCircle },
-  { id: "notes", label: "Notes", icon: FileText },
-  { id: "topics", label: "Topics", icon: Tags },
-  { id: "roadmaps", label: "Roadmaps", icon: GitBranch },
-  { id: "mindmaps", label: "Mindmaps", icon: BrainCircuit },
+const pages = [
+  ["Energy & enzymes", "Lecture 06 · Oct 9"],
+  ["Cellular respiration", "Lecture 07 · Oct 14"],
+  ["Photosynthesis", "Lecture 08 · Oct 16"],
+  ["Lab: yeast respiration", "Lab notes · Oct 15"],
+  ["Midterm review", "Study guide · Oct 20"],
 ];
 
-const notes = [
-  { title: "Understanding retrieval augmented generation", type: "AI Systems", date: "Today", color: "blue" },
-  { title: "Q4 planning notes", type: "Planning", date: "Yesterday", color: "amber" },
-  { title: "Ideas for the reading list", type: "Personal", date: "Sep 21", color: "violet" },
-  { title: "The economics of attention", type: "Research", date: "Sep 18", color: "emerald" },
-];
-
-const chats = [
-  { title: "Help me understand vector databases", preview: "Here is a mental model for how embeddings...", time: "12 min ago" },
-  { title: "Plan a two-week learning sprint", preview: "I would structure the sprint around three...", time: "Yesterday" },
-  { title: "Summarize my notes on focus", preview: "The strongest recurring idea is to protect...", time: "Sep 20" },
-];
-
-function Sidebar({ view, setView, collapsed, setCollapsed, mobileOpen, setMobileOpen }: { view: View; setView: (v: View) => void; collapsed: boolean; setCollapsed: (v: boolean) => void; mobileOpen: boolean; setMobileOpen: (v: boolean) => void }) {
+function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <>
-      {mobileOpen && <button aria-label="Close navigation" className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setMobileOpen(false)} />}
-      <aside className={`workspace-sidebar ${collapsed ? "is-collapsed" : ""} ${mobileOpen ? "is-mobile-open" : ""}`}>
-        <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between px-4 py-5">
-            <button className="brand-lockup" onClick={() => { setView("overview"); setMobileOpen(false); }} aria-label="Go to overview">
-              <span className="brand-mark"><img src="/icon.png" alt="" /></span>
-              <span className="brand-name">AI Notebook</span>
-            </button>
-            <button className="icon-button sidebar-collapse" onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
-              {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-            </button>
-          </div>
-
-          <div className="px-3">
-            <button className="new-chat-button" onClick={() => { setView("chats"); setMobileOpen(false); }}><Plus className="h-4 w-4" /><span>New chat</span><kbd>⌘ N</kbd></button>
-          </div>
-
-          <nav className="mt-7 flex-1 px-3" aria-label="Workspace navigation">
-            <p className="sidebar-label">Workspace</p>
-            <div className="space-y-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return <button key={item.id} className={`nav-link ${view === item.id ? "active" : ""}`} onClick={() => { setView(item.id); setMobileOpen(false); }} title={collapsed ? item.label : undefined}><Icon className="h-[18px] w-[18px]" /><span>{item.label}</span>{item.id === "chats" && !collapsed && <span className="nav-count">3</span>}</button>;
-              })}
-            </div>
-            <div className="my-6 border-t border-line" />
-            <p className="sidebar-label">Your library</p>
-            <button className="nav-link" onClick={() => { setView("notes"); setMobileOpen(false); }}><Archive className="h-[18px] w-[18px]" /><span>Saved items</span></button>
-          </nav>
-
-          <div className="border-t border-line p-3">
-            <button className={`nav-link ${view === "settings" ? "active" : ""}`} onClick={() => { setView("settings"); setMobileOpen(false); }}><Settings className="h-[18px] w-[18px]" /><span>Settings</span></button>
-            <button className="profile-row" onClick={() => setView("settings")}><span className="avatar">JD</span><span className="min-w-0 text-left"><strong className="block truncate text-sm text-ink">Jack Daniels</strong><small className="block text-xs text-ink-faint">AI Notebook Pro</small></span><MoreHorizontal className="ml-auto h-4 w-4 text-ink-faint" /></button>
-          </div>
+      <button aria-label="Close navigation" className={`mobile-scrim ${open ? "show" : ""}`} onClick={onClose} />
+      <aside className={`left-rail ${open ? "mobile-open" : ""}`}>
+        <div className="brand"><span className="brand-icon"><SquarePen /></span><span>Notely</span></div>
+        <button className="search-box"><Search /><span>Search anything</span><kbd>⌘ K</kbd></button>
+        <nav className="primary-nav" aria-label="Main navigation">
+          {([[BookOpen, "Overview"], [FileText, "My notebooks"], [Folder, "Course materials"], [ListChecks, "Flashcards"], [Check, "Quizzes"], [ListChecks, "Tasks"], [BookOpen, "Calendar"], [Headphones, "Recorded lectures"]] as [ComponentType<{ className?: string }>, string][]).map(([icon, label], index) => { const NavIcon = icon as ComponentType<{ className?: string }>; return <button className={index === 1 ? "active" : ""} key={label}><NavIcon /><span>{label}</span>{index > 1 && index < 6 ? <small>{[24, 48, 3, 4][index - 2]}</small> : null}</button>; })}
+        </nav>
+        <div className="library-title"><span>MY NOTEBOOKS</span><Plus /></div>
+        <div className="notebook-list">
+          <button className="notebook active"><i className="indigo" />Biology 101<ChevronDown /></button>
+          <button className="notebook"><i className="green" />Organic Chemistry</button>
+          <button className="notebook"><i className="orange" />World History</button>
         </div>
+        <div className="calendar-card"><strong>On your calendar</strong><span>OCT 16</span><div><b /> <p><strong>Biology study group</strong><small>3:00 PM · Library, room 2B</small></p></div><div className="todo"><span />Lab report due tomorrow</div></div>
+        <div className="profile"><span className="avatar">JL</span><span><strong>Jamie Lee</strong><small>Student workspace</small></span><MoreHorizontal /></div>
       </aside>
     </>
   );
 }
 
-function Header({ view, onSearch, onMenu }: { view: View; onSearch: () => void; onMenu: () => void }) {
-  const label = navItems.find((item) => item.id === view)?.label ?? "Overview";
-  return <header className="workspace-header"><div className="flex min-w-0 items-center gap-3"><button className="icon-button mobile-menu" onClick={onMenu} aria-label="Open navigation"><Menu className="h-5 w-5" /></button><div><p className="eyebrow">Workspace / {view === "overview" ? "Today" : label}</p><h1 className="page-title">{label}</h1></div></div><div className="header-actions"><button className="search-trigger" onClick={onSearch}><Search className="h-4 w-4" /><span>Search your workspace</span><kbd>⌘ K</kbd></button><button className="icon-button"><Sun className="h-4 w-4" /></button><button className="avatar avatar-small">JD</button></div></header>;
+function Assistant() {
+  const [prompt, setPrompt] = useState("");
+  const [sent, setSent] = useState(false);
+  return <aside className="assistant-panel">
+    <div className="assistant-header"><div><Sparkles /><strong>Study assistant</strong></div><div><SquarePen /><X /></div></div>
+    <div className="grounded"><div><span>GROUNDED IN YOUR COURSE</span><ListChecks /></div><p><b><FileText /> Current note</b><b><Paperclip /> 2 materials</b></p></div>
+    <div className="assistant-scroll"><div className="today">TODAY · 10:42 AM</div><div className="question">Why does ATP production stop without oxygen?</div><div className="answer"><strong><Sparkles /> NOTELY</strong><p>Almost! It&apos;s oxidative phosphorylation that stops, not all ATP production. Here&apos;s the chain reaction:</p>{[["The electron chain backs up", "Without O₂ to accept electrons, the electron transport chain cannot keep running."], ["The H⁺ gradient fades", "Proton pumping stops, so ATP synthase loses the gradient that powers it."], ["Glycolysis can still make ATP", "Fermentation regenerates NAD⁺, allowing glycolysis to yield 2 ATP per glucose."]].map(([title, copy], index) => <div className="answer-step" key={title}><span>{index + 1}</span><p><strong>{title}</strong><small>{copy}</small></p></div>)}</div><div className="source-row"><span><FileText /> 1 Ch. 9, p. 7</span><span><Headphones /> 2 Lecture 12:34</span></div><button className="insert-button"><ArrowLeft /> Insert into note</button><div className="stick-card"><div><LayersIcon /><strong>Make it stick</strong><small>8 cards</small></div><p>Turn this note into a quick recall session before your study group.</p><blockquote>What is the final electron acceptor in cellular respiration?</blockquote><button>Generate flashcards <ArrowRight /></button></div></div>
+    <div className="assistant-footer"><div><button>Quiz me on this</button><button>Explain simply</button></div><div className="prompt-box"><textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Ask about your notes or materials..." rows={2} /><div><Paperclip /><button aria-label="Send" onClick={() => setSent(true)}><Send /></button></div></div>{sent && <small className="sent-note">Question queued for your study assistant.</small>}<p>A study partner, not a shortcut. Always check your sources.</p></div>
+  </aside>;
 }
-
-function Overview({ setView }: { setView: (v: View) => void }) {
-  return <div className="page-content">
-    <section className="welcome-row"><div><p className="eyebrow accent-text">Thursday, September 24, 2026</p><h2 className="hero-title">Good afternoon, Jack<span className="accent-text">.</span></h2><p className="hero-subtitle">Pick up a thread or make space for a new idea.</p></div><button className="primary-button" onClick={() => setView("chats")}><Plus className="h-4 w-4" /> Start a chat</button></section>
-    <section className="continue-panel"><div className="continue-copy"><span className="section-kicker">CONTINUE WHERE YOU LEFT OFF</span><h3>Understanding retrieval augmented generation</h3><p>Chat · Updated 12 minutes ago</p><button className="text-button" onClick={() => setView("chats")}>Open conversation <ArrowUpRight className="h-4 w-4" /></button></div><div className="continue-art"><div className="orbit orbit-one" /><div className="orbit orbit-two" /><Sparkles className="h-8 w-8 text-accent" /></div></section>
-    <div className="section-heading"><div><span className="section-kicker">YOUR WORKSPACE</span><h3>Make progress across your knowledge</h3></div><button className="text-button" onClick={() => setView("notes")}>View all <ChevronRight className="h-4 w-4" /></button></div>
-    <div className="overview-grid"><button className="metric-line" onClick={() => setView("notes")}><span className="metric-icon blue"><FileText className="h-5 w-5" /></span><span><strong>24</strong><small>Notes in your library</small></span><ArrowUpRight className="ml-auto h-4 w-4 text-ink-faint" /></button><button className="metric-line" onClick={() => setView("topics")}><span className="metric-icon violet"><BookOpen className="h-5 w-5" /></span><span><strong>8</strong><small>Active knowledge hubs</small></span><ArrowUpRight className="ml-auto h-4 w-4 text-ink-faint" /></button><button className="metric-line" onClick={() => setView("roadmaps")}><span className="metric-icon amber"><Zap className="h-5 w-5" /></span><span><strong>3</strong><small>Learning paths underway</small></span><ArrowUpRight className="ml-auto h-4 w-4 text-ink-faint" /></button></div>
-    <div className="content-columns"><section><div className="section-heading compact"><div><span className="section-kicker">RECENT NOTES</span><h3>Ideas worth returning to</h3></div><button className="text-button" onClick={() => setView("notes")}>See notes <ChevronRight className="h-4 w-4" /></button></div><div className="note-list">{notes.slice(0, 3).map((note) => <button className="note-row" key={note.title} onClick={() => setView("notes")}><span className={`note-dot ${note.color}`} /><span className="min-w-0 flex-1 text-left"><strong className="block truncate">{note.title}</strong><small>{note.type} · {note.date}</small></span><ChevronRight className="h-4 w-4 text-ink-faint" /></button>)}</div></section><section><div className="section-heading compact"><div><span className="section-kicker">QUICK ACTIONS</span><h3>What do you want to do?</h3></div></div><div className="quick-actions"><button onClick={() => setView("chats")}><MessageCircle className="h-4 w-4 text-accent" /><span>Ask AI Notebook</span><ChevronRight className="ml-auto h-4 w-4" /></button><button onClick={() => setView("notes")}><FileText className="h-4 w-4 text-amber-300" /><span>Capture a note</span><ChevronRight className="ml-auto h-4 w-4" /></button><button onClick={() => setView("topics")}><Tags className="h-4 w-4 text-violet-300" /><span>Explore a topic</span><ChevronRight className="ml-auto h-4 w-4" /></button></div></section></div>
-  </div>;
-}
-
-function Chats() {
-  const [draft, setDraft] = useState("");
-  return <div className="page-content chat-page"><div className="chat-intro"><div><span className="section-kicker">AI NOTEBOOK / CONVERSATION</span><h2 className="hero-title small">A thinking partner for your notes.</h2><p className="hero-subtitle">Ask a question, explore an idea, or turn a rough thought into something useful.</p></div><button className="secondary-button"><Archive className="h-4 w-4" /> History</button></div><div className="conversation"><div className="message ai-message"><span className="message-avatar"><Sparkles className="h-4 w-4" /></span><div><p className="message-meta">AI NOTEBOOK <span>• Just now</span></p><p className="message-copy">Welcome back. I can help you connect the ideas in your workspace, or we can start with a blank page.</p><div className="suggestion-row"><button onClick={() => setDraft("Help me organize my recent notes")}>Organize my recent notes <ArrowUpRight className="h-3.5 w-3.5" /></button><button onClick={() => setDraft("Create a learning plan for me")}>Create a learning plan <ArrowUpRight className="h-3.5 w-3.5" /></button></div></div></div></div><div className="composer"><textarea value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Ask anything about your workspace..." rows={2} /><div className="composer-footer"><span className="text-xs text-ink-faint">AI Notebook Pro · <kbd>⌘ ↵</kbd> to send</span><button className="send-button" aria-label="Send message"><Send className="h-4 w-4" /></button></div></div><div className="recent-chat-list"><div className="section-heading compact"><div><span className="section-kicker">RECENT CONVERSATIONS</span><h3>Continue a thread</h3></div></div>{chats.map((chat) => <button className="chat-row" key={chat.title}><span className="chat-row-icon"><MessageCircle className="h-4 w-4" /></span><span className="min-w-0 flex-1 text-left"><strong className="block truncate">{chat.title}</strong><small className="block truncate">{chat.preview}</small></span><small className="shrink-0">{chat.time}</small><ChevronRight className="h-4 w-4 text-ink-faint" /></button>)}</div></div>;
-}
-
-function Notes() { const [selected, setSelected] = useState(notes[0]); return <div className="page-content"><div className="section-toolbar"><div><p className="hero-subtitle">A calm place for everything you want to remember.</p></div><button className="primary-button"><Plus className="h-4 w-4" /> New note</button></div><div className="notes-workspace"><div className="notes-index"><div className="inline-search"><Search className="h-4 w-4" /><input placeholder="Filter notes" /></div><div className="notes-filter"><span>ALL NOTES <b>24</b></span><span>Pinned <b>4</b></span></div>{notes.map((note) => <button className={`index-note ${selected.title === note.title ? "selected" : ""}`} key={note.title} onClick={() => setSelected(note)}><span className={`note-dot ${note.color}`} /><span className="min-w-0 text-left"><strong className="block truncate">{note.title}</strong><small>{note.type} · {note.date}</small></span></button>)}</div><article className="note-editor"><div className="editor-meta"><span className="note-dot blue" /> {selected.type}<button className="icon-button ml-auto"><MoreHorizontal className="h-4 w-4" /></button></div><h2>{selected.title}</h2><p className="editor-date">Last edited {selected.date.toLowerCase()}</p><div className="editor-rule" /><p>Ideas become useful when they have somewhere to land. This note is a working space for connecting the important details, questions, and next steps around <strong>{selected.type.toLowerCase()}</strong>.</p><h3>Key takeaways</h3><ul><li>Keep the central idea visible and easy to return to.</li><li>Link new observations to the context that made them meaningful.</li><li>Leave a clear next action for future you.</li></ul></article></div></div>; }
-
-function Topics() { return <div className="page-content"><div className="section-toolbar"><p className="hero-subtitle">Knowledge hubs that give your ideas a home.</p><button className="primary-button"><Plus className="h-4 w-4" /> New topic</button></div><div className="topic-layout"><section className="topic-hero"><span className="topic-symbol">AI</span><div><span className="section-kicker">FEATURED TOPIC</span><h2>AI Systems</h2><p>How modern AI products work, from retrieval to reasoning.</p></div><div className="topic-progress"><strong>68%</strong><small>explored</small><div className="progress-track"><i style={{ width: "68%" }} /></div></div></section><div className="topic-section-heading"><span>YOUR TOPICS</span><small>8 active hubs</small></div><div className="topic-grid">{["AI Systems", "Personal growth", "Product strategy", "Reading list", "Creative practice", "Work notes"].map((topic, i) => <button className="topic-card" key={topic}><span className={`topic-card-icon t${i % 4}`}>{["AI", "PG", "PS", "RL", "CP", "WN"][i]}</span><strong>{topic}</strong><small>{[14, 9, 7, 12, 6, 21][i]} notes · {i + 2} chats</small><ChevronRight className="ml-auto h-4 w-4 text-ink-faint" /></button>)}</div></div></div>; }
-
-function Roadmaps() { const stages = [{ label: "Foundations", done: true, note: "Core concepts and vocabulary" }, { label: "Build a mental model", done: true, note: "Connect the moving pieces" }, { label: "Apply the ideas", current: true, note: "Use the knowledge in a real project" }, { label: "Share what you know", note: "Teach it back and refine" }]; return <div className="page-content"><div className="section-toolbar"><div><span className="section-kicker">LEARNING PATH</span><h2 className="hero-title small">Build fluency in AI systems.</h2><p className="hero-subtitle">A focused path with room to wander.</p></div><button className="secondary-button"><MoreHorizontal className="h-4 w-4" /> Manage</button></div><section className="roadmap"><div className="roadmap-top"><div><span className="section-kicker">CURRENT ROADMAP</span><h3>AI Systems, from first principles</h3></div><span className="progress-pill">2 of 4 complete</span></div><div className="timeline">{stages.map((stage, i) => <div className={`timeline-stage ${stage.done ? "done" : ""} ${stage.current ? "current" : ""}`} key={stage.label}><div className="timeline-marker">{stage.done ? <Check className="h-4 w-4" /> : <span>{i + 1}</span>}</div><div><h4>{stage.label}{stage.current && <span className="current-label">CURRENT</span>}</h4><p>{stage.note}</p></div></div>)}</div></section></div>; }
-
-function Mindmaps() { return <div className="page-content mindmap-page"><div className="section-toolbar"><div><p className="hero-subtitle">See how your ideas connect.</p></div><div className="map-controls"><button>−</button><span>100%</span><button>+</button><button><span className="sr-only">Reset</span><Circle className="h-3.5 w-3.5" /></button></div></div><div className="mindmap-canvas"><div className="map-line line-a" /><div className="map-line line-b" /><div className="map-line line-c" /><div className="map-node center"><Sparkles className="h-4 w-4" /><strong>AI Systems</strong><small>14 notes</small></div><div className="map-node node-a"><BookOpen className="h-4 w-4" /><strong>Foundations</strong><small>5 notes</small></div><div className="map-node node-b"><BrainCircuit className="h-4 w-4" /><strong>RAG</strong><small>4 notes</small></div><div className="map-node node-c"><Zap className="h-4 w-4" /><strong>Applications</strong><small>5 notes</small></div><div className="canvas-hint">Drag to pan · Scroll to zoom</div></div></div>; }
-
-function SettingsView({ theme, setTheme, accent, setAccent, collapsed, setCollapsed }: { theme: string; setTheme: (v: string) => void; accent: string; setAccent: (v: string) => void; collapsed: boolean; setCollapsed: (v: boolean) => void }) { return <div className="page-content settings-page"><p className="hero-subtitle">Make the workspace feel like yours.</p><div className="settings-layout"><nav className="settings-nav"><span className="active">Appearance</span><span>General</span><span>Chat</span><span>Accessibility</span><span>Account</span></nav><div className="settings-content"><section className="settings-section"><span className="section-kicker">APPEARANCE</span><h2>Shape your workspace</h2><p>Changes are saved automatically on this device.</p><label className="setting-label">Theme<div className="segmented">{["dark", "light", "system"].map((item) => <button className={theme === item ? "selected" : ""} key={item} onClick={() => setTheme(item)}>{item === "dark" ? <Moon className="h-4 w-4" /> : item === "light" ? <Sun className="h-4 w-4" /> : <Circle className="h-4 w-4" />}{item[0].toUpperCase() + item.slice(1)}</button>)}</div></label><label className="setting-label">Accent color<div className="accent-picker">{["#8b7cff", "#4f8cff", "#2abfa4", "#e9a23b", "#ed719d"].map((color) => <button key={color} aria-label={`Use ${color} accent`} className={accent === color ? "selected" : ""} style={{ background: color }} onClick={() => setAccent(color)}>{accent === color && <Check className="h-3 w-3 text-white" />}</button>)}</div></label><div className="setting-toggle"><span><strong>Compact sidebar</strong><small>Keep navigation focused while you work.</small></span><button className={`toggle ${collapsed ? "on" : ""}`} onClick={() => setCollapsed(!collapsed)} aria-label="Toggle compact sidebar"><i /></button></div><div className="preview-card"><div className="preview-top"><span className="brand-mark"><img src="/icon.png" alt="" /></span><span>AI Notebook</span><span className="ml-auto preview-dot" /></div><div className="preview-body"><span className="preview-message" /><span className="preview-message short" /><span className="preview-input" /></div></div></section></div></div></div>; }
+function LayersIcon() { return <BookOpen />; }
 
 export default function Page() {
-  const [view, setView] = useState<View>("overview");
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [commandOpen, setCommandOpen] = useState(false);
-  const [theme, setTheme] = useState("dark");
-  const [accent, setAccent] = useState("#8b7cff");
-  useEffect(() => { const saved = window.localStorage.getItem("ai-notebook-preferences"); if (saved) { const prefs = JSON.parse(saved); setCollapsed(Boolean(prefs.collapsed)); setTheme(prefs.theme || "dark"); setAccent(prefs.accent || "#8b7cff"); } }, []);
-  useEffect(() => { window.localStorage.setItem("ai-notebook-preferences", JSON.stringify({ collapsed, theme, accent })); document.documentElement.style.setProperty("--accent", accent); }, [collapsed, theme, accent]);
-  useEffect(() => { const listener = (event: KeyboardEvent) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setCommandOpen(true); } if (event.key === "Escape") setCommandOpen(false); }; window.addEventListener("keydown", listener); return () => window.removeEventListener("keydown", listener); }, []);
-  const page = useMemo(() => { if (view === "overview") return <Overview setView={setView} />; if (view === "chats") return <Chats />; if (view === "notes") return <Notes />; if (view === "topics") return <Topics />; if (view === "roadmaps") return <Roadmaps />; if (view === "mindmaps") return <Mindmaps />; return <SettingsView theme={theme} setTheme={setTheme} accent={accent} setAccent={setAccent} collapsed={collapsed} setCollapsed={setCollapsed} />; }, [view, theme, accent, collapsed]);
-  return <div className={`app-frame ${theme === "light" ? "light-mode" : ""}`}><Sidebar {...{ view, setView, collapsed, setCollapsed, mobileOpen, setMobileOpen }} /><main className="workspace-main"><Header view={view} onSearch={() => setCommandOpen(true)} onMenu={() => setMobileOpen(true)} />{page}</main>{commandOpen && <div className="command-backdrop" onClick={() => setCommandOpen(false)}><div className="command-modal" onClick={(e) => e.stopPropagation()}><div className="command-input"><Search className="h-5 w-5" /><input autoFocus placeholder="Search notes, chats, topics..." /><kbd>ESC</kbd><button onClick={() => setCommandOpen(false)}><X className="h-4 w-4" /></button></div><div className="command-section"><span>QUICK ACTIONS</span>{[{ icon: Plus, label: "Start a new chat", action: "chats" as View }, { icon: FileText, label: "Open notes", action: "notes" as View }, { icon: Tags, label: "Browse topics", action: "topics" as View }, { icon: Settings, label: "Open settings", action: "settings" as View }].map((item) => { const Icon = item.icon; return <button key={item.label} onClick={() => { setView(item.action); setCommandOpen(false); }}><Icon className="h-4 w-4" /><span>{item.label}</span><ChevronRight className="ml-auto h-4 w-4" /></button>; })}</div><div className="command-footer"><Command className="h-3 w-3" /> Navigate <span>↵</span> Select <span>ESC</span> Close</div></div></div>}</div>;
+  const [activePage, setActivePage] = useState(1);
+  return <div className="notely-app"><Sidebar open={mobileOpen} onClose={() => setMobileOpen(false)} /><main className="notebook-main"><header className="topbar"><button className="mobile-menu" onClick={() => setMobileOpen(true)}><Menu /></button><div className="crumb"><PanelLeft /><span>My notebooks</span><ChevronRight /><strong>Biology 101</strong></div><div className="top-actions"><span className="saved">⌁ All changes saved</span><button className="icon-only"><Upload /></button><button className="share"><Share2 /> Share</button><button className="study"><Sparkles /> Study assistant</button></div></header><section className="course-head"><div className="course-title"><span className="course-icon"><Sparkles /></span><div><h1>Biology 101</h1><p>Fall semester 2026&nbsp; / &nbsp;Prof. Elena Martinez</p></div></div><button className="add-material"><Plus /> Add material</button></section><nav className="tabs">{([[FileText, "Notes", 8], [Folder, "Materials", 12], [SquarePen, "PDF annotation"], [BookOpen, "Flashcards", 24], [ListChecks, "Quizzes", 3]] as [ComponentType<{ className?: string }>, string, number?][]).map(([icon, label, count], index) => { const TabIcon = icon as ComponentType<{ className?: string }>; return <button className={index === 0 ? "active" : ""} key={label}><TabIcon />{label}{count && <small>{count}</small>}</button>; })}</nav><div className="editor-layout"><aside className="page-list"><div className="page-list-head"><span>PAGES · 8</span><Plus /></div><span className="unit-label">UNIT 3 · METABOLISM</span>{pages.map(([title, meta], index) => <button key={title} className={`page-item ${activePage === index ? "selected" : ""}`} onClick={() => setActivePage(index)}><FileText /><span><strong>{title}</strong><small>{meta}</small></span></button>)}<button className="new-page"><Plus /> New page</button><span className="unit-label linked">LINKED MATERIALS</span><div className="material-card"><b>PDF · 18 pages</b><strong>Ch. 9 — Cellular respiration</strong><small>6 annotations ↗</small></div><div className="lecture-card"><Headphones /><span><strong>Lecture 07</strong><small>42 min · Transcript ready</small></span><PlayCircle /></div></aside><article className="note-editor"><div className="editor-toolbar"><span>Normal text <ChevronDown /></span><b>B</b><i>I</i><u>U</u><span>⌁</span><span>🔗</span><span>☷</span><span>☑</span><Plus /><button><Sparkles /> Ask AI</button></div><div className="note-body"><div className="note-kicker">LECTURE 07 / ENERGY & METABOLISM</div><button className="note-more"><MoreHorizontal /></button><h2>{pages[activePage][0]}</h2><p className="note-meta">October 14, 2026&nbsp;&nbsp; · &nbsp;&nbsp;Prof. Elena Martinez <b>Midterm topic</b></p><div className="big-idea"><CircleHelp /><p><strong>The big idea</strong><span>Cells transfer the energy stored in glucose into ATP through a series of redox reactions. Oxygen is the final electron acceptor — not the source of ATP.</span></p></div><h3>01&nbsp; From glucose to usable energy</h3><p>Cellular respiration is a catabolic pathway: glucose is oxidized and oxygen is reduced. The released energy drives ATP synthesis, rather than being lost all at once as heat.</p><div className="equation">C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + energy (ATP)</div><div className="stages"><div className="stages-heading"><span>ONE GLUCOSE. THREE STAGES.</span><b>≈ 30–32 ATP total</b></div><div className="stage-grid"><div><small>Cytoplasm</small><strong>Glycolysis</strong><span>Glucose → 2 pyruvate</span><b>2 ATP</b></div><ArrowRight /><div><small>Mitochondrial matrix</small><strong>Krebs cycle</strong><span>Acetyl-CoA → CO₂</span><b>2 ATP</b></div><ArrowRight /><div><small>Inner membrane</small><strong>Electron transport</strong><span>NADH + FADH₂ → H₂O</span><b>~26–28 ATP</b></div></div></div><h3>02&nbsp; Why the proton gradient matters <span className="audio"><Headphones /> 12:34</span></h3><p>The electron transport chain pumps H⁺ from the matrix into the intermembrane space. <strong>H⁺ flows back through ATP synthase</strong>, coupling the energy of the gradient to ATP production. This is chemiosmosis.</p><div className="exam-tip">Exam tip: the ETC builds the gradient; ATP synthase uses it. Don&apos;t confuse their roles.</div><h3>03&nbsp; Check my understanding <small className="complete">1 of 2 complete</small></h3><label className="check-row"><input type="checkbox" defaultChecked /> Explain substrate-level vs. oxidative phosphorylation.</label><label className="check-row"><input type="checkbox" /> What happens to ATP production if oxygen is unavailable?</label><div className="block-placeholder">Type / for blocks, or space for AI...</div></div></article></div></main><Assistant /></div>;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _unused = { ArrowLeft, ArrowRight };
