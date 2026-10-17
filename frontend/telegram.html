@@ -11,10 +11,8 @@
 <meta name="theme-color" content="#4F46E5">
   <script>
     (function () {
-      try {
-        var t = localStorage.getItem('ss_theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', t);
-      } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+      var t = localStorage.getItem('ss_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
   <title>Telegram · AI Notebook</title>
@@ -68,6 +66,7 @@
   <link rel="stylesheet" href="/css/command-palette.css" />
   <link rel="stylesheet" href="/css/rescue.css" />
   <link rel="stylesheet" href="/css/theme.css" />
+  <link rel="stylesheet" href="/css/figma-redesign.css" />
 </head>
 <body>
   <div id="particles-js"></div>
