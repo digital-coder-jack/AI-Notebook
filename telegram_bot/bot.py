@@ -60,7 +60,7 @@ if not TELEGRAM_BOT_TOKEN:
 # Public web app URL. Configurable via env var so the bot can be pointed at
 # any deployment without code changes.
 WEB_APP_URL = os.environ.get(
-    "WEB_APP_URL", "https://study-sphere-ai-fc1f.vercel.app/"
+    "WEB_APP_URL", "https://ai-notebook-mwlq.vercel.app/"
 )
 
 
