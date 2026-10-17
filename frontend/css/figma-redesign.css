@@ -1,0 +1,830 @@
+/* =====================================================================
+   AI Notebook — Figma Redesign Overlay
+   Layers the new Figma-imported design on top of the existing app.
+   Loaded AFTER workspace-redesign.css so it can refine the visual
+   language without breaking any existing DOM/JS contracts.
+
+   What this file does:
+   - Adds Newsreader serif for page headings (from the Figma design)
+   - Refines the color palette: softer background, warmer accents
+   - Restyles stat cards as notebook-style cards with colored badges
+   - Polishes the search trigger and topbar layout
+   - Adds a quick-start / study-tools hero section
+   - Improves hover micro-interactions on cards and list items
+
+   What this file does NOT do:
+   - Change any DOM structure (all changes are CSS-only)
+   - Break any existing JS hooks or API calls
+   - Create a new application or duplicate any code
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap');
+
+/* ============ REFINED TOKENS ============ */
+:root {
+  /* Soften the background and panels from the Figma palette */
+  --rd-bg: #0f1014;
+  --rd-panel: #161821;
+  --rd-panel-hover: #1a1d28;
+  --rd-sidebar: #131520;
+  --rd-border: #262a36;
+  --rd-border-hover: #363b4d;
+  --rd-border-light: #2e3340;
+
+  /* Warm the text colors slightly for better readability */
+  --rd-text: #f5f6fa;
+  --rd-text-muted: #9098aa;
+  --rd-text-dim: #6b7280;
+
+  /* Refined accent — slightly warmer rose from the Figma */
+  --accent: #f478a5;
+  --accent-soft: rgba(244, 120, 165, .10);
+  --accent-strong: #ff9bc4;
+
+  /* New: serif display font from Figma for page-level headings */
+  --rd-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+
+  /* Notebook card badge colors (from Figma prototype) */
+  --nb-blue: #6b8fd6;
+  --nb-blue-soft: rgba(107, 143, 214, .14);
+  --nb-amber: #d4a055;
+  --nb-amber-soft: rgba(212, 160, 85, .14);
+  --nb-mint: #5fb89a;
+  --nb-mint-soft: rgba(95, 184, 154, .14);
+  --nb-violet: #9b85d9;
+  --nb-violet-soft: rgba(155, 133, 217, .14);
+}
+
+/* ============ SERIF PAGE HEADINGS ============ */
+/* Only the main page h1 gets the serif treatment (from Figma).
+   Section h2/h3 keep the existing Space Grotesk display font. */
+.topbar h1,
+.page-heading h1,
+.content > .topbar h1 {
+  font-family: var(--rd-serif) !important;
+  font-weight: 600 !important;
+  font-size: clamp(24px, 3.2vw, 38px) !important;
+  line-height: 1.1 !important;
+  letter-spacing: -.035em !important;
+  color: #f2f4f8 !important;
+}
+
+/* The wave emoji stays inline but doesn't get serif */
+.topbar h1 .wave {
+  font-family: var(--rd-font) !important;
+}
+
+/* Modal and auth headings also get serif */
+.modal h2,
+.auth-card h1,
+.auth-visual h2 {
+  font-family: var(--rd-serif) !important;
+  font-weight: 600 !important;
+}
+
+/* ============ TOPBAR REFINEMENTS ============ */
+.topbar {
+  height: 76px !important;
+  padding: 0 clamp(20px, 3.5vw, 52px) !important;
+  background: rgba(15, 16, 20, .82) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid #232733 !important;
+}
+
+.topbar .eyebrow {
+  font-size: 11px !important;
+  letter-spacing: .14em !important;
+  color: #888e9e !important;
+  margin-bottom: 6px !important;
+}
+
+.topbar .sub {
+  font-size: 13px !important;
+  color: var(--rd-text-muted) !important;
+  margin-top: 4px !important;
+}
+
+/* Search trigger — refined from Figma */
+.search-trigger {
+  width: 248px !important;
+  height: 36px !important;
+  border: 1px solid #2a2e3a !important;
+  background: #181b24 !important;
+  border-radius: 7px !important;
+  padding: 0 11px !important;
+  font-size: 12px !important;
+  color: #8a91a0 !important;
+  transition: border-color .18s ease, background .18s ease !important;
+}
+
+.search-trigger:hover {
+  border-color: #3a4050 !important;
+  background: #1c1f2a !important;
+}
+
+.search-trigger .stxt {
+  flex: 1 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.search-trigger .kbd,
+.search-trigger kbd {
+  font-size: 10px !important;
+  border: 1px solid #303542 !important;
+  background: #20242f !important;
+  color: #6b7180 !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+  margin-left: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+/* New chat button — refined */
+.topbar .btn {
+  height: 36px !important;
+  padding: 0 14px !important;
+  border-radius: 7px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease !important;
+}
+
+.topbar .btn.primary {
+  box-shadow: 0 3px 12px rgba(244, 120, 165, .22) !important;
+}
+
+.topbar .btn.primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(244, 120, 165, .35) !important;
+}
+
+/* ============ CONTENT AREA ============ */
+.content {
+  padding: 2.2rem clamp(1.2rem, 3.5vw, 3.2rem) 3rem !important;
+  gap: 1.8rem !important;
+}
+
+/* ============ STAT CARDS — NOTEBOOK STYLE ============ */
+.stats-grid {
+  gap: 14px !important;
+}
+
+.stat-card {
+  padding: 1.3rem !important;
+  border-radius: 11px !important;
+  border: 1px solid var(--rd-border) !important;
+  background: var(--rd-panel) !important;
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.stat-card::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent) !important;
+  opacity: 0 !important;
+  transition: opacity .22s ease !important;
+}
+
+a.stat-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--rd-border)) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .12) !important;
+}
+
+a.stat-card:hover::before {
+  opacity: 1 !important;
+}
+
+/* Stat card icon — notebook badge style from Figma */
+.stat-card .ic {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 9px !important;
+  margin-bottom: 14px !important;
+  font-size: 1rem !important;
+}
+
+/* Alternating badge colors for stat cards (notebook style) */
+.stat-card:nth-child(1) .ic {
+  background: var(--nb-blue-soft) !important;
+  color: var(--nb-blue) !important;
+}
+.stat-card:nth-child(2) .ic {
+  background: var(--nb-amber-soft) !important;
+  color: var(--nb-amber) !important;
+}
+.stat-card:nth-child(3) .ic {
+  background: var(--nb-mint-soft) !important;
+  color: var(--nb-mint) !important;
+}
+.stat-card:nth-child(4) .ic {
+  background: var(--nb-violet-soft) !important;
+  color: var(--nb-violet) !important;
+}
+
+.stat-card b {
+  font-size: 1.85rem !important;
+  font-weight: 700 !important;
+  color: #f0f2f8 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.stat-card span {
+  font-size: 11px !important;
+  color: var(--rd-text-muted) !important;
+}
+
+/* ============ LEARN LAUNCHER — REFINED HERO ============ */
+.learn-launcher,
+.learn-launcher.glass {
+  border: 1px solid var(--rd-border) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(130deg, #1a1d28 0%, #161821 50%, #1a1822 100%) !important;
+  padding: 2.4rem clamp(1.5rem, 4vw, 2.8rem) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Subtle glow accent in the corner */
+.learn-launcher::after {
+  content: '' !important;
+  position: absolute !important;
+  top: -30px !important;
+  right: -30px !important;
+  width: 180px !important;
+  height: 180px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, var(--accent-soft), transparent 70%) !important;
+  pointer-events: none !important;
+}
+
+.learn-launcher .ll-copy h2 {
+  font-family: var(--rd-serif) !important;
+  font-size: clamp(22px, 3vw, 30px) !important;
+  font-weight: 600 !important;
+  color: #f4f5f8 !important;
+  letter-spacing: -.03em !important;
+}
+
+.learn-launcher .ll-copy h2 i {
+  color: var(--accent-strong) !important;
+  font-size: .8em !important;
+}
+
+.learn-launcher .ll-copy p {
+  color: var(--rd-text-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  margin-top: 8px !important;
+}
+
+.learn-launcher .ll-form {
+  margin-top: 20px !important;
+  gap: 10px !important;
+}
+
+.learn-launcher .ll-form input {
+  height: 42px !important;
+  border: 1px solid #2e3340 !important;
+  background: #1c1f2a !important;
+  color: #d0d4de !important;
+  border-radius: 8px !important;
+  padding: 0 16px !important;
+  font-size: 13px !important;
+  font-family: var(--rd-font) !important;
+  transition: border-color .18s ease !important;
+}
+
+.learn-launcher .ll-form input::placeholder {
+  color: #6b7180 !important;
+}
+
+.learn-launcher .ll-form input:focus {
+  border-color: color-mix(in srgb, var(--accent) 50%, #2e3340) !important;
+}
+
+.learn-launcher .ll-form .btn {
+  height: 42px !important;
+  padding: 0 18px !important;
+  font-size: 13px !important;
+  white-space: nowrap !important;
+}
+
+/* ============ SECTION HEADINGS ============ */
+.dash-section .section-title h2,
+.panel-head h3 {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #e0e3eb !important;
+}
+
+.dash-section .section-title h2 i,
+.panel-head h3 i {
+  color: var(--accent-strong) !important;
+  margin-right: 6px !important;
+}
+
+/* ============ WORKSPACE CARDS — NOTEBOOK STYLE ============ */
+.workspace-grid {
+  gap: 14px !important;
+}
+
+.ws-card {
+  min-height: 130px !important;
+  padding: 18px !important;
+  border-radius: 11px !important;
+  border: 1px solid var(--rd-border) !important;
+  background: var(--rd-panel) !important;
+  transition: transform .22s ease, border-color .22s ease, background .22s ease !important;
+}
+
+.ws-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: var(--rd-border-hover) !important;
+  background: var(--rd-panel-hover) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .1) !important;
+}
+
+.ws-card .ws-ic {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 9px !important;
+  font-size: 15px !important;
+}
+
+.ws-card strong,
+.ws-card b {
+  font-size: 13px !important;
+  color: #e4e7ee !important;
+  font-weight: 600 !important;
+}
+
+.ws-card p {
+  font-size: 11px !important;
+  color: var(--rd-text-muted) !important;
+  line-height: 1.5 !important;
+}
+
+.ws-card .ws-launch {
+  font-size: 10px !important;
+  color: var(--accent-strong) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin-top: auto !important;
+  opacity: 0 !important;
+  transition: opacity .18s ease !important;
+}
+
+.ws-card:hover .ws-launch {
+  opacity: 1 !important;
+}
+
+/* ============ TRENDING CARDS — REFINED ============ */
+.trending-grid {
+  gap: 12px !important;
+}
+
+.trend-card {
+  border-radius: 11px !important;
+  padding: 16px !important;
+  transition: transform .22s ease, border-color .22s ease !important;
+}
+
+.trend-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: var(--rd-border-hover) !important;
+}
+
+/* ============ TOPIC CARDS — NOTEBOOK STYLE ============ */
+.topics-grid {
+  gap: 14px !important;
+}
+
+.topic-card {
+  padding: 18px !important;
+  border-radius: 11px !important;
+  transition: transform .22s ease, border-color .22s ease !important;
+}
+
+.topic-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: var(--rd-border-hover) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .08) !important;
+}
+
+/* ============ PANELS — REFINED ============ */
+.panel {
+  border-radius: 12px !important;
+  border: 1px solid var(--rd-border) !important;
+  background: var(--rd-panel) !important;
+  padding: 1.4rem !important;
+  transition: border-color .2s ease !important;
+}
+
+.panel:hover {
+  border-color: #2d313e !important;
+}
+
+.panel-head {
+  margin-bottom: 18px !important;
+}
+
+/* ============ RECENT ITEMS — REFINED LIST ============ */
+.recent-item {
+  padding: 13px 2px !important;
+  border-top: 1px solid #232733 !important;
+  transition: transform .18s ease !important;
+}
+
+a.recent-item:hover {
+  transform: translateX(3px) !important;
+  border-color: color-mix(in srgb, var(--accent) 25%, #232733) !important;
+}
+
+.recent-item .ttl i {
+  color: var(--accent) !important;
+  font-size: 14px !important;
+}
+
+.recent-item .ttl b {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #d4d7e0 !important;
+}
+
+.recent-item small {
+  font-size: 10px !important;
+  color: #747b8a !important;
+}
+
+/* ============ DASH GRID — BETTER SPACING ============ */
+.dash-grid,
+.dash-grid-2 {
+  gap: 14px !important;
+  margin-bottom: 14px !important;
+}
+
+/* ============ ACHIEVEMENT CARDS — NOTEBOOK STYLE ============ */
+.ach-card {
+  border-radius: 11px !important;
+  padding: 16px !important;
+  transition: transform .22s ease, border-color .22s ease !important;
+}
+
+.ach-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: var(--rd-border-hover) !important;
+}
+
+.ach-card .ach-ic {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 9px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: var(--accent-soft) !important;
+  color: var(--accent-strong) !important;
+  font-size: 16px !important;
+  flex-shrink: 0 !important;
+}
+
+.ach-card.unlocked .ach-ic {
+  background: var(--nb-mint-soft) !important;
+  color: var(--nb-mint) !important;
+}
+
+.ach-card .ach-body b {
+  font-size: 12px !important;
+  color: #e0e3eb !important;
+  font-weight: 600 !important;
+}
+
+.ach-card .ach-body small {
+  font-size: 10px !important;
+  color: var(--rd-text-muted) !important;
+}
+
+.ach-bar {
+  height: 4px !important;
+  border-radius: 99px !important;
+  background: #232733 !important;
+  margin-top: 8px !important;
+}
+
+.ach-bar > span {
+  background: var(--accent) !important;
+  border-radius: 99px !important;
+  transition: width .5s ease !important;
+}
+
+/* ============ CONTINUE CARD — REFINED ============ */
+.continue-card,
+.first-run {
+  border-radius: 12px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--rd-border)) !important;
+  padding: 1.4rem 1.6rem !important;
+}
+
+.continue-icon {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 11px !important;
+  background: var(--accent-soft) !important;
+  color: var(--accent-strong) !important;
+}
+
+.continue-copy h2,
+.first-run h2 {
+  font-family: var(--rd-serif) !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+}
+
+/* ============ PROGRESS RING — REFINED ============ */
+.progress-ring {
+  border: 3px solid var(--rd-border) !important;
+  border-radius: 50% !important;
+  transition: --p .8s ease !important;
+}
+
+/* ============ AI USAGE — REFINED BAR ============ */
+.ai-usage-bar .progress {
+  height: 6px !important;
+  border-radius: 99px !important;
+  background: #232733 !important;
+  overflow: hidden !important;
+}
+
+.ai-usage-bar .progress span {
+  border-radius: 99px !important;
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong)) !important;
+  transition: width .6s ease !important;
+}
+
+/* ============ QUICK-START SECTION (from Figma prototype) ============ */
+/* This is a CSS-only enhancement that styles the existing learn-launcher
+   to also serve as a quick-start prompt area. No new HTML is needed —
+   the existing #learn-launcher section gets this refined treatment. */
+.learn-launcher .ll-form input {
+  padding-left: 38px !important;
+  position: relative !important;
+}
+
+.learn-launcher .ll-form {
+  position: relative !important;
+}
+
+.learn-launcher .ll-form > i.fa-wand-magic-sparkles {
+  position: absolute !important;
+  left: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: var(--accent-strong) !important;
+  font-size: 14px !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+/* ============ EMPTY STATES — REFINED ============ */
+.empty-state {
+  text-align: center !important;
+  padding: 1.8rem 1rem !important;
+}
+
+.empty-state .empty-icon {
+  width: 48px !important;
+  height: 48px !important;
+  margin: 0 auto 14px !important;
+  border-radius: 12px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: var(--accent-soft) !important;
+  color: var(--accent-strong) !important;
+  font-size: 20px !important;
+}
+
+.empty-state h4 {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #d4d7e0 !important;
+  margin: 0 0 6px !important;
+}
+
+.empty-state p {
+  font-size: 11px !important;
+  color: var(--rd-text-muted) !important;
+  margin: 0 0 14px !important;
+  line-height: 1.5 !important;
+}
+
+/* ============ SKELETON — REFINED SHIMMER ============ */
+.skeleton {
+  background: linear-gradient(90deg, #161821 25%, #1e212c 50%, #161821 75%) !important;
+  background-size: 200% 100% !important;
+  animation: rd-shimmer 1.6s infinite linear !important;
+  border-radius: 6px !important;
+}
+
+/* ============ GUEST BANNER — REFINED ============ */
+.guest-banner {
+  border-radius: 12px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--rd-border)) !important;
+  background: var(--accent-soft) !important;
+  padding: 1rem 1.4rem !important;
+}
+
+.guest-banner-text i {
+  color: var(--accent-strong) !important;
+}
+
+.guest-banner-text strong {
+  color: #e0e3eb !important;
+  font-size: 13px !important;
+}
+
+.guest-banner-text p {
+  color: var(--rd-text-muted) !important;
+  font-size: 11px !important;
+}
+
+/* ============ NOTE ITEMS — REFINED ============ */
+.note-item {
+  border-radius: 10px !important;
+  border: 1px solid var(--rd-border) !important;
+  background: var(--rd-panel) !important;
+  transition: border-color .18s ease, transform .18s ease !important;
+}
+
+.note-item:hover {
+  border-color: var(--rd-border-hover) !important;
+}
+
+.note-item .ni-main b {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #d4d7e0 !important;
+}
+
+.note-item .ni-main small {
+  font-size: 10px !important;
+  color: #747b8a !important;
+}
+
+.note-actions button {
+  border-radius: 7px !important;
+  width: 32px !important;
+  height: 32px !important;
+  transition: background .15s ease, color .15s ease !important;
+}
+
+.note-actions button:hover {
+  background: #232631 !important;
+}
+
+.note-actions button.danger:hover {
+  color: #ef6b8b !important;
+  background: rgba(239, 107, 139, .1) !important;
+}
+
+/* ============ LOAD ERROR — REFINED ============ */
+.load-error {
+  border-radius: 12px !important;
+  border: 1px solid #3d3520 !important;
+  background: rgba(212, 160, 85, .08) !important;
+  padding: 1.2rem 1.4rem !important;
+}
+
+.load-error > i {
+  color: var(--nb-amber) !important;
+}
+
+.load-error b {
+  color: #e0e3eb !important;
+  font-size: 13px !important;
+}
+
+.load-error p {
+  color: var(--rd-text-muted) !important;
+  font-size: 11px !important;
+}
+
+/* ============ MODEL BADGES — REFINED ============ */
+.model-badge {
+  font-size: 11px !important;
+  color: var(--rd-text-muted) !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  background: #1c1f2a !important;
+  border: 1px solid #2a2e3a !important;
+}
+
+.model-dot {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+/* ============ CHIPS — REFINED ============ */
+.chip {
+  font-size: 10px !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  background: #1c1f2a !important;
+  border: 1px solid #2a2e3a !important;
+  color: var(--rd-text-muted) !important;
+  transition: border-color .18s ease, color .18s ease !important;
+}
+
+.chip.clickable:hover {
+  border-color: var(--rd-border-hover) !important;
+  color: #d0d4de !important;
+}
+
+/* ============ MOBILE REFINEMENTS ============ */
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .stat-card b {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .content {
+    padding: calc(64px + 1rem) 1rem 2rem !important;
+    gap: 1.3rem !important;
+  }
+
+  .topbar {
+    height: 64px !important;
+    padding: 0 1rem !important;
+  }
+
+  .search-trigger {
+    display: none !important;
+  }
+
+  .topbar h1 {
+    font-size: 20px !important;
+  }
+
+  .topbar .sub {
+    display: none !important;
+  }
+
+  .learn-launcher {
+    padding: 1.5rem !important;
+  }
+
+  .learn-launcher .ll-copy h2 {
+    font-size: 20px !important;
+  }
+
+  .stat-card {
+    padding: 1rem !important;
+  }
+
+  .stat-card .ic {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .stat-card b {
+    font-size: 1.3rem !important;
+  }
+
+  .ws-card {
+    min-height: 110px !important;
+    padding: 14px !important;
+  }
+
+  .ws-card .ws-launch {
+    opacity: 1 !important;
+  }
+}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce) {
+  .stat-card,
+  .ws-card,
+  .topic-card,
+  .trend-card,
+  .ach-card,
+  .recent-item,
+  .note-item,
+  .skeleton {
+    transition: none !important;
+    animation: none !important;
+  }
+}
