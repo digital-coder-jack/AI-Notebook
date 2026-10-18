@@ -134,14 +134,11 @@
 
   /* ---- Footer markup ---- */
   function footerHtml(u) {
-    var light = (function () {
-      try { return (localStorage.getItem('ss_theme') || 'dark') === 'light'; } catch (e) { return false; }
-    })();
     return '' +
       '<button class="theme-toggle side-theme" id="sideThemeToggle" type="button" ' +
-        'aria-label="Toggle dark and light mode" title="Theme">' +
-        '<i class="fas ' + (light ? 'fa-sun' : 'fa-moon') + '" aria-hidden="true"></i>' +
-        '<span>' + (light ? 'Light mode' : 'Dark mode') + '</span>' +
+        'aria-label="Theme" title="Theme" hidden>' +
+        '<i class="fas fa-sun" aria-hidden="true"></i>' +
+        '<span>Light mode</span>' +
       '</button>' +
       userFooterHtml(u);
   }

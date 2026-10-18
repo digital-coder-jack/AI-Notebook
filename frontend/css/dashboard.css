@@ -240,7 +240,7 @@ a.recent-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 
 .first-run-steps li { display: flex; gap: .55rem; align-items: center; min-width: 0; padding: .6rem; border: 1px solid var(--border); border-radius: 10px; color: var(--text-dim); }
 .first-run-steps li > span { display: grid; place-items: center; width: 24px; height: 24px; flex: 0 0 24px; border-radius: 50%; background: var(--glass-strong); color: var(--text); font-size: .75rem; }
 .first-run-steps li.complete { border-color: color-mix(in srgb, var(--success) 45%, var(--border)); color: var(--text); }
-.first-run-steps li.complete > span { background: var(--success); color: #06130f; }
+.first-run-steps li.complete > span { background: var(--success); color: #fbfaf7; }
 .first-run-steps b, .first-run-steps small { display: block; }
 .first-run-steps b { font-size: .82rem; }
 .first-run-steps small { margin-top: .15rem; font-size: .75rem; color: inherit; }
