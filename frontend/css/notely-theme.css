@@ -1,0 +1,224 @@
+/* =====================================================================
+   AI Notebook — Notely Theme (foundation)
+   Defines every theme token the app expects with the Notely
+   paper-and-ink palette. Loaded LAST (after figma-redesign.css) so
+   these values win wherever pages referenced missing base sheets.
+   ===================================================================== */
+
+:root {
+  /* Surfaces */
+  --bg-0: #fbfaf7;
+  --bg-1: #f6f5ef;
+  --bg-2: #f2f1ec;
+  --surface: #fffefa;
+  --surface-1: #fffdf8;
+  --surface-2: #f6f5ef;
+  --surface-raised: #ffffff;
+  --surface-glass: rgba(255, 254, 250, .82);
+  --page-bg: #fbfaf7;
+  --nav-bg: rgba(251, 250, 247, .85);
+  --menu-bg: #ffffff;
+
+  /* Ink */
+  --text: #2d3038;
+  --text-2: #50535b;
+  --text-muted: #6f7280;
+  --text-dim: #9a9ca3;
+
+  /* Lines */
+  --border: #e5e3dc;
+  --border-light: #dedcd5;
+  --border-strong: #c9c6bf;
+
+  /* Accent (Notely indigo) */
+  --primary: #5558ac;
+  --accent: #5558ac;
+  --accent-2: #6d70c9;
+  --accent-h: #4b4f9c;
+  --accent-strong: #6d70c9;
+  --accent-soft: #eeedff;
+  --accent-light: #eeedff;
+  --accent-ring: rgba(85, 88, 172, .22);
+  --grad: linear-gradient(135deg, #5558ac, #6d70c9);
+  --grad-primary: linear-gradient(135deg, #5558ac, #6d70c9);
+
+  /* Status */
+  --success: #3f8f74;
+  --warning: #b98a3c;
+  --danger: #c74f6f;
+  --info: #5b8ac9;
+
+  /* Glass */
+  --glass: rgba(255, 254, 250, .85);
+  --glass-2: rgba(255, 254, 250, .65);
+  --glass-strong: #f1efe8;
+
+  /* Chat */
+  --chat-ink: #2d3038;
+  --chat-line: #e5e3dc;
+  --chat-muted: #6f7280;
+
+  /* Shape & elevation */
+  --radius-sm: 6px;
+  --radius-md: 9px;
+  --radius: 9px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-full: 999px;
+  --shadow-sm: 0 1px 2px rgba(45, 48, 56, .06);
+  --shadow-md: 0 4px 14px rgba(45, 48, 56, .08);
+  --shadow: 0 4px 14px rgba(45, 48, 56, .08);
+  --shadow-lg: 0 10px 30px rgba(45, 48, 56, .10);
+  --shadow-xl: 0 20px 60px rgba(45, 48, 56, .12);
+  --shadow-accent: 0 3px 12px rgba(85, 88, 172, .20);
+  --shadow-glow: 0 0 24px rgba(85, 88, 172, .18);
+
+  /* Type scale */
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --type-12: 12px;
+  --type-14: 14px;
+  --type-16: 16px;
+  --type-18: 18px;
+  --type-24: 24px;
+  --type-32: 32px;
+  --type-48: 48px;
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur-base: 240ms;
+  --dur-slow: 400ms;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-smooth: ease;
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --transition-base: 240ms ease;
+
+  /* Fonts */
+  --font-family-ui: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --rd-font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --rd-display: 'DM Sans', sans-serif;
+
+  /* Space */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-md: 16px;
+  --density-pad: 16px;
+}
+
+/* ---- Notely font + base look, applied over everything ---- */
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #fbfaf7;
+  color: #2d3038;
+}
+
+/* Serif for big page titles (Notely uses Playfair-style headings) */
+.topbar h1,
+.page-heading h1,
+.auth-card h1,
+.auth-visual h2,
+.learn-launcher .ll-copy h2,
+.modal h2,
+.topic-header h1,
+.cl-hero h1,
+.landing-hero h1,
+.cl-mini-heading,
+.cl-section-heading,
+.course-head h1,
+.flashcard .fc-q {
+  font-family: 'Playfair Display', Georgia, serif !important;
+}
+
+/* Brand wordmark */
+.brand,
+.brand span,
+.cl-brand,
+.landing-brand {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Buttons: solid indigo, softly rounded (Notely style) */
+.btn {
+  border-radius: 8px !important;
+  font-family: 'DM Sans', sans-serif !important;
+}
+.btn.primary,
+.auth-card .btn.block,
+.chat-side-head .btn.block,
+.cl-cta .btn.primary,
+.landing-cta .btn.primary {
+  background: #5558ac !important;
+  color: #fff !important;
+}
+.btn.primary:hover {
+  background: #4b4f9c !important;
+}
+.btn.ghost,
+.btn.secondary,
+.btn.outline {
+  background: #fff !important;
+  border: 1px solid #dedcd5 !important;
+  color: #50535b !important;
+}
+
+/* Active nav items: soft indigo wash */
+.primary-nav button.active,
+.notebook.active,
+.sidebar .nav-item.active,
+.nav-item.active {
+  background: #eeedff !important;
+  color: #4b4f9c !important;
+}
+
+/* Cards: clean paper panels instead of glass */
+.glass,
+.panel,
+.stat-card,
+.ws-card,
+.tool-card,
+.topic-card,
+.ach-card,
+.set-card,
+.settings-nav,
+.quiz-card,
+.flashcard,
+.modal,
+.toast {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #fffefa !important;
+  border: 1px solid #e5e3dc !important;
+  box-shadow: 0 1px 2px rgba(45, 48, 56, .05) !important;
+}
+.glass:hover,
+.panel:hover,
+.stat-card:hover,
+.ws-card:hover,
+.tool-card:hover,
+.topic-card:hover,
+.ach-card:hover {
+  border-color: #c9c6bf !important;
+  box-shadow: 0 4px 14px rgba(45, 48, 56, .08) !important;
+}
+
+/* Inputs */
+input, textarea, select {
+  background: #fffdf8 !important;
+  border-color: #dedcd5 !important;
+  color: #2d3038 !important;
+}
+
+/* Light-mode scrollbars */
+::-webkit-scrollbar-track { background: #fbfaf7 !important; }
+
+/* Kill the dark particle backdrop */
+#particles-js { opacity: 0 !important; }
+
+/* Theme toggle: light theme is now the only theme */
+:root[data-theme='light'] .theme-toggle .fa-sun,
+.theme-toggle .fa-sun { display: none !important; }
+:root[data-theme='light'] .theme-toggle .fa-moon,
+.theme-toggle .fa-moon { display: none !important; }
