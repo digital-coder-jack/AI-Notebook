@@ -47,7 +47,7 @@
   function applyPreferences() {
     var root = document.documentElement;
 
-    var theme = read(PREF_KEYS.theme, 'dark');
+    var theme = 'light';
     root.setAttribute('data-theme', theme);
 
     root.setAttribute('data-accent', read(PREF_KEYS.accent, 'violet'));
