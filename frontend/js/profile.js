@@ -564,14 +564,9 @@ async function saveAiSettings() {
    THEME helper (system aware)
    ===================================================================== */
 function applyTheme(theme) {
-  LS.set('ss_theme', theme);
-  if (theme === 'system') {
-    const sys = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', sys);
-  } else {
-    document.documentElement.setAttribute('data-theme', theme);
-  }
-  if (window.SS && SS.applyTheme && theme !== 'system') SS.applyTheme(theme);
+  LS.set('ss_theme', 'light');
+  document.documentElement.setAttribute('data-theme', 'light');
+  if (window.SS && SS.applyTheme) SS.applyTheme('light');
 }
 
 /* =====================================================================
