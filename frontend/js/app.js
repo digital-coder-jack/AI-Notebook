@@ -205,23 +205,18 @@ const SS = (() => {
     });
   }
 
-  /* ---------- theme (dark / light) ---------- */
+  /* ---------- theme (Notely light is the only theme) ---------- */
   const THEME_KEY = 'ss_theme';
   function getTheme() {
-    try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch { return 'dark'; }
+    try { return localStorage.getItem(THEME_KEY) || 'light'; } catch { return 'light'; }
   }
   function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    try { localStorage.setItem(THEME_KEY, theme); } catch { /* ignore */ }
+    document.documentElement.setAttribute('data-theme', 'light');
+    try { localStorage.setItem(THEME_KEY, 'light'); } catch { /* ignore */ }
   }
   function toggleTheme() {
-    const next = getTheme() === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    // Re-init particles so their colours suit the new theme.
-    if (typeof particlesJS !== 'undefined' && document.getElementById('particles-js')) {
-      initParticles();
-    }
-    return next;
+    // No-op: the Notely look is light-only.
+    return 'light';
   }
   function initTheme() {
     applyTheme(getTheme()); // ensure attribute is set even without inline script
