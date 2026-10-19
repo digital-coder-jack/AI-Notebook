@@ -1,0 +1,48 @@
+/* Notely screens part 2 — calendar, settings, home, quiz library (from Notely app) */
+.calendar-head { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+.calendar-head h2 { font-size: 27px; margin: 0; }
+.calendar-views { margin-left: auto; display: flex; gap: 3px; }
+.calendar-views button { border: 0; background: transparent; color: #999a9d; padding: 7px; font-size: 10px; }
+.calendar-views .active { color: #5553a3; font-weight: 700; }
+.month-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid #e5e3dc; border-left: 1px solid #e5e3dc; }
+.month-grid span, .month-grid div { min-height: 62px; border-right: 1px solid #e5e3dc; border-bottom: 1px solid #e5e3dc; padding: 10px; font-size: 10px; color: #75777d; }
+.month-grid span { min-height: 30px; padding: 8px; color: #999a9c; text-align: center; text-transform: uppercase; font-size: 9px; }
+.month-grid div.today { color: white; background: #5a58aa; border-radius: 0; }
+.date-label { margin: 24px 0 20px; }
+.event-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.event-card { padding: 23px 20px; min-height: 225px; }
+.event-card.lavender { background: #e9e9f8; border-color: #dfdff0; }
+.event-card h3 { font-size: 20px; margin: 0 0 14px; }
+.event-card strong { color: #6968ac; font-size: 11px; }
+.event-card p { font-size: 11px; color: #62646c; line-height: 1.55; }
+.event-card .button { margin-top: 7px; }
+.settings-layout { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 26px; }
+.settings-nav { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+.settings-nav > button:not(.button) { border: 0; background: transparent; text-align: left; padding: 9px; border-radius: 6px; color: #575960; font-size: 10px; }
+.settings-nav > button.active { background: #e9e8f8; color: #5755ad; font-weight: 600; }
+.settings-nav .button { margin-top: 12px; }
+.settings-panel { padding: 20px 16px; margin-bottom: 17px; }
+.settings-panel h2 { font-size: 18px; margin: 0 0 17px; }
+.profile-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: white; background: #9291ba; font-size: 10px; }
+.profile-heading h3 { margin: 0 0 3px; font-size: 16px; }
+.profile-heading p { margin: 0; color: #999a9c; font-size: 10px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin-bottom: 15px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.field.wide { grid-column: 1 / -1; }
+.field span { font-size: 10px; font-weight: 700; }
+.field input { border: 1px solid #e5e3dc; border-radius: 6px; padding: 9px; color: #54565e; background: #fffdfa; font-size: 11px; }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+.toggle-row strong, .toggle-row span { display: block; }
+.toggle-row strong { font-size: 10px; }
+.toggle-row span { margin-top: 4px; color: #999a9c; font-size: 9px; }
+.toggle { width: 31px; height: 19px; border: 0; border-radius: 20px; padding: 2px; background: #e1e0da; }
+.toggle i { display: block; width: 15px; height: 15px; border-radius: 50%; background: white; transition: .2s; }
+.toggle.on { background: #5a58aa; }
+.toggle.on i { transform: translateX(12px); }
+.privacy-note { color: #999a9c; font-size: 9px; line-height: 1.5; }
+.empty-state { min-height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.empty-icon { width: 45px; height: 45px; }
+.empty-state h2 { margin: 0 0 8px; font-size: 24px; }
+.empty-state p { color: #85868a; font-size: 12px; margin: 0 0 15px; }
+.toast { position: fixed; right: 24px; bottom: 24px; z-index: 50; display: flex; align-items: center; gap: 8px; padding: 12px 15px; border: 1px solid #d8d7e9; border-radius: 8px; color: #4b499b; background: #f0effb; box-shadow: 0 8px 25px #39374718; font-size: 11px; animation: rise .25s ease-out; }

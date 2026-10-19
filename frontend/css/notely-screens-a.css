@@ -1,0 +1,48 @@
+/* Notely screens part 1 — notebook library, notebook view, flashcard study, quiz results (from Notely app) */
+.notebook-tabs { display: flex; gap: 22px; border-bottom: 1px solid #e6e4dc; margin-bottom: 22px; }
+.notebook-tabs button, .library-tabs button, .material-tabs button { border: 0; background: transparent; padding: 0 0 11px; color: #929397; font-size: 11px; }
+.notebook-tabs button.selected, .library-tabs button.selected, .material-tabs button.selected { color: #5755ad; border-bottom: 2px solid #5755ad; font-weight: 700; }
+.notebook-layout { display: grid; grid-template-columns: 150px minmax(0, 1fr) 220px; align-items: start; gap: 18px; }
+.notebook-list { padding-top: 10px; }
+.note-row { width: 100%; display: flex; flex-direction: column; gap: 5px; border: 0; background: transparent; border-radius: 6px; padding: 11px 9px; text-align: left; font-size: 10px; color: #4e5058; }
+.note-row small { color: #9b9b9e; font-size: 9px; }
+.note-row.selected { color: #5654a7; background: #e9e8f8; }
+.add-page { border: 0; background: transparent; color: #8e8e91; font-size: 10px; padding: 13px 9px; display: flex; gap: 5px; }
+.note-paper { overflow: hidden; border: 1px solid #e5e3dc; background: #fffdfa; border-radius: 7px; }
+.editor-bar { height: 35px; border-bottom: 1px solid #ebe9e2; display: flex; justify-content: space-between; padding: 0 12px; align-items: center; color: #99999b; font-size: 10px; }
+.note-content { padding: 25px 23px 30px; }
+.note-content h2 { font-size: 30px; margin: 14px 0 10px; }
+.note-meta { color: #999a9c; font-size: 10px; }
+.tag { display: inline-block; color: #5554a3; font-size: 10px; font-weight: 600; margin: 19px 0 14px; }
+.big-idea { background: #e9e9f8; border: 1px solid #dfdff1; border-radius: 8px; padding: 16px; font-size: 11px; line-height: 1.55; }
+.big-idea p { margin-bottom: 0; }
+.note-content h3 { font-size: 19px; margin: 24px 0 9px; }
+.note-content > p { color: #5d5f68; font-size: 11px; line-height: 1.6; }
+.formula { padding: 15px; border: 1px solid #e4e2db; border-radius: 8px; color: #585963; font: 14px Georgia, serif; }
+.assistant-card { padding: 7px 2px; }
+.assistant-card h3 { font-size: 16px; line-height: 1.25; margin: 18px 0 13px; }
+.assistant-card p:not(.eyebrow), .assistant-card li { color: #646670; font-size: 11px; line-height: 1.6; }
+.assistant-card ol { padding-left: 17px; }
+.review-progress { color: #5b59a3; display: grid; grid-template-columns: 1fr auto; font-size: 10px; font-weight: 600; margin: -4px 0 24px; }
+.review-progress span:nth-child(2) { color: #9a9a9d; font-weight: 400; }
+.review-progress div { grid-column: 1 / -1; height: 5px; margin-top: 12px; }
+.flash-layout { display: grid; grid-template-columns: minmax(0, 1fr) 245px; gap: 22px; }
+.flash-card { min-height: 390px; padding: 44px; }
+.flash-card h2 { max-width: 690px; font-size: 33px; line-height: 1.2; margin: 30px 0; }
+.flash-divider { border-top: 1px solid #ebe9e2; }
+.answer { margin-top: 28px; }
+.success-text { color: #6e9587 !important; font-size: 10px !important; font-weight: 600; }
+.answer h3 { font-size: 24px; margin: 28px 0 15px; }
+.answer p:not(.success-text) { color: #595c65; font-size: 13px; line-height: 1.55; max-width: 680px; }
+.answer small { color: #999a9b; font-size: 10px; }
+.reveal-button { border: 1px solid #deddd6; background: #fffdfa; color: #55545e; padding: 12px 18px; margin-top: 28px; border-radius: 6px; font-size: 11px; }
+.rating-label { color: #8b8c8f; font-size: 11px; margin: 23px 0 10px; }
+.rating-row { display: flex; gap: 9px; }
+.rating-row button { background: #fffdfa; border: 1px solid #deddd7; border-radius: 7px; padding: 12px 14px; color: #55565f; font-size: 11px; }
+.rating-row button.chosen { background: #5755ad; border-color: #5755ad; color: white; }
+.session-sidebar, .quiz-sidebar { display: flex; flex-direction: column; gap: 17px; }
+.side-card { padding: 22px 20px; }
+.side-card h3 { font-size: 20px; margin: 0 0 17px; }
+.side-card p { color: #5f6169; font-size: 11px; line-height: 1.55; }
+.side-card small { color: #99999b; font-size: 10px; line-height: 1.5; }
+.side-card .button { width: 100%; }

@@ -1,0 +1,42 @@
+/* Notely workspace surfaces — hero, stat, plan, recent cards (from Notely app) */
+.overview-grid { display: grid; grid-template-columns: 1.55fr .8fr; gap: 18px; }
+.hero-card, .stat-card, .plan-card, .recent-card, .side-card, .settings-panel, .event-card, .score-card, .flash-card, .empty-state { border: 1px solid #e6e3dc; border-radius: 10px; background: #fffdfa; }
+.lavender-card { background: #e8e8f7; border-color: #dfdff0; }
+.hero-card { min-height: 216px; padding: 28px; display: flex; justify-content: space-between; overflow: hidden; }
+.hero-card h2 { margin: 8px 0 8px; font-size: 27px; }
+.hero-card p:not(.eyebrow) { max-width: 290px; color: #646671; font-size: 12px; line-height: 1.55; margin: 0 0 24px; }
+.hero-doodle { width: 150px; color: #9e9dc5; position: relative; display: flex; justify-content: space-between; align-items: flex-end; opacity: .75; }
+.hero-doodle span { border: 1px solid #aaa9cc; border-radius: 50%; padding: 18px 8px; font: 20px Georgia, serif; }
+.hero-doodle span:nth-child(2) { align-self: flex-start; }
+.doodle-line { width: 130px; height: 40px; position: absolute; top: 60px; border-top: 1px solid #aaa9cc; transform: rotate(25deg); }
+.stat-card { padding: 24px; display: flex; flex-direction: column; align-items: flex-start; }
+.stat-icon, .mini-icon, .file-icon, .empty-icon { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 7px; color: #5654a7; background: #eeedf9; margin-bottom: 18px; }
+.stat-card strong { margin: 7px 0 4px; font: 29px Fraunces, Georgia, serif; }
+.stat-card > span { color: #898a8d; font-size: 11px; }
+.streak-dots { display: flex; gap: 6px; margin-top: 21px; }
+.streak-dots i { width: 10px; height: 10px; border-radius: 50%; background: #e2e1dc; }
+.streak-dots i.filled { background: #5755ad; }
+.section-row { display: flex; justify-content: space-between; align-items: end; margin: 38px 0 15px; }
+.section-title { font-size: 20px; margin: 5px 0 0; }
+.text-button { display: inline-flex; align-items: center; gap: 4px; border: 0; background: transparent; color: #5351a3; font-size: 11px; font-weight: 600; }
+.plan-grid, .recent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.plan-card { position: relative; min-height: 174px; padding: 18px; text-align: left; transition: .2s ease; }
+.plan-card:hover, .recent-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px #3533400b; }
+.plan-card.lavender { background: #e8e8f7; border-color: #dfdff0; }
+.plan-top { display: flex; align-items: center; gap: 8px; color: #8b8b8f; font-size: 10px; }
+.mini-icon { width: 27px; height: 27px; margin: 0; }
+.muted-icon { margin-left: auto; color: #aaa; }
+.plan-card h3 { font-size: 19px; margin: 19px 0 8px; }
+.plan-card p, .recent-card p { color: #777981; font-size: 11px; margin: 0; }
+.card-arrow { position: absolute; right: 18px; bottom: 16px; color: #5654a7; }
+.warning-text { color: #ad7d35 !important; }
+.recent-heading { margin-top: 44px; }
+.recent-card { padding: 18px; min-height: 153px; }
+.recent-card-top { display: flex; justify-content: space-between; }
+.file-icon { width: 28px; height: 28px; margin: 0 0 12px; }
+.icon-button { border: 0; background: transparent; color: #8d8d91; padding: 4px; }
+.recent-card h3 { font-size: 17px; margin: 0 0 5px; }
+.progress-label { display: flex; justify-content: space-between; margin-top: 22px; color: #a0a0a1; font-size: 9px; }
+.progress-label strong { color: #5a59a7; }
+.progress-line { height: 4px; margin-top: 7px; overflow: hidden; border-radius: 10px; background: #e7e6e0; }
+.progress-line i { display: block; height: 100%; border-radius: inherit; background: #5a59aa; }
