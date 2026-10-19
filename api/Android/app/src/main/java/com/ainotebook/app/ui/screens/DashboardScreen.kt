@@ -1,126 +1,181 @@
 package com.ainotebook.app.ui.screens
 
-import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Forum
-import androidx.compose.material.icons.filled.Quiz
-import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ainotebook.app.data.Chat
-import com.ainotebook.app.data.Stats
 import com.ainotebook.app.ui.DashboardViewModel
-import com.ainotebook.app.ui.components.BrandLogo
-import com.ainotebook.app.ui.components.DashboardSkeleton
-import com.ainotebook.app.ui.components.ErrorBanner
-import com.ainotebook.app.ui.components.GlassCard
-import com.ainotebook.app.ui.components.rememberHaptics
-import com.ainotebook.app.ui.theme.Cyan
-import com.ainotebook.app.ui.theme.Indigo
-import com.ainotebook.app.ui.theme.MutedText
-import com.ainotebook.app.ui.theme.Violet
+import com.ainotebook.app.ui.theme.NotelyBackground
+import com.ainotebook.app.ui.theme.NotelyGreen
+import com.ainotebook.app.ui.theme.NotelyIndigo
+import com.ainotebook.app.ui.theme.NotelyLavender
+import com.ainotebook.app.ui.theme.NotelyLine
+import com.ainotebook.app.ui.theme.NotelyMuted
+import com.ainotebook.app.ui.theme.NotelySurface
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val CardShape = RoundedCornerShape(12.dp)
+
 @Composable
-fun DashboardScreen(vm: DashboardViewModel, userName: String, onOpenChat: (Int) -> Unit, onNewChat: () -> Unit, onOpenTools: () -> Unit) {
-    val state by vm.state.collectAsState()
-    val haptic = rememberHaptics()
-    if (state.loading && state.stats == null) { DashboardSkeleton(Modifier.fillMaxSize()); return }
-    val pull = rememberPullToRefreshState()
-    if (pull.isRefreshing) LaunchedEffect(true) { haptic(); vm.load() }
-    LaunchedEffect(state.loading) { if (!state.loading) pull.endRefresh() }
-
-    Box(Modifier.fillMaxSize().nestedScroll(pull.nestedScrollConnection)) {
-        LazyColumn(Modifier.fillMaxSize().padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            item { Header(userName) }
-            item { ErrorBanner(state.error) }
-            state.stats?.let { s ->
-                item { Hero(s, onNewChat) }
-                item { SectionTitle("Your workspace") }
-                item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) { Metric("Chats", s.total_chats, Icons.AutoMirrored.Filled.Chat, Indigo, Modifier.weight(1f)); Metric("AI replies", s.ai_responses, Icons.Default.SmartToy, Cyan, Modifier.weight(1f)) } }
-                item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) { Metric("Messages", s.total_messages, Icons.Default.Forum, Violet, Modifier.weight(1f)); Metric("Quizzes", s.quizzes, Icons.Default.Quiz, Cyan, Modifier.weight(1f)) } }
-                item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) { Action("Ask AI", "New conversation", Icons.Default.SmartToy, Indigo, onNewChat, Modifier.weight(1f)); Action("Study tools", "Notes, quiz, plan", Icons.Default.AutoStories, Cyan, onOpenTools, Modifier.weight(1f)) } }
-                item { SectionTitle("Recent workspace") }
-                if (s.recent_chats.isEmpty()) item { EmptyCard(onNewChat) } else items(s.recent_chats) { Recent(it, onOpenChat) }
-                item { Spacer(Modifier.height(16.dp)) }
+fun DashboardScreen(
+    vm: DashboardViewModel,
+    userName: String,
+    onOpenChat: (Int) -> Unit,
+    onNewChat: () -> Unit,
+    onOpenTools: () -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().background(NotelyBackground),
+        contentPadding = PaddingValues(bottom = 32.dp)
+    ) {
+        item {
+            DashboardHeader(userName)
+            Text("A calmer place to pick up where you left off.", style = MaterialTheme.typography.bodyMedium, color = NotelyMuted, modifier = Modifier.padding(horizontal = 20.dp))
+        }
+        item {
+            DashboardCard(NotelyLavender, Modifier.padding(20.dp, 24.dp, 20.dp, 8.dp)) {
+                Eyebrow("BIOLOGY 101 · LECTURE 07")
+                Text("Cellular respiration", style = MaterialTheme.typography.headlineSmall)
+                Text("How does a proton gradient become usable energy? Continue your note before today’s study group.", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 10.dp))
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 12.dp)) {
+                    Text("8 note pages", style = MaterialTheme.typography.labelMedium, color = NotelyMuted)
+                    Spacer(Modifier.width(10.dp))
+                    Text("All changes saved", style = MaterialTheme.typography.labelMedium, color = NotelyGreen)
+                }
+                NotelyButton("Continue writing", Icons.Default.ArrowForward, onNewChat)
             }
         }
-        PullToRefreshContainer(state = pull, modifier = Modifier.align(Alignment.TopCenter))
-    }
-}
-
-@Composable private fun Header(name: String) {
-    Row(Modifier.fillMaxWidth().padding(top = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-        BrandLogo(48.dp)
-        Spacer(Modifier.width(12.dp)); Column(Modifier.weight(1f)) {
-            Text("AI NOTEBOOK", color = Indigo, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 1.8.sp)
-            Text(greeting(), color = MutedText, style = MaterialTheme.typography.bodySmall)
-            Text(name.ifBlank { "Explorer" }, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        item { SectionLabel("YOUR NOTEBOOKS") }
+        item { NotebookRow("Biology 101", "Prof. Elena Martinez · 8 pages · Updated Oct 14", Icons.Default.School) }
+        item { NotebookRow("Organic Chemistry", "6 pages · Reaction mechanisms", Icons.Default.AutoStories) }
+        item { NotebookRow("World History", "5 pages · Industrial revolutions", Icons.Default.MenuBook) }
+        item {
+            DashboardCard(modifier = Modifier.padding(20.dp, 16.dp, 20.dp, 8.dp)) {
+                Text("A quick recall session", style = MaterialTheme.typography.titleLarge)
+                Text("12 Biology cards are ready for review. Five focused minutes can make the next lecture feel easier.", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 10.dp))
+                NotelyOutlineButton("Review flashcards", Icons.Default.AutoStories, onOpenTools)
+            }
         }
-        Box(Modifier.size(38.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHigh), contentAlignment = Alignment.Center) { Icon(Icons.Default.AutoAwesome, null, tint = Cyan, modifier = Modifier.size(19.dp)) }
-    }
-}
-
-@Composable private fun Hero(s: Stats, onClick: () -> Unit) {
-    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(Brush.linearGradient(listOf(Color(0xFF33205C), Color(0xFF171323)))).clickable(onClick = onClick).padding(20.dp)) {
-        Column {
-            Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.Bolt, null, tint = Color(0xFFFDE68A), modifier = Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Your learning command center", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium) }
-            Spacer(Modifier.height(10.dp)); Text(if (s.total_chats == 0) "Start a focused chat and turn any question into a clear next step." else "You have ${s.total_chats} learning conversations. Keep building momentum.", color = Color.White.copy(alpha = .78f), style = MaterialTheme.typography.bodyMedium)
-            Spacer(Modifier.height(15.dp)); Row(verticalAlignment = Alignment.CenterVertically) { Box(Modifier.clip(RoundedCornerShape(12.dp)).background(Color.White).padding(horizontal = 14.dp, vertical = 9.dp)) { Text("New conversation  →", color = Color(0xFF291749), fontWeight = FontWeight.Bold) }; Spacer(Modifier.width(12.dp)); Text("Groq ready", color = Cyan, style = MaterialTheme.typography.labelMedium) }
+        item {
+            DashboardCard(modifier = Modifier.padding(20.dp, 8.dp)) {
+                Text("On your calendar", style = MaterialTheme.typography.titleLarge)
+                Eyebrow("TODAY · OCT 16", NotelyIndigo)
+                Text("Biology study group", style = MaterialTheme.typography.titleLarge)
+                Text("3:00–4:00 PM · Library, room 2B", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+                NotelyOutlineButton("View calendar", Icons.Default.CalendarMonth, onOpenTools)
+            }
+        }
+        item {
+            DashboardCard(modifier = Modifier.padding(20.dp, 8.dp)) {
+                Text("Coming up", style = MaterialTheme.typography.titleLarge)
+                TaskRow("Lab report: yeast respiration", "Biology 101 · Due Oct 17")
+                TaskRow("Mechanisms problem set", "Organic Chemistry · Due Oct 19")
+            }
+        }
+        item {
+            DashboardCard(modifier = Modifier.padding(20.dp, 8.dp, 20.dp, 20.dp)) {
+                Text("Your study rhythm", style = MaterialTheme.typography.titleLarge)
+                Text("20 / 30 min", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 8.dp))
+                LinearProgressIndicator(progress = { .38f }, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), color = NotelyIndigo, trackColor = NotelyLine)
+                Text("Today’s study goal · 10 minutes to go", style = MaterialTheme.typography.labelMedium, color = NotelyMuted)
+            }
         }
     }
 }
 
-@Composable private fun Metric(label: String, value: Int, icon: ImageVector, accent: Color, modifier: Modifier) {
-    GlassCard(modifier) { Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) { Box(Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(accent.copy(alpha = .16f)), contentAlignment = Alignment.Center) { Icon(icon, null, tint = accent, modifier = Modifier.size(20.dp)) }; Spacer(Modifier.width(9.dp)); Column { val count by animateIntAsState(value, tween(700), label = label); Text(count.toString(), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text(label, color = MutedText, style = MaterialTheme.typography.labelSmall) } } }
+@Composable
+private fun DashboardHeader(userName: String) {
+    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 22.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Text("Notely", style = MaterialTheme.typography.titleLarge)
+        Text("JL", style = MaterialTheme.typography.labelMedium, color = NotelyMuted)
+    }
+    Text("Good morning, ${userName.ifBlank { "Jamie" }}", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(horizontal = 20.dp))
 }
 
-@Composable private fun Action(title: String, subtitle: String, icon: ImageVector, accent: Color, onClick: () -> Unit, modifier: Modifier) { GlassCard(modifier.clickable(onClick = onClick)) { Column(Modifier.padding(14.dp)) { Icon(icon, null, tint = accent, modifier = Modifier.size(22.dp)); Spacer(Modifier.height(10.dp)); Text(title, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold); Text(subtitle, color = MutedText, style = MaterialTheme.typography.labelSmall) } } }
+@Composable
+private fun DashboardCard(background: Color = NotelySurface, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    Card(modifier = modifier.fillMaxWidth(), shape = CardShape, colors = CardDefaults.cardColors(containerColor = background), border = BorderStroke(1.dp, NotelyLine)) {
+        Column(modifier = Modifier.padding(16.dp), content = content)
+    }
+}
 
-@Composable private fun Recent(chat: Chat, onOpen: (Int) -> Unit) { GlassCard(Modifier.fillMaxWidth().clickable { onOpen(chat.id) }) { Row(Modifier.padding(15.dp), verticalAlignment = Alignment.CenterVertically) { Box(Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(Indigo.copy(alpha = .16f)), contentAlignment = Alignment.Center) { Icon(Icons.AutoMirrored.Filled.Chat, null, tint = Indigo, modifier = Modifier.size(19.dp)) }; Spacer(Modifier.width(12.dp)); Column(Modifier.weight(1f)) { Text(chat.title, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold, maxLines = 1); chat.updated_at?.let { Text(it, color = MutedText, style = MaterialTheme.typography.labelSmall) } }; Text("›", color = MutedText, fontSize = 24.sp) } } }
+@Composable
+private fun NotebookRow(title: String, detail: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    DashboardCard(modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, tint = NotelyIndigo, modifier = Modifier.size(22.dp))
+            Spacer(Modifier.width(14.dp))
+            Column { Text(title, style = MaterialTheme.typography.titleMedium); Text(detail, style = MaterialTheme.typography.labelMedium, color = NotelyMuted) }
+        }
+    }
+}
 
-@Composable private fun EmptyCard(onClick: () -> Unit) { GlassCard(Modifier.fillMaxWidth().clickable(onClick = onClick)) { Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally) { Icon(Icons.Default.Widgets, null, tint = Indigo, modifier = Modifier.size(28.dp)); Spacer(Modifier.height(8.dp)); Text("Your workspace is ready", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold); Text("Start your first conversation to see it here.", color = MutedText, style = MaterialTheme.typography.bodySmall) } } }
+@Composable
+private fun TaskRow(title: String, detail: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 10.dp)) {
+        Icon(Icons.Default.CheckBoxOutlineBlank, contentDescription = null, tint = NotelyIndigo, modifier = Modifier.size(22.dp))
+        Spacer(Modifier.width(12.dp))
+        Column { Text(title, style = MaterialTheme.typography.labelLarge); Text(detail, style = MaterialTheme.typography.labelMedium, color = NotelyMuted) }
+    }
+}
 
-@Composable private fun SectionTitle(text: String) { Text(text, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
-private fun greeting() = when (java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)) { in 5..11 -> "Good morning"; in 12..17 -> "Good afternoon"; else -> "Good evening" }
+@Composable
+private fun SectionLabel(text: String) {
+    Text(text, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = NotelyMuted, modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 4.dp))
+}
+
+@Composable
+private fun Eyebrow(text: String, color: Color = NotelyMuted) {
+    Text(text, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = color, modifier = Modifier.padding(bottom = 10.dp))
+}
+
+@Composable
+private fun NotelyButton(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+    Button(onClick = onClick, colors = ButtonDefaults.buttonColors(containerColor = NotelyIndigo), shape = RoundedCornerShape(8.dp), modifier = Modifier.padding(top = 14.dp)) {
+        Icon(icon, contentDescription = null, modifier = Modifier.size(17.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(text)
+    }
+}
+
+@Composable
+private fun NotelyOutlineButton(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+    OutlinedButton(onClick = onClick, shape = RoundedCornerShape(8.dp), border = BorderStroke(1.dp, NotelyLine), modifier = Modifier.padding(top = 12.dp)) {
+        Icon(icon, contentDescription = null, tint = NotelyIndigo, modifier = Modifier.size(17.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(text, color = MaterialTheme.colorScheme.onSurface)
+    }
+}

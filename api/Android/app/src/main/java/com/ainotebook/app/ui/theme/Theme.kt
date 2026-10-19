@@ -15,87 +15,92 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.ainotebook.app.data.AccentTone
 
-val BrandOrange = Color(0xFFFF9547)
-val BrandPink = Color(0xFFF053A0)
-val BrandViolet = Color(0xFF9B5CF5)
-val BrandBlue = Color(0xFF4B7BF5)
-val Indigo = Color(0xFF9B5CF5)
-val Violet = Color(0xFFE879F9)
-val Cyan = Color(0xFF67E8F9)
+val NotelyIndigo = Color(0xFF5759B2)
+val NotelyInk = Color(0xFF303340)
+val NotelyMuted = Color(0xFF7D8088)
+val NotelyBackground = Color(0xFFF5F4EF)
+val NotelySurface = Color(0xFFFFFDF8)
+val NotelyLavender = Color(0xFFEBEBFA)
+val NotelyLine = Color(0xFFE3E0D8)
+val NotelyGreen = Color(0xFF467866)
+val NotelyAmber = Color(0xFFB27A21)
 
-val SpaceBg = Color.White
-val SpaceSurface = Color.White
-val SpaceCard = Color(0xFFF8F9FC)
-val AssistantBubble = Color(0xFFF1F3F8)
-val HairlineOutline = Color(0xFFE2E6EF)
-val MutedText = Color(0xFF5E6675)
-val LightBg = Color.White
-val LightSurface = Color(0xFFFFFFFF)
-val LightCard = Color(0xFFF8F9FC)
-val LightHairline = Color(0xFFE2E6EF)
-val LightMuted = Color(0xFF5E6675)
+val BrandOrange = Color(0xFFB27A21)
+val BrandPink = Color(0xFF9B5D72)
+val BrandViolet = NotelyIndigo
+val BrandBlue = NotelyIndigo
+val Indigo = NotelyIndigo
+val Violet = Color(0xFF7A78C7)
+val Cyan = Color(0xFF467866)
+
+val SpaceBg = NotelyBackground
+val SpaceSurface = NotelySurface
+val SpaceCard = NotelyLavender
+val AssistantBubble = NotelyLavender
+val HairlineOutline = NotelyLine
+val MutedText = NotelyMuted
+val LightBg = NotelyBackground
+val LightSurface = NotelySurface
+val LightCard = NotelyLavender
+val LightHairline = NotelyLine
+val LightMuted = NotelyMuted
 
 private val DarkColors = darkColorScheme(
-    primary = BrandViolet,
+    primary = NotelyIndigo,
     onPrimary = Color.White,
-    primaryContainer = BrandViolet.copy(alpha = 0.22f),
-    onPrimaryContainer = Color(0xFFE4D9FF),
-    secondary = BrandPink,
+    primaryContainer = NotelyIndigo.copy(alpha = 0.22f),
+    onPrimaryContainer = Color.White,
+    secondary = NotelyGreen,
     onSecondary = Color.White,
-    secondaryContainer = BrandPink.copy(alpha = 0.18f),
-    onSecondaryContainer = Color.White,
-    tertiary = Cyan,
-    onTertiary = Color(0xFF062A30),
-    background = SpaceBg,
-    onBackground = Color(0xFFEDEBFF),
-    surface = SpaceSurface,
-    onSurface = Color(0xFFEDEBFF),
-    surfaceVariant = SpaceCard,
-    onSurfaceVariant = MutedText,
-    surfaceContainer = SpaceCard,
-    surfaceContainerHigh = Color(0xFF231E3A),
-    outline = HairlineOutline,
-    outlineVariant = Color(0xFF1C1638),
-    error = Color(0xFFFB7185),
+    tertiary = NotelyAmber,
+    onTertiary = Color.White,
+    background = Color(0xFF252522),
+    onBackground = Color(0xFFF7F4EE),
+    surface = Color(0xFF2D2D29),
+    onSurface = Color(0xFFF7F4EE),
+    surfaceVariant = Color(0xFF3A3A35),
+    onSurfaceVariant = Color(0xFFD0CEC5),
+    outline = Color(0xFF56564F),
+    error = Color(0xFFD66C6C),
     onError = Color.White
 )
 
 private val LightColors = lightColorScheme(
-    primary = BrandViolet,
+    primary = NotelyIndigo,
     onPrimary = Color.White,
-    primaryContainer = BrandViolet.copy(alpha = 0.14f),
-    onPrimaryContainer = Color(0xFF2A1F60),
-    secondary = BrandPink,
+    primaryContainer = NotelyLavender,
+    onPrimaryContainer = NotelyInk,
+    secondary = NotelyGreen,
     onSecondary = Color.White,
-    secondaryContainer = BrandPink.copy(alpha = 0.12f),
-    onSecondaryContainer = Color(0xFF2A0F20),
-    tertiary = Cyan,
-    onTertiary = Color(0xFF062A30),
-    background = LightBg,
-    onBackground = Color(0xFF130E26),
-    surface = LightSurface,
-    onSurface = Color(0xFF130E26),
-    surfaceVariant = LightCard,
-    onSurfaceVariant = LightMuted,
-    surfaceContainer = LightCard,
-    surfaceContainerHigh = Color(0xFFE4E0F6),
-    outline = LightHairline,
-    outlineVariant = Color(0xFFE0DCF2),
-    error = Color(0xFFDC2626),
+    secondaryContainer = Color(0xFFE9F1EC),
+    onSecondaryContainer = NotelyInk,
+    tertiary = NotelyAmber,
+    onTertiary = Color.White,
+    background = NotelyBackground,
+    onBackground = NotelyInk,
+    surface = NotelySurface,
+    onSurface = NotelyInk,
+    surfaceVariant = NotelyLavender,
+    onSurfaceVariant = NotelyMuted,
+    outline = NotelyLine,
+    outlineVariant = NotelyLine,
+    error = Color(0xFFB34848),
     onError = Color.White
 )
 
 private val AppTypography = Typography().run {
     copy(
-        displaySmall = displaySmall.copy(fontWeight = FontWeight.Bold, letterSpacing = (-0.6).sp),
-        headlineMedium = headlineMedium.copy(fontWeight = FontWeight.Bold, letterSpacing = (-0.5).sp),
-        headlineSmall = headlineSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = (-0.3).sp),
-        titleLarge = titleLarge.copy(fontWeight = FontWeight.SemiBold),
+        displaySmall = displaySmall.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.Normal, letterSpacing = (-0.6).sp),
+        headlineLarge = headlineLarge.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.Normal),
+        headlineMedium = headlineMedium.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.Normal, letterSpacing = (-0.5).sp),
+        headlineSmall = headlineSmall.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.Normal, letterSpacing = (-0.3).sp),
+        titleLarge = titleLarge.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.Normal),
         titleMedium = titleMedium.copy(fontWeight = FontWeight.SemiBold),
         bodyLarge = bodyLarge.copy(lineHeight = 24.sp),
         bodyMedium = bodyMedium.copy(lineHeight = 22.sp),
@@ -137,16 +142,16 @@ private fun androidx.compose.material3.ColorScheme.withAccent(
     dark: Boolean
 ): androidx.compose.material3.ColorScheme {
     val primary = when (tone) {
-        AccentTone.INDIGO -> BrandViolet
-        AccentTone.CYAN -> Cyan
-        AccentTone.VIOLET -> Violet
-        AccentTone.SUNSET -> BrandOrange
+        AccentTone.INDIGO -> NotelyIndigo
+        AccentTone.CYAN -> NotelyGreen
+        AccentTone.VIOLET -> NotelyIndigo
+        AccentTone.SUNSET -> NotelyAmber
     }
     return copy(
         primary = primary,
         primaryContainer = primary.copy(alpha = if (dark) 0.24f else 0.14f),
-        onPrimaryContainer = if (dark) Color.White else Color(0xFF20143F),
-        secondary = if (tone == AccentTone.SUNSET) BrandPink else primary,
-        tertiary = if (tone == AccentTone.CYAN) BrandViolet else Cyan
+        onPrimaryContainer = if (dark) Color.White else NotelyInk,
+        secondary = if (tone == AccentTone.SUNSET) BrandPink else NotelyGreen,
+        tertiary = NotelyAmber
     )
 }
