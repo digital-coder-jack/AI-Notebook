@@ -41,3 +41,21 @@ kbd { margin-left: auto; font-size: 9px; color: #9a9a99; }
 .button.primary { border-color: #5755ad; color: white; background: #5755ad; }
 .button.dark { border-color: #2e3140; color: white; background: #2e3140; }
 .button.light { margin-top: 10px; background: #fffdfa; }
+
+/* ---- Dark theme (data-theme="dark" on <html>, set by motion.js) ---- */
+[data-theme="dark"] { color: #e7e6e2; background: #1d1e22; }
+[data-theme="dark"] .app-shell { background: #1d1e22; }
+[data-theme="dark"] .sidebar { border-right-color: #2e2f36; background: #222329; }
+[data-theme="dark"] .brand-row { color: #f2f1ee; }
+[data-theme="dark"] .brand-mark { background: #7d7fd6; }
+[data-theme="dark"] .nav-item, [data-theme="dark"] .notebook-link { color: #b9babd; }
+[data-theme="dark"] .nav-item:hover, [data-theme="dark"] .notebook-link:hover { background: #2c2d34; color: #a9aef0; }
+[data-theme="dark"] .nav-item.active { background: #33345a; color: #c3c6ff; }
+[data-theme="dark"] .search-button, [data-theme="dark"] .calendar-snippet, [data-theme="dark"] .profile-link { color: #8b8d92; }
+[data-theme="dark"] .calendar-snippet strong, [data-theme="dark"] .profile-link strong { color: #c9cacd; }
+[data-theme="dark"] .topbar { border-bottom-color: #2e2f36; background: #24252b; color: #9a9ca1; }
+[data-theme="dark"] .page-heading h1, [data-theme="dark"] h2, [data-theme="dark"] h3 { color: #f0efec; }
+[data-theme="dark"] .button { border-color: #3a3b43; color: #dcdbd7; background: #2a2b31; }
+[data-theme="dark"] .button.primary { border-color: #7d7fd6; background: #7d7fd6; color: #17181c; }
+[data-theme="dark"] .button.dark { border-color: #dcdbd7; background: #dcdbd7; color: #17181c; }
+[data-theme="dark"] .button.light { background: #2a2b31; }

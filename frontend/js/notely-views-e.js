@@ -67,11 +67,11 @@
       .map(function (item, i) { return '<button' + (i === 0 ? ' class="active"' : '') + '>' + item + '</button>'; }).join('');
     return V.pageHeading({ title: 'Account & settings', subtitle: 'A workspace that fits the way you study.' }) +
       '<div class="settings-layout"><div class="settings-nav">' + nav +
-      '<button class="button light" data-toast="Signed out">Sign out</button></div>' +
+      '<button class="button light" data-settings-action="logout">Sign out</button></div>' +
       '<div class="settings-panels">' +
       panel('Student profile', '<div class="profile-heading"><div class="avatar">JL</div><div><h3>Jamie Lee</h3><p>Student workspace · Fall semester 2026</p></div></div>' +
         '<div class="form-grid">' + field('Full name', 'Jamie Lee') + field('Student email', 'jamie.lee@university.edu') + field('Semester', 'Fall semester 2026', true) + '</div>' +
-        '<button class="button primary" data-toast="Profile saved">Save profile</button>') +
+        '<button class="button primary" data-settings-action="save-profile">Save profile</button>') +
       panel('Study preferences', '<div class="form-grid">' + field('Daily study goal', '30 minutes') + field('Week starts on', 'Monday') + field('Default notebook', 'Biology 101', true) + '</div>' +
         toggle('Spaced repetition', 'Show due cards first in study sessions.', true) +
         toggle('Gentle study reminders', 'Weekdays at 6:00 PM', true)) +
@@ -80,7 +80,7 @@
         toggle('Weekly study summary', 'Email a short reflection every Sunday.', false)) +
       panel('Privacy & AI', toggle('Use course sources for AI answers', 'Cite your notes, materials, and lecture transcripts.', true) +
         '<p class="privacy-note">Your notes are private and aren’t used to train AI models. Review generated study materials before saving them.</p>' +
-        '<button class="button light" data-toast="Workspace export prepared">Export my workspace</button>') +
+        '<button class="button light" data-settings-action="export">Export my workspace</button>') +
       '</div></div>';
   };
 })();
