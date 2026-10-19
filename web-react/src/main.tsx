@@ -1,162 +1,43 @@
-import { StrictMode, useState } from 'react';
+import { StrictMode, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 import './landing.css';
 
 type Page = 'Home' | 'Notebooks' | 'Study' | 'Planner' | 'More';
-
 const navItems: Page[] = ['Home', 'Notebooks', 'Study', 'Planner', 'More'];
-
-// ─── Existing Notely SPA (dashboard) — unchanged ───────────────────────────
 
 function Header({ back = false }: { back?: boolean }) {
   return <header className="topbar"><div className="brand">{back && <span className="back">‹</span>}Notely</div><div className="header-meta"><span className="search-dot">⌕</span><span>JL</span></div></header>;
 }
-
 function Button({ children, secondary = false, onClick }: { children: React.ReactNode; secondary?: boolean; onClick?: () => void }) {
   return <button className={secondary ? 'button secondary' : 'button'} onClick={onClick}>{children}</button>;
 }
-
 function Card({ children, tone = '', className = '' }: { children: React.ReactNode; tone?: string; className?: string }) {
   return <section className={`card ${tone} ${className}`}>{children}</section>;
 }
-
 function BottomNav({ page, setPage }: { page: Page; setPage: (page: Page) => void }) {
   return <nav className="bottom-nav">{navItems.map((item) => <button key={item} className={page === item ? 'active' : ''} onClick={() => setPage(item)}>{item}</button>)}</nav>;
 }
-
 function Home({ setPage }: { setPage: (page: Page) => void }) {
-  return <>
-    <Header />
-    <main>
-      <div className="eyebrow">FRIDAY, OCTOBER 16 · A LITTLE PROGRESS, ONE IDEA AT A TIME.</div>
-      <h1>Good morning, Jamie</h1>
-      <p className="subhead">A calmer place to pick up where you left off.</p>
-      <Card tone="lavender" className="hero-card">
-        <div className="eyebrow">BIOLOGY 101 · LECTURE 07</div><h2>Cellular respiration</h2>
-        <p>How does a proton gradient become usable energy? Continue your note before today’s study group.</p>
-        <div className="muted">8 note pages <span className="green">All changes saved</span></div>
-        <Button onClick={() => setPage('Notebooks')}>→ &nbsp; Continue writing</Button>
-      </Card>
-      <div className="eyebrow section-label">YOUR NOTEBOOKS</div>
-      {['Biology 101|Prof. Elena Martinez · 8 pages · Updated Oct 14','Organic Chemistry|6 pages · Reaction mechanisms','World History|5 pages · Industrial revolutions'].map(([title, detail]) => <Card key={title} className="list-card"><div className="line-icon">◌</div><div><strong>{title}</strong><small>{detail}</small></div></Card>)}
-      <Card><h3>A quick recall session</h3><p>12 Biology cards are ready for review. Five focused minutes can make the next lecture feel easier.</p><Button secondary onClick={() => setPage('Study')}>▱ &nbsp; Review flashcards</Button></Card>
-      <Card><h3>On your calendar</h3><div className="eyebrow blue">TODAY · OCT 16</div><h3>Biology study group</h3><p>3:00–4:00 PM · Library, room 2B</p><Button secondary onClick={() => setPage('Planner')}>View calendar</Button></Card>
-      <Card><h3>Coming up</h3><div className="mini-row">□ <strong>Lab report: yeast respiration</strong><small>Biology 101 · Due Oct 17</small></div><div className="mini-row">□ <strong>Mechanisms problem set</strong><small>Organic Chemistry · Due Oct 19</small></div></Card>
-      <Card><h3>Your study rhythm</h3><div className="metric">20 / 30 <span>min</span></div><div className="progress"><i style={{width:'38%'}} /></div><small>Today’s study goal · 10 minutes to go</small></Card>
-    </main>
-  </>;
+  return <><Header /><main><div className="eyebrow">FRIDAY, OCTOBER 16 · A LITTLE PROGRESS, ONE IDEA AT A TIME.</div><h1>Good morning, Jamie</h1><p className="subhead">A calmer place to pick up where you left off.</p><Card tone="lavender" className="hero-card"><div className="eyebrow">BIOLOGY 101 · LECTURE 07</div><h2>Cellular respiration</h2><p>How does a proton gradient become usable energy? Continue your note before today’s study group.</p><div className="muted">8 note pages <span className="green">All changes saved</span></div><Button onClick={() => setPage('Notebooks')}>→ &nbsp; Continue writing</Button></Card><div className="eyebrow section-label">YOUR NOTEBOOKS</div>{['Biology 101|Prof. Elena Martinez · 8 pages · Updated Oct 14','Organic Chemistry|6 pages · Reaction mechanisms','World History|5 pages · Industrial revolutions'].map(([title, detail]) => <Card key={title} className="list-card"><div className="line-icon">◌</div><div><strong>{title}</strong><small>{detail}</small></div></Card>)}<Card><h3>A quick recall session</h3><p>12 Biology cards are ready for review. Five focused minutes can make the next lecture feel easier.</p><Button secondary onClick={() => setPage('Study')}>▱ &nbsp; Review flashcards</Button></Card><Card><h3>On your calendar</h3><div className="eyebrow blue">TODAY · OCT 16</div><h3>Biology study group</h3><p>3:00–4:00 PM · Library, room 2B</p><Button secondary onClick={() => setPage('Planner')}>View calendar</Button></Card><Card><h3>Coming up</h3><div className="mini-row">□ <strong>Lab report: yeast respiration</strong><small>Biology 101 · Due Oct 17</small></div><div className="mini-row">□ <strong>Mechanisms problem set</strong><small>Organic Chemistry · Due Oct 19</small></div></Card><Card><h3>Your study rhythm</h3><div className="metric">20 / 30 <span>min</span></div><div className="progress"><i style={{width:'38%'}} /></div><small>Today’s study goal · 10 minutes to go</small></Card></main></>;
 }
+function Notebooks() { const books = [['Biology 101','Prof. Elena Martinez','Cellular respiration','8'],['Organic Chemistry','Chemistry · Fall 2026','Reaction mechanisms','6'],['World History','Humanities · Fall 2026','Industrial revolutions','5']]; return <><Header /><main><h1>My notebooks</h1><p className="subhead">A home for every course, and every connection you make.</p><Button>＋ New notebook</Button><div className="filter-row blue">Fall semester 2026 <span>All notebooks · 3</span><span>Recently updated ↓</span></div>{books.map(([title, detail, recent, count]) => <Card key={title} className="notebook-card"><div className="eyebrow">FALL SEMESTER 2026</div><h2>{title}</h2><small>{detail}</small><p className="tiny-bold">{count} note pages · 12 materials</p><p className="tiny-bold">24 flashcards · 3 quizzes</p><div className="inset"><div className="eyebrow">LAST OPENED</div><h3>{recent}</h3><small>Continue from your last note</small></div><Button secondary>→ &nbsp; Open notebook</Button></Card>)}</main></>; }
+function Study() { return <><Header /><main><h1>Study assistant</h1><p className="subhead">A study partner grounded in your course, not a shortcut.</p><div className="filter-row blue">Biology 101 <span>Current note</span><span>2 source materials</span></div><Card tone="lavender" className="question"><p>Why does ATP production stop without oxygen?</p></Card><div className="eyebrow section-label">◇ NOTELY · ANSWER WITH SOURCES</div><p>Almost! It’s oxidative phosphorylation that stops, not all ATP production. Here’s the chain reaction:</p>{[['1','The electron chain backs up','Without O₂ to accept electrons at the end of the chain, electron transfer cannot keep running.'],['2','The H⁺ gradient fades','Proton pumping stops. ATP synthase loses the gradient that powers ATP synthesis.'],['3','Glycolysis can still make ATP','If fermentation regenerates NAD⁺, glycolysis can continue to yield a net 2 ATP per glucose.']].map(([n,t,d]) => <div className="answer" key={n}><b>{n}</b><div><strong>{t}</strong><p>{d}</p></div></div>)}<Card><div className="eyebrow">SOURCE CITATIONS</div><p>[1] Ch. 9 — Cellular respiration · p. 7</p><p>[2] Lecture 07 · 12:34–14:02</p><small>Sources are from your Biology 101 materials.</small></Card><Button secondary>▧ &nbsp; Insert into note</Button> <Button secondary>▣ &nbsp; Copy answer</Button></main></>; }
+function Planner() { return <><Header /><main><h1>Tasks</h1><p className="subhead">Give every deadline a place, and your mind a little room.</p><Button>＋ New task</Button><div className="filter-row blue">Upcoming · 4 <span>Completed</span><span>All courses</span></div>{['Lab report: yeast respiration|Biology 101 · Due Oct 17, 11:59 PM','Mechanisms problem set|Organic Chemistry · Due Oct 19, 9:00 AM','Read Ch. 10 — Photosynthesis|Biology 101 · Due Oct 20, 10:00 AM'].map(([title, detail], i) => <div key={title}><div className="eyebrow day-label">{['TOMORROW · OCTOBER 17','MONDAY · OCTOBER 19','TUESDAY · OCTOBER 20'][i]}</div><Card className={i === 0 ? 'list-card lavender' : 'list-card'}><div className="checkbox">□</div><div><strong>{title}</strong><small>{detail}</small></div></Card></div>)}</main></>; }
+function More() { return <><Header /><main><h1>Course materials</h1><p className="subhead">Readings, slides, and references — close to your notes.</p><Button>＋ Add material</Button><div className="filter-row blue">Biology 101 · 12 <span>All courses · 24</span><span>PDFs</span><span>Slides</span></div>{['Ch. 9 — Cellular respiration','Lecture 07 — Energy & metabolism','Yeast respiration — lab guide','Ch. 10 — Photosynthesis','ATP synthase: a molecular motor'].map((x, i) => <Card key={x} className={i === 0 ? 'list-card lavender' : 'list-card'}><div className="line-icon">▧</div><div><strong>{x}</strong><small>{i === 0 ? 'PDF · 18 pages · Added Oct 14' : 'Biology 101 · Recently added'}</small></div></Card>)}</main></>; }
+function Dashboard({ onBack }: { onBack: () => void }) { const [page, setPage] = useState<Page>('Home'); return <div className="app"><button className="nl-dash-exit" onClick={onBack}>← Landing</button><div className="device"><div className="status"><span>9:41</span><span>LTE ▰</span></div>{page === 'Home' && <Home setPage={setPage} />}{page === 'Notebooks' && <Notebooks />}{page === 'Study' && <Study />}{page === 'Planner' && <Planner />}{page === 'More' && <More />}<BottomNav page={page} setPage={setPage} /></div></div>; }
 
-function Notebooks() {
-  const books = [['Biology 101','Prof. Elena Martinez','Cellular respiration','8 note pages · 12 materials','8'],['Organic Chemistry','Chemistry · Fall 2026','Reaction mechanisms','6 note pages · 7 materials','6'],['World History','Humanities · Fall 2026','Industrial revolutions','5 note pages · 5 materials','5']];
-  return <><Header /><main><h1>My notebooks</h1><p className="subhead">A home for every course, and every connection you make.</p><Button>＋ New notebook</Button><div className="filter-row blue">Fall semester 2026 <span>All notebooks · 3</span><span>Recently updated ↓</span></div>{books.map(([title, detail, recent, count]) => <Card key={title} className="notebook-card"><div className="eyebrow">FALL SEMESTER 2026</div><h2>{title}</h2><small>{detail}</small><p className="tiny-bold">{count} note pages · 12 materials</p><p className="tiny-bold">24 flashcards · 3 quizzes</p><div className="inset"><div className="eyebrow">LAST OPENED</div><h3>{recent}</h3><small>Continue from your last note</small></div><Button secondary>→ &nbsp; Open notebook</Button></Card>)}<div className="eyebrow section-label">RECENT PAGES</div>{['Cellular respiration','Lab: yeast respiration','Substitution vs. elimination'].map((x) => <Card key={x} className="list-card"><div className="line-icon">▧</div><div><strong>{x}</strong><small>Biology 101 · Lecture 07 · October 14, 2026</small></div></Card>)}</main></>;
-}
-
-function Study() {
-  return <><Header /><main><h1>Study assistant</h1><p className="subhead">A study partner grounded in your course, not a shortcut.</p><div className="filter-row blue">Biology 101 <span>Current note</span><span>2 source materials</span></div><Card tone="lavender" className="question"><p>Why does ATP production stop without oxygen?</p></Card><div className="eyebrow section-label">◇ NOTELY · ANSWER WITH SOURCES</div><p>Almost! It’s oxidative phosphorylation that stops, not all ATP production. Here’s the chain reaction:</p>{[['1','The electron chain backs up','Without O₂ to accept electrons at the end of the chain, electron transfer cannot keep running.'],['2','The H⁺ gradient fades','Proton pumping stops. ATP synthase loses the gradient that powers ATP synthesis.'],['3','Glycolysis can still make ATP','If fermentation regenerates NAD⁺, glycolysis can continue to yield a net 2 ATP per glucose.']].map(([n,t,d]) => <div className="answer" key={n}><b>{n}</b><div><strong>{t}</strong><p>{d}</p></div></div>)}<Card><div className="eyebrow">SOURCE CITATIONS</div><p>[1] Ch. 9 — Cellular respiration · p. 7</p><p>[2] Lecture 07 · 12:34–14:02</p><small>Sources are from your Biology 101 materials.</small></Card><Button secondary>▧ &nbsp; Insert into note</Button> <Button secondary>▣ &nbsp; Copy answer</Button><Card><h3>Make it stick</h3><div className="muted"><span className="blue">8 proposed flashcards</span> &nbsp; <span className="amber">Not saved</span></div><p>Preview this AI-generated set before adding it to your Biology deck.</p><Card tone="lavender"><div className="eyebrow">PROPOSED CARD</div><h3>What is the final electron acceptor in cellular respiration?</h3><p>Oxygen (O₂), which is reduced to water.</p></Card><Button secondary>▱ &nbsp; Review 8 proposed cards</Button></Card><div className="ask-box">Ask about your notes or materials... <Button>↑ &nbsp; Send</Button></div></main></>;
-}
-
-function Planner() {
-  return <><Header /><main><h1>Tasks</h1><p className="subhead">Give every deadline a place, and your mind a little room.</p><Button>＋ New task</Button><div className="filter-row blue">Upcoming · 4 <span>Completed</span><span>All courses</span><span>By due date ↓</span></div>{['Lab report: yeast respiration|Biology 101 · Due Oct 17, 11:59 PM|In progress','Mechanisms problem set|Organic Chemistry · Due Oct 19, 9:00 AM|','Read Ch. 10 — Photosynthesis|Biology 101 · Due Oct 20, 10:00 AM|','Industrialization essay outline|World History · Due Oct 21, 5:00 PM|'].map(([title, detail, status], i) => <div key={title}><div className="eyebrow day-label">{['TOMORROW · OCTOBER 17','MONDAY · OCTOBER 19','TUESDAY · OCTOBER 20','WEDNESDAY · OCTOBER 21'][i]}</div><Card className={i === 0 ? 'list-card lavender' : 'list-card'}><div className="checkbox">□</div><div><strong>{title}</strong><small>{detail}</small>{status && <small className="blue">{status}</small>}</div></Card></div>)}<Card><h2>Lab report: yeast respiration</h2><div className="eyebrow blue">BIOLOGY 101</div><p>Compare CO₂ production under aerobic and anaerobic conditions. Explain the relationship to ATP yield.</p><label>Due date<input value="October 17, 2026 · 11:59 PM" readOnly /></label><div className="eyebrow">CHECKLIST · 1 OF 3 COMPLETE</div><p>☑ Organize observations</p><p>□ Draft results and discussion</p><p>□ Add references and proofread</p><Button>✓ &nbsp; Mark complete</Button></Card></main></>;
-}
-
-function More({ setPage }: { setPage: (page: Page) => void }) {
-  return <><Header /><main><h1>Course materials</h1><p className="subhead">Readings, slides, and references — close to your notes.</p><Button>＋ Add material</Button><div className="filter-row blue">Biology 101 · 12 <span>All courses · 24</span><span>PDFs</span><span>Slides</span></div>{['Ch. 9 — Cellular respiration','Lecture 07 — Energy & metabolism','Yeast respiration — lab guide','Ch. 10 — Photosynthesis','ATP synthase: a molecular motor','Metabolism — midterm reading list'].map((x, i) => <Card key={x} className={i === 0 ? 'list-card lavender' : 'list-card'}><div className="line-icon">{i === 4 ? '↗' : '▧'}</div><div><strong>{x}</strong><small>{i === 0 ? 'PDF · 18 pages · Added Oct 14' : 'Biology 101 · Recently added'}</small></div></Card>)}<Card><div className="large-icon">⌁</div><h2>Bring your sources in</h2><p>Upload PDFs, lecture slides, or documents. Link them to a course so your assistant can cite them.</p><Button>⇧ &nbsp; Choose files</Button> <Button secondary>↗ &nbsp; Add a link</Button></Card><Card><h2>Selected material</h2><div className="eyebrow blue">BIOLOGY 101</div><h2>Ch. 9 — Cellular respiration</h2><p>18 pages · 6 annotations · Linked to Cellular respiration</p><Button secondary>▣ &nbsp; Open PDF</Button></Card><Card><h2>All tools</h2>{['Course materials','Flashcards','Quizzes','Tasks','Calendar','Recorded lectures','Study assistant'].map(x => <div className="mini-row" key={x}><span className="line-icon">▧</span><strong>{x}</strong><small>Open workspace tool</small></div>)}</Card></main></>;
-}
-
-function Dashboard({ onBack }: { onBack: () => void }) {
-  const [page, setPage] = useState<Page>('Home');
-  return (
-    <div className="app">
-      <button className="nl-dash-exit" onClick={onBack} title="Back to landing page">← Landing</button>
-      <div className="device">
-        <div className="status"><span>9:41</span><span>LTE ▰</span></div>
-        {page === 'Home' && <Home setPage={setPage} />}
-        {page === 'Notebooks' && <Notebooks />}
-        {page === 'Study' && <Study />}
-        {page === 'Planner' && <Planner />}
-        {page === 'More' && <More setPage={setPage} />}
-        <BottomNav page={page} setPage={setPage} />
-      </div>
-    </div>
-  );
-}
-
-// ─── Landing page (mounted at "/") — all styles scoped under #nl ───────────
-
-// TODO: replace with your hosted APK link (e.g. "/notely.apk" in /public, or a full URL)
-const APK_URL = 'YAHAN_APK_KA_LINK_DAALO';
-
-function Landing({ onOpenApp }: { onOpenApp: () => void }) {
-  return (
-    <div id="nl" className="nl-page">
-      <canvas id="fx" aria-hidden="true"></canvas>
-
-      <header className="nl-header">
-        <a className="nl-logo" href="#top">
-          <img src="/logo-symbol.svg" alt="Notely logo" height="34" />
-          <span className="nl-logo-word">Notely</span>
-        </a>
-        <a className="nl-btn nl-btn-primary nl-btn-sm" href={APK_URL}>Download app</a>
-      </header>
-
-      <main>
-        <section className="nl-hero" id="top">
-          <div className="nl-hero-copy">
-            <p className="nl-eyebrow">YOUR AI STUDY PARTNER</p>
-            <h1 className="nl-hero-title">Study at<br />warp speed.</h1>
-            <p className="nl-lede">Notes, flashcards, quizzes and a study assistant — everything for your semester in one calm, fast app.</p>
-            <div className="nl-cta-row">
-              <a className="nl-btn nl-btn-primary" href={APK_URL}>Download the app</a>
-              <button className="nl-btn nl-btn-ghost" onClick={onOpenApp}>Open web app</button>
-            </div>
-            <p className="nl-note">Free on Android · Web app in your browser</p>
-          </div>
-
-          <div className="nl-phone-wrap" aria-hidden="true">
-            <div className="nl-phone">
-              <div className="nl-phone-notch"></div>
-              <div className="nl-phone-screen">
-                <div className="nl-mock">
-                  <p className="nl-mock-eyebrow">FRIDAY · OCTOBER 16</p>
-                  <p className="nl-mock-title">Good morning, Jamie</p>
-                  <div className="nl-mock-card">
-                    <p className="nl-mock-eyebrow">BIOLOGY 101 · LECTURE 07</p>
-                    <p className="nl-mock-card-title">Cellular respiration</p>
-                    <div className="nl-mock-lines"><i></i><i></i><i style={{ width: '62%' }}></i></div>
-                  </div>
-                  <div className="nl-mock-row"><i></i><span></span></div>
-                  <div className="nl-mock-row"><i></i><span></span></div>
-                  <div className="nl-mock-progress"><i style={{ width: '38%' }}></i></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="nl-cta">
-          <h2>Ace the semester.</h2>
-          <div className="nl-cta-row nl-cta-row-center">
-            <a className="nl-btn nl-btn-primary" href={APK_URL}>Download the app</a>
-            <button className="nl-btn nl-btn-ghost" onClick={onOpenApp}>Open web app</button>
-          </div>
-        </section>
-      </main>
-
-      <footer className="nl-footer">
-        <span>© 2026 Notely</span>
-        <span>Made for students.</span>
-      </footer>
-    </div>
-  );
-}
-
-function App() {
-  const [view, setView] = useState<'landing' | 'dashboard'>('landing');
-  return view === 'landing'
-    ? <Landing onOpenApp={() => setView('dashboard')} />
-    : <Dashboard onBack={() => setView('landing')} />;
-}
-
+const APK_URL = '#download';
+const featureSteps = [
+  { kicker: '01 / WRITE', title: 'Write.', body: 'A notebook for every course, built to keep your ideas moving.', tag: 'Lab report due', icon: 'note' },
+  { kicker: '02 / PRACTICE', title: 'Practice.', body: 'Turn notes into flashcards and quizzes that know what you need next.', tag: '12 cards ready', icon: 'cards' },
+  { kicker: '03 / ASK', title: 'Ask.', body: 'A study assistant that answers with citations from your own materials.', tag: 'Ch. 9 · p. 7', icon: 'ask' },
+];
+const featureCards = [
+  ['01','Notebooks','A home for every course, page, and connection you make.'],['02','Course materials','Upload PDFs and slides, then annotate them beside your notes.'],['03','Flashcards & quizzes','Practice the ideas that matter with generated recall sessions.'],['04','Recorded lectures','Searchable transcripts turn long lectures into clear next steps.'],['05','Study assistant','Get answers grounded in your sources, with citations attached.'],['06','Tasks & calendar','Deadlines, checklists, and study time in one quiet place.'],
+];
+function MiniPhone({ kind = 'note' }: { kind?: string }) { return <div className={`nl-mini-phone ${kind}`}><div className="mini-notch" /><div className="mini-screen"><span className="mini-brand">N Notely</span><div className="mini-pill cyan">{kind === 'cards' ? 'Biology 101' : kind === 'ask' ? 'Study assistant' : 'My notebooks'}</div><div className="mini-panel"><span className="mini-label">{kind === 'ask' ? 'SOURCE CITATIONS' : 'CONTINUE WHERE YOU LEFT OFF'}</span><b>{kind === 'cards' ? '12 cards ready' : kind === 'ask' ? 'Why does ATP stop?' : 'Cellular respiration'}</b><i /><i /><i className="short" /></div><div className="mini-rowline"><em /><span /><small /></div><div className="mini-rowline"><em /><span /><small /></div></div></div>; }
+function WarpCanvas() { const ref = useRef<HTMLCanvasElement>(null); useEffect(() => { const canvas = ref.current; if (!canvas) return; const ctx = canvas.getContext('2d'); if (!ctx) return; let frame = 0; let raf = 0; const stars = Array.from({ length: 150 }, (_, i) => ({ a: Math.random() * Math.PI * 2, d: Math.random(), s: 0.25 + Math.random() * 1.5, l: 0.2 + Math.random() * 0.8, o: i % 3 })); const resize = () => { canvas.width = window.innerWidth * devicePixelRatio; canvas.height = window.innerHeight * devicePixelRatio; ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); }; const draw = () => { const w = window.innerWidth, h = window.innerHeight, cx = w * .51, cy = h * .52; ctx.clearRect(0, 0, w, h); for (const star of stars) { star.d += .0018 * star.s; if (star.d > 1.1) star.d = .05; const r = 18 + star.d * Math.max(w, h) * .9; const x = cx + Math.cos(star.a) * r, y = cy + Math.sin(star.a) * r * .45; const pr = 18 + (star.d - .018) * Math.max(w, h) * .9; const px = cx + Math.cos(star.a) * pr, py = cy + Math.sin(star.a) * pr * .45; ctx.strokeStyle = `rgba(${star.o ? '125,211,252' : '226,232,240'},${Math.max(.04, star.d * .22)})`; ctx.lineWidth = star.o ? 1.1 : .7; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x, y); ctx.stroke(); } frame += 1; raf = requestAnimationFrame(draw); }; resize(); window.addEventListener('resize', resize); draw(); return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); }; }, []); return <canvas id="fx" ref={ref} aria-hidden="true" />; }
+function Landing({ onOpenApp }: { onOpenApp: () => void }) { const [step, setStep] = useState(0); useEffect(() => { const onScroll = () => { const y = window.scrollY; setStep(Math.min(2, Math.max(0, Math.floor((y - window.innerHeight * 1.35) / (window.innerHeight * .44))))); }; window.addEventListener('scroll', onScroll, { passive: true }); return () => window.removeEventListener('scroll', onScroll); }, []); const current = featureSteps[step]; return <div id="nl" className="nl-page"><WarpCanvas /><header className="nl-header"><a className="nl-logo" href="#top"><img src="/logo-symbol.svg" alt="Notely" /><span>Notely</span></a><a className="nl-btn nl-btn-primary nl-btn-sm" href={APK_URL}>Download app <span>↗</span></a></header><main><section className="nl-hero" id="top"><div className="nl-hero-copy"><p className="nl-eyebrow">THE AI STUDY PARTNER</p><h1 className="nl-hero-title">Study at<br /><span>warp speed.</span></h1><p className="nl-lede">A focused workspace for students: notes, flashcards, quizzes, recorded lectures, and an AI study assistant that learns your courses.</p><div className="nl-cta-row"><a className="nl-btn nl-btn-primary" href={APK_URL}>Download the app <span>↗</span></a><button className="nl-btn nl-btn-ghost" onClick={onOpenApp}>Open web app <span>→</span></button></div><p className="nl-note">Free on Android · Works in your browser</p></div><div className="nl-hero-visual"><div className="nl-orbit orbit-a">Biology 101</div><div className="nl-orbit orbit-b">Organic Chemistry</div><div className="nl-orbit orbit-c">World History</div><MiniPhone kind="note" /></div></section><section className="nl-story"><div className="nl-story-copy"><p className="nl-eyebrow">ONE WORKSPACE. EVERY COURSE.</p><h2>Everything you need<br />to keep going.</h2><div className="nl-step-list">{featureSteps.map((item, i) => <button key={item.title} className={i === step ? 'active' : ''} onClick={() => setStep(i)}><span>{item.kicker}</span><strong>{item.title}</strong><small>{item.body}</small></button>)}</div></div><div className="nl-story-stage"><div className="nl-status-pill">{current.tag}</div><MiniPhone kind={current.icon} /><div className="nl-stage-label"><span>{current.kicker}</span><b>{current.title}</b></div></div></section><section className="nl-showcase"><div className="nl-section-heading"><p className="nl-eyebrow">A CALMER WAY TO STUDY</p><h2>See it in action.</h2><p>Pick up where you left off, without hunting for the thread.</p></div><div className="nl-showcase-track"><div className="nl-shot shot-dashboard"><div className="shot-top"><span>N Notely</span><i>Good morning, Jamie</i></div><div className="shot-card accent"><small>CONTINUE WHERE YOU LEFT OFF</small><b>Cellular respiration</b><span>8 note pages · All changes saved</span></div><div className="shot-lines"><i /><i /><i /></div><strong>Overview.</strong><small>Pick up where you left off.</small></div><div className="nl-shot shot-notebooks"><div className="shot-top"><span>N Notely</span><i>My notebooks</i></div><div className="folder-grid"><b>Biology 101</b><b>Organic Chemistry</b><b>World History</b><b>+ New notebook</b></div><strong>Notebooks.</strong><small>A home for every course.</small></div><div className="nl-shot shot-assistant"><div className="shot-top"><span>N Notely</span><i>Study assistant</i></div><div className="chat-bubble">Why does ATP production stop without oxygen?</div><div className="answer-lines"><i /><i /><i /></div><strong>Study assistant.</strong><small>Answers with sources attached.</small></div></div></section><section className="nl-features"><div className="nl-section-heading"><p className="nl-eyebrow">BUILT FOR THE WHOLE SEMESTER</p><h2>Small tools.<br />Big momentum.</h2></div><div className="nl-feature-grid">{featureCards.map(([number, title, body]) => <article key={number}><span>{number}</span><h3>{title}</h3><p>{body}</p><i>↗</i></article>)}</div></section><section className="nl-final"><div className="nl-marquee" aria-hidden="true">NOTES · CARDS · QUIZZES · LECTURES · WEB · ANDROID · NOTES · CARDS · QUIZZES · LECTURES ·</div><p className="nl-eyebrow">MAKE THE NEXT SESSION COUNT</p><h2>Ace the <span>semester.</span></h2><p>Notely keeps the useful stuff close, so you can spend your energy on learning.</p><div className="nl-cta-row nl-cta-row-center"><a className="nl-btn nl-btn-primary" href={APK_URL}>Download the app <span>↗</span></a><button className="nl-btn nl-btn-ghost" onClick={onOpenApp}>Open web app <span>→</span></button></div><small>Installing the APK? Android may ask you to allow installs from your browser.</small></section></main><footer className="nl-footer"><span>© 2026 Notely</span><nav><a href="#privacy">Privacy</a><a href="#terms">Terms</a><a href="#contact">Contact</a></nav><span>Made for students.</span></footer></div>; }
+function App() { const [view, setView] = useState<'landing' | 'dashboard'>('landing'); return view === 'landing' ? <Landing onOpenApp={() => setView('dashboard')} /> : <Dashboard onBack={() => setView('landing')} />; }
 createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>);
