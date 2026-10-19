@@ -3,7 +3,7 @@
 
     <!--
       Launch theme using the AndroidX Splash Screen API.
-      Shows the official AI Notebook logo on a clean white launch surface,
+      Shows the official Notely logo on a clean white launch surface,
       then hands off to the Compose UI. No generated/alternative branding.
     -->
     <style name="Theme.AiNotebook.Starting" parent="Theme.SplashScreen">

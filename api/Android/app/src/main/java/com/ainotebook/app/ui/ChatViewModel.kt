@@ -272,7 +272,7 @@ class ChatViewModel(private val repo: Repository) : ViewModel() {
                         loadChats()
                     }
                     is StreamEvent.Error -> {
-                        if (sb.isEmpty()) updateLastAssistant("AI Notebook isn't responding right now.\n\nPlease try again in a moment.")
+                        if (sb.isEmpty()) updateLastAssistant("Notely isn't responding right now.\n\nPlease try again in a moment.")
                         _state.update { it.copy(streaming = false) }
                     }
                 }
@@ -314,7 +314,7 @@ class ChatViewModel(private val repo: Repository) : ViewModel() {
                 msg.contains("timeout", true) ||
                 msg.contains("failed to connect", true) ->
                 "Cannot reach the server. Check your connection and try again."
-            else -> "AI Notebook isn't responding right now. Please try again in a moment."
+            else -> "Notely isn't responding right now. Please try again in a moment."
         }
     }
 }

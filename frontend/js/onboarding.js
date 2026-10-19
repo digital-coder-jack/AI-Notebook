@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  onboarding.js
+   Notely  -  onboarding.js
    ---------------------------------------------------------------------
    Beautiful multi-step onboarding wizard shown ONCE after any auth
    method (login / signup / guest / OAuth). Collects education level,
@@ -145,11 +145,11 @@
     overlay.className = 'ob-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-label', 'Welcome to AI Notebook — quick setup');
+    overlay.setAttribute('aria-label', 'Welcome to Notely — quick setup');
     overlay.innerHTML =
       '<section class="ob-modal" id="obModal">' +
         '<header class="ob-head">' +
-          '<span class="ob-brand"><img src="/assets/logo-192.png" alt="" /> AI Notebook</span>' +
+          '<span class="ob-brand"><img src="/assets/logo-192.png" alt="" /> Notely</span>' +
           '<button class="ob-skip" id="obSkip" type="button">Skip for now</button>' +
         '</header>' +
         '<div class="ob-progress" id="obProgress" aria-hidden="true">' +
@@ -360,7 +360,7 @@
       '<div class="ob-step"><div class="ob-done">' +
         '<div class="ob-check"><i class="fas fa-check" aria-hidden="true"></i></div>' +
         '<h2>You\u2019re all set! 🎉</h2>' +
-        '<p class="ob-sub">AI Notebook is now personalized for you.</p>' +
+        '<p class="ob-sub">Notely is now personalized for you.</p>' +
         (chips.length ? '<div class="ob-summary">' + chips.map(function (c) { return '<span>' + esc(c) + '</span>'; }).join('') + '</div>' : '') +
       '</div></div>';
     document.querySelectorAll('#obProgress span').forEach(function (d) { d.className = 'done'; });

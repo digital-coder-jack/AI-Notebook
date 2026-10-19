@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>AI Chat · AI Notebook</title>
+  <title>AI Chat · Notely</title>
   <meta name="description" content="Chat with your AI study partner: ask questions, learn new topics and create notes." />
   <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#5558ac" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="AI Notebook" />
+  <meta name="apple-mobile-web-app-title" content="Notely" />
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" type="image/png" href="/assets/logo-192.png" />
   <link rel="apple-touch-icon" href="/assets/logo-192.png" />
@@ -47,7 +47,7 @@
 </head>
 <body>
   <a class="skip-link" href="#input">Skip to message box</a>
-  <noscript><p style="padding:16px;text-align:center">AI Notebook needs JavaScript to run. Please enable it and reload.</p></noscript>
+  <noscript><p style="padding:16px;text-align:center">Notely needs JavaScript to run. Please enable it and reload.</p></noscript>
 
   <div id="toast-wrap" role="status" aria-live="polite"></div>
   <div class="chat-overlay" id="chatOverlay" aria-hidden="true"></div>
@@ -56,7 +56,7 @@
     <!-- Conversation sidebar -->
     <aside class="chat-side" id="chatSide" aria-label="Conversations">
       <div class="chat-side-head">
-        <a class="brand" href="/dashboard" aria-label="AI Notebook dashboard"><span class="logo"><img src="/assets/logo.png" alt="" width="32" height="32" /></span><span>AI <span class="grad-text">Notebook</span></span></a>
+        <a class="brand" href="/dashboard" aria-label="Notely dashboard"><span class="logo"><img src="/assets/logo.png" alt="" width="32" height="32" /></span><span>Notely</span></a>
         <button type="button" class="btn block" id="newChatBtn"><i class="fas fa-plus" aria-hidden="true"></i> New chat</button>
       </div>
       <div class="chat-list" id="chatList" role="list" aria-label="Chat history"></div>
@@ -74,16 +74,16 @@
           <span class="chat-brand-mark" aria-hidden="true"><i class="fas fa-sparkles"></i></span>
           <div>
             <span class="eyebrow">PERSONAL AI WORKSPACE</span>
-            <h1 id="chatTitle" style="font:inherit;margin:0">AI Notebook</h1>
+            <h1 id="chatTitle" style="font:inherit;margin:0">Notely</h1>
           </div>
         </div>
         <div class="actions">
           <div class="model-selector" id="modelSelector" title="Choose AI tier">
             <span class="model-dot" id="modelDot" aria-hidden="true"></span>
             <select id="modelSelect" aria-label="AI tier">
-              <option value="default">AI Notebook</option>
-              <option value="pro">AI Notebook Pro</option>
-              <option value="pro_max">AI Notebook Pro Max</option>
+              <option value="default">Notely</option>
+              <option value="pro">Notely Pro</option>
+              <option value="pro_max">Notely Pro Max</option>
             </select>
           </div>
           <button type="button" class="icon-btn" id="downloadBtn" title="Download chat" aria-label="Download chat"><i class="fas fa-download" aria-hidden="true"></i></button>
@@ -99,10 +99,10 @@
       <div class="composer">
         <div class="composer-tools"><span><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Ask, learn, create</span><span class="composer-status" role="status"><i class="fas fa-circle" aria-hidden="true"></i> Ready</span></div>
         <div class="composer-inner">
-          <textarea id="input" rows="1" aria-label="Message AI Notebook" aria-describedby="composerHint" placeholder="Ask anything… (Shift+Enter for a new line)" enterkeyhint="send" autocomplete="off"></textarea>
+          <textarea id="input" rows="1" aria-label="Message Notely" aria-describedby="composerHint" placeholder="Ask anything… (Shift+Enter for a new line)" enterkeyhint="send" autocomplete="off"></textarea>
           <button type="button" class="send-btn" id="sendBtn" title="Send" aria-label="Send message"><i class="fas fa-paper-plane" aria-hidden="true"></i></button>
         </div>
-        <p class="hint" id="composerHint">AI Notebook can make mistakes. Verify important information. <span>Enter to send · Shift + Enter for a new line</span></p>
+        <p class="hint" id="composerHint">Notely can make mistakes. Verify important information. <span>Enter to send · Shift + Enter for a new line</span></p>
       </div>
     </main>
   </div>

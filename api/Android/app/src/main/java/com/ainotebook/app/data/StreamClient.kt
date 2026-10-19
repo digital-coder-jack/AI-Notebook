@@ -137,21 +137,21 @@ object StreamClient {
                 call.execute().use { response ->
                     when {
                         response.code == 401 || response.code == 403 -> {
-                            emitTerminal(StreamEvent.Error("AI Notebook isn't responding right now. Please try again in a moment.", retryable = false))
+                            emitTerminal(StreamEvent.Error("Notely isn't responding right now. Please try again in a moment.", retryable = false))
                             AttemptResult.DONE
                         }
                         response.code == 429 || response.code in 500..599 -> {
                             // Server-side transient — worth retrying.
-                            AttemptResult.RETRY("AI Notebook is temporarily busy")
+                            AttemptResult.RETRY("Notely is temporarily busy")
                         }
                         !response.isSuccessful -> {
-                            emitTerminal(StreamEvent.Error("AI Notebook isn't responding right now. Please try again in a moment.", retryable = false))
+                            emitTerminal(StreamEvent.Error("Notely isn't responding right now. Please try again in a moment.", retryable = false))
                             AttemptResult.DONE
                         }
                         else -> {
                             val source = response.body?.source()
                             if (source == null) {
-                                emitTerminal(StreamEvent.Error("AI Notebook isn't responding right now. Please try again in a moment.", retryable = false))
+                                emitTerminal(StreamEvent.Error("Notely isn't responding right now. Please try again in a moment.", retryable = false))
                                 AttemptResult.DONE
                             } else {
                                 consumeStream(source, ::emitTerminal) { ev -> if (!isClosedForSend) trySend(ev) }
@@ -170,7 +170,7 @@ object StreamClient {
                 AttemptResult.RETRY(e.message ?: "Network error")
             } catch (e: Exception) {
                 // Unexpected — never crash silently.
-                emitTerminal(StreamEvent.Error("AI Notebook isn't responding right now. Please try again in a moment.", retryable = false))
+                emitTerminal(StreamEvent.Error("Notely isn't responding right now. Please try again in a moment.", retryable = false))
                 AttemptResult.DONE
             }
 
@@ -375,9 +375,9 @@ object StreamClient {
     private fun extractError(obj: JsonObject): String? {
         (obj["error"])?.let { el ->
             (el as? JsonObject)?.let { eo ->
-                return "AI Notebook is temporarily unavailable. Please try again."
+                return "Notely is temporarily unavailable. Please try again."
             }
-            el.jsonPrimitive.contentOrNull?.let { return "AI Notebook is temporarily unavailable. Please try again." }
+            el.jsonPrimitive.contentOrNull?.let { return "Notely is temporarily unavailable. Please try again." }
         }
         return null
     }

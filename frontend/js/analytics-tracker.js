@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  analytics-tracker.js
+   Notely  -  analytics-tracker.js
    Client-side analytics tracking with guest ID management
    ===================================================================== */
 

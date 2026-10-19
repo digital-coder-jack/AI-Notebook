@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  config.js   (MUST load before app.js & trackers)
+   Notely  -  config.js   (MUST load before app.js & trackers)
    ---------------------------------------------------------------------
    This is the SINGLE place to point the frontend at your backend API.
 

@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  pwa.js
+   Notely  -  pwa.js
    ---------------------------------------------------------------------
    - Registers the service worker.
    - Keeps the service worker and network status behavior without showing

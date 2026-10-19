@@ -202,7 +202,7 @@ private fun ChatHistoryRow(
     }
 }
 
-/** Native bottom sheet for picking an AI Notebook product tier. */
+/** Native bottom sheet for picking an Notely product tier. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelPickerSheet(
@@ -225,7 +225,7 @@ fun ModelPickerSheet(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                "Choose the AI Notebook tier for your next response.",
+                "Choose the Notely tier for your next response.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MutedText
             )
@@ -266,15 +266,15 @@ fun ModelPickerSheet(
 }
 
 private fun modelLabel(model: String): String = when (model.lowercase()) {
-    "default", "auto" -> "AI Notebook"
-    "pro" -> "AI Notebook Pro"
-    "pro_max" -> "AI Notebook Pro Max"
-    else -> "AI Notebook"
+    "default", "auto" -> "Notely"
+    "pro" -> "Notely Pro"
+    "pro_max" -> "Notely Pro Max"
+    else -> "Notely"
 }
 
 private fun modelDescription(model: String): String = when (model.lowercase()) {
     "default", "auto" -> "Your calm, fast study assistant"
     "pro" -> "More capable study assistance"
     "pro_max" -> "Advanced study assistance"
-    else -> "Your AI Notebook assistant"
+    else -> "Your Notely assistant"
 }

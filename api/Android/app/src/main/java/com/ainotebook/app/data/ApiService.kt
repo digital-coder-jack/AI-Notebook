@@ -8,7 +8,7 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 
 /**
- * Retrofit declaration of the AI Notebook REST API.
+ * Retrofit declaration of the Notely REST API.
  * (Streaming chat is handled separately via raw OkHttp in [StreamClient].)
  */
 interface ApiService {
