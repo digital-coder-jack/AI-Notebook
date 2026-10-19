@@ -9,7 +9,7 @@ The single FastAPI application that powers BOTH:
   3. The static frontend  (served from /frontend)
 
 Everything shares backend.database (one SQLite file) and backend.ai
-(one AI Notebook gateway router), so the bot and the website operate on the same data.
+(one Notely model router), so the bot and the website operate on the same data.
 
 Run locally:
     uvicorn backend.main:app --reload --port 3000
@@ -63,9 +63,9 @@ def _validate_environment() -> None:
     # AI uses three independent product tiers. The default tier is required
     # for AI features; Pro and Pro Max are optional upgrades.
     ai_providers = {
-        "GEMINI_API_KEY": "AI Notebook default tier",
-        "OPENROUTER_API_KEY": "AI Notebook Pro tier",
-        "GROQ_API_KEY": "AI Notebook Pro Max tier",
+        "GEMINI_API_KEY": "Notely default tier",
+        "OPENROUTER_API_KEY": "Notely Pro tier",
+        "GROQ_API_KEY": "Notely Pro Max tier",
     }
     recommended = {
         "JWT_SECRET": "stable session signing secret (logins break on restart without it)",
@@ -87,7 +87,7 @@ def _validate_environment() -> None:
     missing_recommended = [k for k in recommended if not os.environ.get(k)]
 
     logger.info("=" * 60)
-    logger.info("AI Notebook — environment check")
+    logger.info("Notely — environment check")
     for key, why in ai_providers.items():
         status = "OK" if os.environ.get(key) else "not set"
         logger.info("  [%s] %-18s — %s", status, key, why)
@@ -120,7 +120,7 @@ def _validate_environment() -> None:
 
 _validate_environment()
 
-app = FastAPI(title="AI Notebook", docs_url=None, redoc_url=None)
+app = FastAPI(title="Notely", docs_url=None, redoc_url=None)
 
 # ---------------------------------------------------------------------------
 # CORS — the frontend now lives on a DIFFERENT origin (Vercel) than this API
@@ -272,7 +272,7 @@ async def health() -> dict:
     snapshot = providers.status_snapshot()
     return {
         "status": "ok",
-        "app": "AI Notebook",
+        "app": "Notely",
         "storage": "sqlite",
         "db_path": db.DB_PATH,
         "ai_configured": snapshot["any_configured"],
@@ -289,7 +289,7 @@ async def api_root_status() -> dict:
     """Friendly JSON status at the API base."""
     return {
         "status": "ok",
-        "service": "AI Notebook — backend API",
+        "service": "Notely — backend API",
         "health": "/api/health",
     }
 
@@ -406,7 +406,7 @@ async def index():
     return JSONResponse(
         {
             "status": "ok",
-            "service": "AI Notebook — backend API",
+            "service": "Notely — backend API",
             "health": "/api/health",
             "note": "Frontend is hosted separately (e.g. Vercel).",
         }
