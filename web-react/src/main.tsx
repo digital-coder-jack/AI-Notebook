@@ -1,10 +1,13 @@
 import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
+import './landing.css';
 
 type Page = 'Home' | 'Notebooks' | 'Study' | 'Planner' | 'More';
 
 const navItems: Page[] = ['Home', 'Notebooks', 'Study', 'Planner', 'More'];
+
+// ─── Existing Notely SPA (dashboard) — unchanged ───────────────────────────
 
 function Header({ back = false }: { back?: boolean }) {
   return <header className="topbar"><div className="brand">{back && <span className="back">‹</span>}Notely</div><div className="header-meta"><span className="search-dot">⌕</span><span>JL</span></div></header>;
@@ -62,9 +65,98 @@ function More({ setPage }: { setPage: (page: Page) => void }) {
   return <><Header /><main><h1>Course materials</h1><p className="subhead">Readings, slides, and references — close to your notes.</p><Button>＋ Add material</Button><div className="filter-row blue">Biology 101 · 12 <span>All courses · 24</span><span>PDFs</span><span>Slides</span></div>{['Ch. 9 — Cellular respiration','Lecture 07 — Energy & metabolism','Yeast respiration — lab guide','Ch. 10 — Photosynthesis','ATP synthase: a molecular motor','Metabolism — midterm reading list'].map((x, i) => <Card key={x} className={i === 0 ? 'list-card lavender' : 'list-card'}><div className="line-icon">{i === 4 ? '↗' : '▧'}</div><div><strong>{x}</strong><small>{i === 0 ? 'PDF · 18 pages · Added Oct 14' : 'Biology 101 · Recently added'}</small></div></Card>)}<Card><div className="large-icon">⌁</div><h2>Bring your sources in</h2><p>Upload PDFs, lecture slides, or documents. Link them to a course so your assistant can cite them.</p><Button>⇧ &nbsp; Choose files</Button> <Button secondary>↗ &nbsp; Add a link</Button></Card><Card><h2>Selected material</h2><div className="eyebrow blue">BIOLOGY 101</div><h2>Ch. 9 — Cellular respiration</h2><p>18 pages · 6 annotations · Linked to Cellular respiration</p><Button secondary>▣ &nbsp; Open PDF</Button></Card><Card><h2>All tools</h2>{['Course materials','Flashcards','Quizzes','Tasks','Calendar','Recorded lectures','Study assistant'].map(x => <div className="mini-row" key={x}><span className="line-icon">▧</span><strong>{x}</strong><small>Open workspace tool</small></div>)}</Card></main></>;
 }
 
-function App() {
+function Dashboard({ onBack }: { onBack: () => void }) {
   const [page, setPage] = useState<Page>('Home');
-  return <div className="app"><div className="device"><div className="status"><span>9:41</span><span>LTE ▰</span></div>{page === 'Home' && <Home setPage={setPage} />}{page === 'Notebooks' && <Notebooks />}{page === 'Study' && <Study />}{page === 'Planner' && <Planner />}{page === 'More' && <More setPage={setPage} />}<BottomNav page={page} setPage={setPage} /></div></div>;
+  return (
+    <div className="app">
+      <button className="nl-dash-exit" onClick={onBack} title="Back to landing page">← Landing</button>
+      <div className="device">
+        <div className="status"><span>9:41</span><span>LTE ▰</span></div>
+        {page === 'Home' && <Home setPage={setPage} />}
+        {page === 'Notebooks' && <Notebooks />}
+        {page === 'Study' && <Study />}
+        {page === 'Planner' && <Planner />}
+        {page === 'More' && <More setPage={setPage} />}
+        <BottomNav page={page} setPage={setPage} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Landing page (mounted at "/") — all styles scoped under #nl ───────────
+
+// TODO: replace with your hosted APK link (e.g. "/notely.apk" in /public, or a full URL)
+const APK_URL = 'YAHAN_APK_KA_LINK_DAALO';
+
+function Landing({ onOpenApp }: { onOpenApp: () => void }) {
+  return (
+    <div id="nl" className="nl-page">
+      <canvas id="fx" aria-hidden="true"></canvas>
+
+      <header className="nl-header">
+        <a className="nl-logo" href="#top">
+          <img src="/logo-symbol.svg" alt="Notely logo" height="34" />
+          <span className="nl-logo-word">Notely</span>
+        </a>
+        <a className="nl-btn nl-btn-primary nl-btn-sm" href={APK_URL}>Download app</a>
+      </header>
+
+      <main>
+        <section className="nl-hero" id="top">
+          <div className="nl-hero-copy">
+            <p className="nl-eyebrow">YOUR AI STUDY PARTNER</p>
+            <h1 className="nl-hero-title">Study at<br />warp speed.</h1>
+            <p className="nl-lede">Notes, flashcards, quizzes and a study assistant — everything for your semester in one calm, fast app.</p>
+            <div className="nl-cta-row">
+              <a className="nl-btn nl-btn-primary" href={APK_URL}>Download the app</a>
+              <button className="nl-btn nl-btn-ghost" onClick={onOpenApp}>Open web app</button>
+            </div>
+            <p className="nl-note">Free on Android · Web app in your browser</p>
+          </div>
+
+          <div className="nl-phone-wrap" aria-hidden="true">
+            <div className="nl-phone">
+              <div className="nl-phone-notch"></div>
+              <div className="nl-phone-screen">
+                <div className="nl-mock">
+                  <p className="nl-mock-eyebrow">FRIDAY · OCTOBER 16</p>
+                  <p className="nl-mock-title">Good morning, Jamie</p>
+                  <div className="nl-mock-card">
+                    <p className="nl-mock-eyebrow">BIOLOGY 101 · LECTURE 07</p>
+                    <p className="nl-mock-card-title">Cellular respiration</p>
+                    <div className="nl-mock-lines"><i></i><i></i><i style={{ width: '62%' }}></i></div>
+                  </div>
+                  <div className="nl-mock-row"><i></i><span></span></div>
+                  <div className="nl-mock-row"><i></i><span></span></div>
+                  <div className="nl-mock-progress"><i style={{ width: '38%' }}></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="nl-cta">
+          <h2>Ace the semester.</h2>
+          <div className="nl-cta-row nl-cta-row-center">
+            <a className="nl-btn nl-btn-primary" href={APK_URL}>Download the app</a>
+            <button className="nl-btn nl-btn-ghost" onClick={onOpenApp}>Open web app</button>
+          </div>
+        </section>
+      </main>
+
+      <footer className="nl-footer">
+        <span>© 2026 Notely</span>
+        <span>Made for students.</span>
+      </footer>
+    </div>
+  );
+}
+
+function App() {
+  const [view, setView] = useState<'landing' | 'dashboard'>('landing');
+  return view === 'landing'
+    ? <Landing onOpenApp={() => setView('dashboard')} />
+    : <Dashboard onBack={() => setView('landing')} />;
 }
 
 createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>);
