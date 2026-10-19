@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  chat.css  (ChatGPT-style interface)
+   Notely  -  chat.css  (ChatGPT-style interface)
    ===================================================================== */
 
 .chat-layout { display: flex; height: 100vh; position: relative; z-index: 2; }
