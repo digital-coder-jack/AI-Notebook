@@ -1,0 +1,43 @@
+/* Notely base — layout shell, sidebar, topbar, buttons (from Notely app) */
+:root { color: #2a2d39; background: #f7f6f2; font-family: 'DM Sans', sans-serif; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.app-shell { min-height: 100vh; display: flex; background: #f7f6f2; }
+.sidebar { width: 196px; flex: 0 0 196px; min-height: 100vh; padding: 20px 16px 18px; border-right: 1px solid #e6e4dc; background: #f1f0ea; display: flex; flex-direction: column; gap: 19px; position: relative; z-index: 20; }
+.brand-row { display: flex; align-items: center; gap: 8px; color: #242734; font-family: Georgia, serif; font-size: 21px; letter-spacing: -.5px; }
+.brand-mark { width: 23px; height: 23px; display: grid; place-items: center; color: white; background: #5755ad; border-radius: 5px; transform: rotate(-2deg); }
+.mobile-close, .mobile-menu { display: none; }
+.search-button { color: #8a8b8d; border: 0; background: transparent; display: flex; align-items: center; gap: 6px; padding: 2px 1px; font-size: 10px; text-align: left; }
+kbd { margin-left: auto; font-size: 9px; color: #9a9a99; }
+.primary-nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-item, .notebook-link { width: 100%; border: 0; background: transparent; color: #454852; display: flex; align-items: center; gap: 9px; border-radius: 5px; padding: 8px 6px; font-size: 11px; text-align: left; transition: .18s ease; }
+.nav-item:hover, .notebook-link:hover { background: #e8e7e2; color: #3e3c96; }
+.nav-item.active { background: #e7e6f7; color: #4b49a7; font-weight: 700; }
+.sidebar-section { margin-top: 11px; }
+.eyebrow { margin: 0; color: #888a8d; font-size: 9px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+.sidebar .eyebrow { margin: 0 6px 8px; }
+.notebook-link { padding: 7px 10px; font-size: 10px; }
+.notebook-link.blue { color: #5d64a8; }
+.notebook-link.green { color: #669084; }
+.notebook-link.orange { color: #b17e68; }
+.calendar-snippet { margin-top: auto; padding: 0 6px; display: flex; flex-direction: column; gap: 3px; color: #929397; font-size: 9px; line-height: 1.35; }
+.calendar-snippet strong, .profile-link strong { color: #444752; font-size: 10px; }
+.profile-link { border: 0; background: transparent; padding: 0 6px; display: flex; flex-direction: column; gap: 3px; text-align: left; color: #999a9a; font-size: 9px; }
+.main-area { min-width: 0; flex: 1; }
+.topbar { height: 49px; padding: 0 30px; border-bottom: 1px solid #e8e6df; background: #fbfaf7; display: flex; align-items: center; color: #88898c; font-size: 10px; }
+.slash { color: #c5c3bc; margin: 0 5px; }
+.topbar-user { margin-left: auto; }
+.topbar-user span { margin: 0 7px; color: #c8c6c0; }
+.page-content { width: min(1080px, calc(100% - 64px)); margin: 0 auto; padding: 42px 0 70px; }
+.page-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 30px; }
+.page-heading h1, h2, h3 { font-family: Fraunces, Georgia, serif; font-weight: 500; color: #292c38; }
+.page-heading h1 { font-size: 33px; letter-spacing: -.8px; line-height: 1.12; margin: 0 0 3px; }
+.page-heading p:not(.eyebrow) { margin: 0; color: #85868a; font-size: 12px; }
+.heading-eyebrow { margin-bottom: 8px; }
+.button { border: 1px solid #e0dfd8; border-radius: 7px; padding: 10px 14px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; color: #464952; background: #fffdfa; font-size: 11px; font-weight: 600; transition: transform .18s, box-shadow .18s, background .18s; }
+.button:hover { transform: translateY(-1px); box-shadow: 0 5px 15px #36344812; }
+.button.primary { border-color: #5755ad; color: white; background: #5755ad; }
+.button.dark { border-color: #2e3140; color: white; background: #2e3140; }
+.button.light { margin-top: 10px; background: #fffdfa; }
