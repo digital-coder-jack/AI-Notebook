@@ -1,0 +1,59 @@
+/* Notely screens part 3 — home, lecture library, search, assistant, tasks (from Notely app) */
+.home-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; }
+.continue-card { background: #e9e9f8; border: 1px solid #deddf0; border-radius: 10px; padding: 23px 20px; }
+.course-kicker { color: #7778a9; font-size: 9px; font-weight: 700; text-transform: uppercase; margin: 15px 0 0; }
+.continue-card h2 { font-size: 31px; margin: 13px 0 12px; }
+.continue-card > p:not(.eyebrow):not(.course-kicker) { color: #51535e; font-size: 12px; }
+.saved-row { display: flex; gap: 12px; color: #85868e; font-size: 10px; margin: 17px 0 4px; }
+.saved-row strong { color: #669284; }
+.home-label, .recent-label { margin: 26px 0 12px; }
+.home-notebooks { display: flex; flex-direction: column; gap: 14px; }
+.home-notebook { border: 1px solid #e5e3dc; border-radius: 8px; background: #fffdfa; display: flex; align-items: center; gap: 13px; padding: 16px; text-align: left; }
+.home-notebook-icon { color: #5a58aa; }
+.home-notebook span:nth-child(2) { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.home-notebook strong { color: #42444d; font-size: 12px; }
+.home-notebook small { color: #96979a; font-size: 10px; }
+.home-notebook.green .home-notebook-icon { color: #5f8b78; }
+.home-notebook.orange .home-notebook-icon { color: #b47f65; }
+.quick-recall { border: 1px solid #e5e3dc; border-radius: 9px; padding: 18px 20px; margin-top: 22px; }
+.quick-recall h2 { font-size: 20px; margin: 0 0 11px; }
+.quick-recall p { color: #5f6169; font-size: 11px; }
+.home-side { display: flex; flex-direction: column; gap: 18px; }
+.calendar-callout h3, .home-side .side-card h3 { font-size: 20px; }
+.calendar-callout h4 { font: 19px Fraunces, Georgia, serif; margin: 16px 0 8px; }
+.task-mini { display: flex; gap: 12px; border: 1px solid #e5e3dc; border-radius: 8px; padding: 16px 12px; margin-top: 12px; }
+.task-mini > span { width: 16px; height: 16px; border: 2px solid #6562b1; border-radius: 3px; }
+.task-mini div { display: flex; flex-direction: column; gap: 4px; }
+.task-mini strong { font-size: 11px; }
+.task-mini small { color: #929397; font-size: 9px; }
+.rhythm-card > strong { display: block; font: 29px Fraunces, Georgia, serif; margin: 13px 0; }
+.rhythm-card > small { display: block; color: #96979a; font-size: 10px; margin-top: 12px; }
+.rhythm-card > p { margin-bottom: 0; }
+.notebook-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.course-notebook { border: 1px solid #e4e2db; border-top: 6px solid #5a58aa; border-radius: 9px; background: #fffdfa; padding: 19px; }
+.course-notebook.green { border-top-color: #578270; }
+.course-notebook.orange { border-top-color: #b27d65; }
+.course-notebook h2 { font-size: 24px; margin: 17px 0 18px; }
+.course-notebook > p:not(.eyebrow), .course-notebook > span { color: #88898e; display: block; font-size: 10px; margin-bottom: 15px; }
+.last-opened { border: 1px solid #e4e2db; border-radius: 8px; padding: 15px; margin-top: 19px; }
+.last-opened h3 { font-size: 18px; margin: 13px 0 10px; }
+.last-opened small { color: #999a9d; font-size: 9px; }
+.recent-pages { display: flex; flex-direction: column; gap: 14px; }
+.recent-pages button { display: flex; align-items: center; gap: 13px; border: 1px solid #e5e3dc; border-radius: 8px; background: #fffdfa; padding: 16px; color: #5a58aa; text-align: left; }
+.recent-pages span { flex: 1; color: #42444c; font-size: 11px; font-weight: 700; }
+.recent-pages small { display: block; color: #929397; font-size: 9px; font-weight: 400; margin-top: 4px; }
+.quiz-library-layout, .lecture-layout { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 22px; }
+.quiz-feature { background: #e9e9f8; border: 1px solid #deddf0; border-radius: 10px; padding: 23px 20px; }
+.quiz-feature h2 { font-size: 23px; margin: 14px 0 10px; }
+.quiz-feature > p:not(.eyebrow) { color: #555762; font-size: 11px; }
+.quiz-feature small { display: block; color: #8b8c91; font-size: 9px; margin-top: 15px; }
+.quiz-list { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; }
+.quiz-library-row { display: flex; align-items: center; gap: 13px; border: 1px solid #e5e3dc; border-radius: 8px; background: #fffdfa; padding: 17px; text-align: left; color: #5956aa; }
+.quiz-library-row span { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.quiz-library-row strong { color: #41434b; font-size: 12px; }
+.quiz-library-row small { color: #929397; font-size: 9px; }
+.quiz-library-row em { color: #5956aa; font-style: normal; font-size: 9px; }
+.source-mini { display: flex; align-items: center; gap: 11px; border: 1px solid #e5e3dc; border-radius: 7px; padding: 14px; color: #5a58aa; margin-top: 12px; }
+.source-mini span { display: flex; flex-direction: column; gap: 4px; }
+.source-mini strong { color: #484a53; font-size: 11px; }
+.source-mini small { color: #96979a; font-size: 9px; }
