@@ -282,7 +282,7 @@ private fun ChatHeader(
         Spacer(Modifier.size(10.dp))
         Column(Modifier.weight(1f)) {
             Text(
-                "AI Notebook",
+                "Notely",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -312,9 +312,9 @@ private fun ChatHeader(
             Spacer(Modifier.size(4.dp))
             Text(
                 when (model.lowercase()) {
-                    "pro" -> "AI Notebook Pro"
-                    "pro_max" -> "AI Notebook Pro Max"
-                    else -> "AI Notebook"
+                    "pro" -> "Notely Pro"
+                    "pro_max" -> "Notely Pro Max"
+                    else -> "Notely"
                 },
                 style = MaterialTheme.typography.labelMedium,
                 color = Indigo,
@@ -373,7 +373,7 @@ private fun ChatInputBar(
             OutlinedTextField(
                 value = value,
                 onValueChange = onValueChange,
-                placeholder = { Text("Message AI Notebook…") },
+                placeholder = { Text("Message Notely…") },
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(24.dp),
                 maxLines = 5,
@@ -558,7 +558,7 @@ private fun AssistantMessage(
             AssistantAvatar(size = 30.dp)
             Spacer(Modifier.size(8.dp))
             Text(
-                "AI Notebook",
+                "Notely",
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -614,7 +614,7 @@ private fun AssistantMessage(
                     val send = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_TEXT, msg.content)
-                        putExtra(Intent.EXTRA_SUBJECT, "AI Notebook")
+                        putExtra(Intent.EXTRA_SUBJECT, "Notely")
                     }
                     context.startActivity(Intent.createChooser(send, "Share response"))
                 }

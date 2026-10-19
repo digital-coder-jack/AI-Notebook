@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  auth.js  (login / signup / forgot)
+   Notely  -  auth.js  (login / signup / forgot)
    ===================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {

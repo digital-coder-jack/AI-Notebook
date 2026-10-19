@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  profile.js  (2026 Premium Settings)
+   Notely  -  profile.js  (2026 Premium Settings)
    ---------------------------------------------------------------------
    Powers the expanded settings page: Profile, Security, Privacy,
    Appearance, Dashboard, Notifications, AI Preferences, Accessibility.
@@ -209,13 +209,13 @@ async function loadProviderStatus() {
   try {
     const data = await SS.api('/api/ai/status', { auth: false });
     box.innerHTML = (data.providers || []).map(p =>
-      `<span class="model-badge" title="${p.label || 'AI Notebook'}">` +
+      `<span class="model-badge" title="${p.label || 'Notely'}">` +
       `<span class="model-dot ${p.configured ? '' : 'off'}"></span>` +
-      `${p.label || 'AI Notebook'} ${p.configured ? '' : '(temporarily unavailable)'}</span>`
+      `${p.label || 'Notely'} ${p.configured ? '' : '(temporarily unavailable)'}</span>`
     ).join(' ');
-    if (!box.innerHTML) box.innerHTML = '<span class="model-badge">AI Notebook · Checking availability</span>';
+    if (!box.innerHTML) box.innerHTML = '<span class="model-badge">Notely · Checking availability</span>';
   } catch {
-    box.innerHTML = '<span class="model-badge"><span class="model-dot off"></span> AI Notebook · Try again later</span>';
+    box.innerHTML = '<span class="model-badge"><span class="model-dot off"></span> Notely · Try again later</span>';
   }
 }
 

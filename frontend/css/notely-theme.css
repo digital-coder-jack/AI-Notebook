@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook — Notely Theme (foundation)
+   Notely — Notely Theme (foundation)
    Defines every theme token the app expects with the Notely
    paper-and-ink palette. Loaded LAST (after figma-redesign.css) so
    these values win wherever pages referenced missing base sheets.

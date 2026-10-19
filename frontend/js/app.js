@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  app.js  (shared helpers, loaded on every page)
+   Notely  -  app.js  (shared helpers, loaded on every page)
    - API client with JWT
    - auth/session helpers
    - toasts, ripple effects, particles config, mobile nav
@@ -339,8 +339,8 @@ const SS = (() => {
     if (document.querySelector('.ainb-boot')) return;
     const overlay = document.createElement('div');
     overlay.className = 'ainb-boot';
-    overlay.setAttribute('aria-label', 'Loading AI Notebook');
-    overlay.innerHTML = '<div class="ainb-boot-card"><img src="/assets/logo.png" alt="" /><span>AI Notebook<small>Preparing your workspace</small></span></div>';
+    overlay.setAttribute('aria-label', 'Loading Notely');
+    overlay.innerHTML = '<div class="ainb-boot-card"><img src="/assets/logo.png" alt="" /><span>Notely<small>Preparing your workspace</small></span></div>';
     document.body.prepend(overlay);
     requestAnimationFrame(() => {
       window.setTimeout(() => overlay.classList.add('is-out'), 120);

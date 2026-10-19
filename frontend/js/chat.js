@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  chat.js  (AI chat interface with streaming)
+   Notely  -  chat.js  (AI chat interface with streaming)
    ===================================================================== */
 
 
@@ -61,7 +61,7 @@ async function saveModel(model) {
   updateModelDot();
   try {
     await SS.api('/api/ai/model', { method: 'PUT', body: { model } });
-    const label = ({ default: 'AI Notebook', pro: 'AI Notebook Pro', pro_max: 'AI Notebook Pro Max' })[model] || 'AI Notebook';
+    const label = ({ default: 'Notely', pro: 'Notely Pro', pro_max: 'Notely Pro Max' })[model] || 'Notely';
     SS.toast(`${label} is ready.`);
   } catch (err) { SS.toast(err.message, 'error'); }
 }
@@ -122,11 +122,11 @@ function userInitial() {
 
 function showEmptyState() {
   if (!el.messages) return;
-  if (el.title) el.title.textContent = 'AI Notebook';
+  if (el.title) el.title.textContent = 'Notely';
   el.messages.innerHTML = `
     <div class="chat-empty">
       <div>
-        <div class="big"><img src="/assets/logo.png" alt="AI Notebook Logo" class="logo-img" /></div>
+        <div class="big"><img src="/assets/logo.png" alt="Notely Logo" class="logo-img" /></div>
         <h2>How can I help you study today?</h2>
         <p>Ask a question, request an explanation, or pick a starter below.</p>
         <div class="suggest-grid">
@@ -160,10 +160,10 @@ function appendMessage(role, content) {
   msg.className = `msg ${role}`;
   const avatar = role === 'user'
     ? escapeHtml(userInitial())
-    : '<img src="/assets/logo.png" alt="AI Notebook Logo" class="logo-img" />';
+    : '<img src="/assets/logo.png" alt="Notely Logo" class="logo-img" />';
   msg.innerHTML = `
     <div class="avatar">${avatar}</div>
-    <div class="bubble"><div class="role">${role === 'user' ? 'You' : 'AI Notebook'}</div><div class="body"></div></div>`;
+    <div class="bubble"><div class="role">${role === 'user' ? 'You' : 'Notely'}</div><div class="body"></div></div>`;
   const body = msg.querySelector('.body');
   if (role === 'assistant') body.appendChild(renderMarkdown(content));
   else body.textContent = content;
@@ -434,7 +434,7 @@ async function sendMessage() {
       body.appendChild(renderMarkdown('⏹️ Generation stopped.'));
     } else if (!cancelled && !hadError && !full.trim()) {
       body.innerHTML = '';
-      body.appendChild(renderMarkdown('AI Notebook isn\'t responding right now.\n\nPlease try again in a moment.'));
+      body.appendChild(renderMarkdown('Notely isn\'t responding right now.\n\nPlease try again in a moment.'));
     }
 
     refreshTitle();
@@ -447,7 +447,7 @@ async function sendMessage() {
       }
     } else {
       body.innerHTML = '';
-      body.appendChild(renderMarkdown('AI Notebook isn\'t responding right now.\n\nPlease try again in a moment.'));
+      body.appendChild(renderMarkdown('Notely isn\'t responding right now.\n\nPlease try again in a moment.'));
     }
   } finally {
     // Release the reader to avoid leaking the underlying stream.
@@ -475,11 +475,11 @@ function friendlyError(e) {
     case 'provider_error':
     case 'invalid_response':
     case 'unavailable':
-      return 'AI Notebook isn\'t responding right now.\n\nPlease try again in a moment.';
+      return 'Notely isn\'t responding right now.\n\nPlease try again in a moment.';
     case 'not_configured':
-      return 'AI Notebook is getting ready. Please try again in a moment.';
+      return 'Notely is getting ready. Please try again in a moment.';
     default:
-      return 'AI Notebook isn\'t responding right now.\n\nPlease try again in a moment.';
+      return 'Notely isn\'t responding right now.\n\nPlease try again in a moment.';
   }
 }
 
@@ -498,9 +498,9 @@ async function downloadChat() {
   if (!state.currentId) return SS.toast('Open a chat first.', 'error');
   try {
     const data = await SS.api(`/api/chats/${state.currentId}`);
-    let md = `# ${data.chat.title}\n\n_Exported from AI Notebook_\n\n`;
+    let md = `# ${data.chat.title}\n\n_Exported from Notely_\n\n`;
     data.messages.forEach((m) => {
-      md += `## ${m.role === 'user' ? '🧑 You' : '<img src="/assets/logo.png" alt="AI Notebook Logo" class="logo-img" /> AI Notebook'}\n\n${m.content}\n\n---\n\n`;
+      md += `## ${m.role === 'user' ? '🧑 You' : '<img src="/assets/logo.png" alt="Notely Logo" class="logo-img" /> Notely'}\n\n${m.content}\n\n---\n\n`;
     });
     const blob = new Blob([md], { type: 'text/markdown' });
     const a = document.createElement('a');

@@ -66,7 +66,7 @@
     if (e.target.closest('[data-open-reader]')) return openReader();
     if (e.target.closest('[data-close-reader]')) return closeReader();
 
-    /* --- Settings actions (wired to the AI Notebook backend) --- */
+    /* --- Settings actions (wired to the Notely backend) --- */
     var actionEl = e.target.closest('[data-settings-action]');
     if (actionEl) {
       var action = actionEl.getAttribute('data-settings-action');

@@ -193,7 +193,7 @@ fun ProfileScreen(
         }
         Spacer(Modifier.height(8.dp))
         Text(
-            "AI Notebook · v1.2",
+            "Notely · v1.2",
             style = MaterialTheme.typography.labelSmall,
             color = MutedText,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),

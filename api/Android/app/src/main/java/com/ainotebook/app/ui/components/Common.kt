@@ -75,7 +75,7 @@ fun GlassCard(modifier: Modifier = Modifier, elevated: Boolean = false, content:
 fun BrandLogo(size: Dp, modifier: Modifier = Modifier) {
     Image(
         painter = painterResource(id = R.drawable.official_logo),
-        contentDescription = "AI Notebook",
+        contentDescription = "Notely",
         contentScale = ContentScale.Fit,
         modifier = modifier.size(size)
     )
@@ -91,7 +91,7 @@ fun AssistantAvatar(size: Dp = 30.dp, modifier: Modifier = Modifier) {
         Box(Modifier.size(size - 3.dp).clip(CircleShape), contentAlignment = Alignment.Center) {
             Image(
                 painter = painterResource(id = R.drawable.official_logo),
-                contentDescription = "AI Notebook",
+                contentDescription = "Notely",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.size(size * 0.60f)
             )

@@ -1,6 +1,6 @@
 workflows:
   android-apk:
-    name: AI Notebook APK Build
+    name: Notely APK Build
 
     environment:
       java: 17

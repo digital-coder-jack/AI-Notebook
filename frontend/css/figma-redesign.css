@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook — Figma Redesign Overlay (v2 — Full App Coverage)
+   Notely — Figma Redesign Overlay (v2 — Full App Coverage)
    Layers the Figma-imported design on top of the existing app.
    Loaded AFTER workspace-redesign.css and theme.css so it can refine
    the visual language without breaking any existing DOM/JS contracts.

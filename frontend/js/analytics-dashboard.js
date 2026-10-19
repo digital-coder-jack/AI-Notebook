@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  analytics-dashboard.js
+   Notely  -  analytics-dashboard.js
    Admin Analytics Dashboard Logic
    ===================================================================== */
 

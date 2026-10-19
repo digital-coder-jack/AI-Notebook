@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook - dashboard.js
+   Notely - dashboard.js
    Same backend (/api/stats, /api/topics, /api/ai/status). Client-side only.
    ===================================================================== */
 
@@ -305,7 +305,7 @@ function renderRecentNotes(notes) {
             SS.toast('Note duplicated');
             refreshNotes();
           } else if (act === 'share') {
-            const text = '📝 ' + note.topic + ' — study note from AI Notebook';
+            const text = '📝 ' + note.topic + ' — study note from Notely';
             if (navigator.share) await navigator.share({ title: note.topic, text });
             else { await navigator.clipboard.writeText(text + '\n' + location.origin); SS.toast('Share text copied'); }
           } else if (act === 'del') {
@@ -434,10 +434,10 @@ async function loadProvidersMini() {
   try {
     const data = await SS.api('/api/ai/status', { auth: false });
     box.innerHTML = (data.providers || []).map((p) => {
-      const label = escapeHtml(p.label || 'AI Notebook');
+      const label = escapeHtml(p.label || 'Notely');
       return `<span class="model-badge" title="${label}"><span class="model-dot ${p.configured ? '' : 'off'}"></span>${label}${p.configured ? '' : ' (temporarily unavailable)'}</span>`;
     }).join(' ');
-    if (!box.innerHTML) box.innerHTML = '<span class="model-badge">AI Notebook</span>';
+    if (!box.innerHTML) box.innerHTML = '<span class="model-badge">Notely</span>';
   } catch {
     box.innerHTML = '<span class="model-badge"><span class="model-dot off"></span> AI status unavailable</span> <button type="button" class="text-button" id="retryProviders">Retry</button>';
     const retry = document.getElementById('retryProviders');

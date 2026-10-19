@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  tools.js  (notes, quiz, flashcards, planner,
+   Notely  -  tools.js  (notes, quiz, flashcards, planner,
    summarizer, homework helper)
    ===================================================================== */
 

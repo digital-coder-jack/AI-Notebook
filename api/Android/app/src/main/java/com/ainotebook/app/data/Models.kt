@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 /* =========================================================================
- *  Data models that mirror the AI Notebook FastAPI backend contracts.
+ *  Data models that mirror the Notely FastAPI backend contracts.
  * ========================================================================= */
 
 @Serializable

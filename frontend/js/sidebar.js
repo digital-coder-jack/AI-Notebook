@@ -1,5 +1,5 @@
 /* =====================================================================
-   AI Notebook  -  sidebar.js  (Premium Glass Redesign)
+   Notely  -  sidebar.js  (Premium Glass Redesign)
    ---------------------------------------------------------------------
    Single-source sidebar renderer powering every authenticated page.
    Inspired by ChatGPT · Perplexity · Vercel · Linear · macOS Dock.
@@ -7,7 +7,7 @@
    Layout (expanded)                    Layout (collapsed = floating dock)
      ┌──────────────────────────┐          ┌──────┐
      │        ◉ LOGO            │          │  ◉   │  ← circular glass logo
-     │      AI Notebook         │          │ ⇔   │  ← expand button BELOW logo
+     │      Notely         │          │ ⇔   │  ← expand button BELOW logo
      │  [⇔ collapse button]     │          │ ──── │
      ├──────────────────────────┤          │  ✚   │  ← new chat
      │  ✚ New Chat              │          │  🏠  │
@@ -98,11 +98,11 @@
   aside.setAttribute('role', 'complementary');
   aside.innerHTML =
     '<div class="side-head">' +
-      '<a class="brand" href="/dashboard" aria-label="AI Notebook home">' +
+      '<a class="brand" href="/dashboard" aria-label="Notely home">' +
         '<span class="logo" aria-hidden="true">' +
           '<img src="/assets/logo.png" alt="" class="logo-img" />' +
         '</span>' +
-        '<span class="brand-text">AI <span class="grad-text">Notebook</span></span>' +
+        '<span class="brand-text">Notely</span>' +
       '</a>' +
       '<button id="sidebarMobileClose" class="mobile-close" type="button" aria-label="Close navigation" title="Close navigation">' +
         '<i class="fas fa-xmark" aria-hidden="true"></i>' +
