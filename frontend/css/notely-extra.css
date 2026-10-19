@@ -1,0 +1,92 @@
+/* Notely extras — styles used by screens whose tokens were missing from the base app stylesheet */
+.materials-count, .materials-label { margin: 26px 0 12px; }
+.deck-feature, .deck-cards, .quiz-feature, .upload-card { border: 1px solid #e5e3dc; border-radius: 10px; background: #fffdfa; }
+.deck-feature { padding: 24px; }
+.deck-feature h2 { font-size: 27px; margin: 10px 0 8px; }
+.deck-feature > p { color: #5f6169; font-size: 11px; }
+.deck-meta { display: flex; gap: 12px; color: #757781; font-size: 10px; margin: 16px 0 12px; }
+.deck-meta strong { color: #5553a3; }
+.deck-row { display: flex; align-items: center; gap: 13px; width: 100%; border: 1px solid #e5e3dc; border-radius: 8px; background: #fffdfa; padding: 17px; margin-top: 14px; text-align: left; color: #5654a7; }
+.deck-row span { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.deck-row strong { color: #41434b; font-size: 12px; }
+.deck-row small { color: #929397; font-size: 9px; }
+.deck-cards { padding: 24px; margin-top: 26px; }
+.deck-cards h2 { font-size: 22px; margin: 0 0 14px; }
+.saved-card { display: flex; align-items: center; gap: 13px; width: 100%; border: 1px solid #e5e3dc; border-radius: 8px; background: #fffdfa; padding: 16px; margin-bottom: 12px; text-align: left; color: #5654a7; }
+.saved-card span { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.saved-card strong { color: #41434b; font-size: 12px; }
+.saved-card small { color: #929397; font-size: 9px; }
+.large-stat { display: block; font: 29px Fraunces, Georgia, serif; color: #292c38; margin: 6px 0; }
+.proposal-card { border-color: #e4ddc9; background: #faf6ea; }
+.flash-library-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 22px; }
+.answers-list { margin-top: 22px; }
+.answer-row { display: flex; gap: 14px; border: 1px solid #e5e3dc; border-radius: 10px; background: #fffdfa; padding: 18px; margin-bottom: 14px; }
+.answer-number { width: 26px; height: 26px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 7px; color: #5654a7; background: #eeedf9; font-size: 11px; font-weight: 700; }
+.answer-row h3 { font-size: 15px; margin: 2px 0 4px; }
+.answer-row > div > span { display: block; font-size: 10px; }
+.answer-row p { margin: 6px 0 4px; color: #5d5f68; font-size: 11px; }
+.answer-row strong { color: #43454e; }
+.answer-row small { display: block; color: #929397; font-size: 9px; line-height: 1.5; }
+.score-card { padding: 24px; display: flex; justify-content: space-between; align-items: center; }
+.score-card h2 { font-size: 33px; margin: 4px 0; }
+.score-card span { font-size: 16px; color: #757781; }
+.score-card small { color: #8e9096; font-size: 9px; }
+.score-ring { width: 84px; height: 84px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; border: 6px solid #e0dfee; color: #5553a3; font: 700 17px Fraunces, Georgia, serif; }
+.upload-card { padding: 24px; text-align: center; }
+.upload-card svg { margin: 0 auto 10px; color: #5654a7; }
+.materials-layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 22px; }
+.material-list { display: flex; flex-direction: column; gap: 12px; }
+.material-row { display: flex; align-items: center; gap: 13px; border: 1px solid #e5e3dc; border-radius: 8px; background: #fffdfa; padding: 17px; text-align: left; color: #5654a7; }
+.material-row.selected { border-color: #5553a3; background: #efefef; }
+.material-row span { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.material-row strong { color: #41434b; font-size: 12px; }
+.material-row small { color: #929397; font-size: 9px; }
+.material-row em { color: #6d9484; font-style: normal; font-size: 9px; }
+.materials-count { color: #929397; font-size: 10px; margin-top: 18px; }
+.reader-toolbar { display: flex; justify-content: space-between; align-items: center; border: 1px solid #e5e3dc; border-radius: 8px; background: #fffdfa; padding: 11px 15px; color: #757781; font-size: 10px; margin-bottom: 16px; }
+.reader-layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 22px; align-items: start; }
+.pdf-page { border: 1px solid #e5e3dc; border-radius: 10px; background: #fffefa; padding: 40px 44px 28px; }
+.pdf-page h2 { font-size: 27px; margin: 10px 0 12px; }
+.pdf-page > p { color: #4c4e57; font-size: 14px; line-height: 1.7; margin: 0 0 14px; }
+.pdf-page blockquote { border-left: 3px solid #5553a3; margin: 16px 0; padding: 2px 0 2px 16px; color: #534f75; font-size: 14px; line-height: 1.7; }
+.pdf-page footer { display: flex; justify-content: space-between; border-top: 1px solid #ebe9e2; margin-top: 22px; padding-top: 12px; color: #a3a4a7; font-size: 9px; letter-spacing: .08em; }
+.pdf-page small { color: #97989b; font-size: 9px; }
+.gradient-figure { border: 1px solid #e4e2db; border-radius: 10px; background: #f4f3ec; margin: 20px 0 8px; padding: 22px; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+.gradient-figure span, .gradient-figure small { color: #97989b; font-size: 9px; letter-spacing: .08em; }
+.proton-line { color: #5553a3; font-size: 11px; letter-spacing: .1em; }
+.gradient-figure strong { color: #43454e; font-size: 11px; }
+.annotation-side { display: flex; flex-direction: column; gap: 12px; }
+.annotation-heading { display: flex; justify-content: space-between; color: #43454e; font-size: 11px; font-weight: 700; }
+.annotation-heading span { color: #929397; font-weight: 400; }
+.annotation-card { border: 1px solid #e5e3dc; border-radius: 10px; background: #fffdfa; padding: 16px; }
+.annotation-card.selected { border-color: #5553a3; background: #efefef; }
+.annotation-card q { display: block; font-size: 12px; margin: 8px 0; }
+.annotation-card p { color: #5d5f68; font-size: 11px; margin: 6px 0; }
+.annotation-card small { display: block; color: #929397; font-size: 9px; line-height: 1.5; }
+.question-card { border: 1px solid #e6e3dc; border-radius: 10px; background: #fffdfa; padding: 28px; }
+.question-card h2 { font-size: 27px; margin: 10px 0 8px; }
+.question-help { color: #8e9096; font-size: 11px; }
+.option-list { display: flex; flex-direction: column; gap: 12px; margin-top: 22px; }
+.quiz-option { display: flex; align-items: center; gap: 13px; border: 1px solid #deddd6; border-radius: 8px; background: #fffdfa; padding: 16px 18px; text-align: left; color: #43454e; font-size: 12px; }
+.quiz-option > span { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 7px; color: #5654a7; background: #eeedf9; font-size: 11px; font-weight: 700; }
+.quiz-option i { width: 18px; height: 18px; margin-left: auto; border-radius: 50%; border: 2px solid #deddd6; }
+.quiz-option.selected { border-color: #5553a3; background: #efefef; }
+.quiz-option.selected i { border-color: #5553a3; background: #5553a3; }
+.quiz-timer { display: grid; grid-template-columns: 1fr auto; color: #757781; font-size: 10px; margin-bottom: 18px; }
+.quiz-timer div { grid-column: 1 / -1; height: 4px; border-radius: 10px; background: #e7e6e0; margin-top: 8px; }
+.quiz-timer i { display: block; height: 100%; border-radius: inherit; background: #5553a3; }
+.quiz-actions { display: flex; justify-content: space-between; margin-top: 22px; }
+.quiz-footnote { color: #929397; font-size: 10px; margin-top: 14px; }
+.question-dots { display: flex; gap: 8px; margin-bottom: 12px; }
+.question-dots span { border: 1px solid #deddd6; border-radius: 7px; padding: 6px 9px; color: #757781; font-size: 10px; }
+.quiz-taker-grid { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 22px; align-items: start; }
+.quiz-taker-side { display: flex; flex-direction: column; gap: 16px; }
+
+/* Runtime helpers */
+.icon-holder { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 9px; background: #eeedf9; }
+.icon-holder svg { display: block; }
+.material-row { padding: 12px; gap: 12px; }
+.material-row > span:last-child { gap: 4px; }
+.sidebar-scrim { display: none; }
+.sidebar-scrim.visible { display: block; position: fixed; inset: 0; z-index: 30; background: #25273355; border: 0; }
+@media (max-width: 700px) { .sidebar.sidebar-open { left: 0; } .sidebar { position: fixed; left: -210px; top: 0; bottom: 0; transition: left .22s ease; box-shadow: 8px 0 30px #2c2d3718; } .mobile-menu, .mobile-close { display: grid; place-items: center; border: 0; background: transparent; color: #62646c; } }
