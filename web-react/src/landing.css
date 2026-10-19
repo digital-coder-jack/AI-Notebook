@@ -1,0 +1,335 @@
+/* ================================================================
+   Landing page styles — scoped entirely under #nl so nothing here
+   leaks into the rest of the Notely app (styles.css).
+   ================================================================ */
+
+#nl {
+  --nl-bg: #060C1C;
+  --nl-ink: #EAF2FF;
+  --nl-dim: #93A5C4;
+  --nl-lime: #8FE8F8;
+  --nl-vio: #1F6FB5;
+  --nl-line: rgba(147, 165, 196, 0.18);
+
+  min-height: 100vh;
+  background: var(--nl-bg);
+  color: var(--nl-ink);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  line-height: 1.5;
+  position: relative;
+  overflow-x: hidden;
+}
+
+#nl h1, #nl h2 {
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  line-height: 1.1;
+  margin: 0;
+}
+
+#nl a { color: inherit; text-decoration: none; }
+
+/* Starfield canvas */
+#nl #fx {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Header */
+#nl .nl-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: linear-gradient(to bottom, rgba(6,12,28,0.9), rgba(6,12,28,0));
+}
+
+#nl .nl-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#nl .nl-logo-word {
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Hero */
+#nl .nl-hero {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 48px;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 120px 24px 64px;
+}
+
+#nl .nl-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--nl-lime);
+  margin: 0 0 16px;
+}
+
+#nl .nl-hero-title {
+  font-size: clamp(48px, 7vw, 88px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+#nl .nl-lede {
+  font-size: 18px;
+  color: var(--nl-dim);
+  max-width: 46ch;
+  margin: 20px 0 0;
+}
+
+#nl .nl-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+#nl .nl-note {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--nl-dim);
+}
+
+/* Buttons */
+#nl .nl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+#nl .nl-btn-primary {
+  background: var(--nl-lime);
+  color: #04121C;
+}
+
+#nl .nl-btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+#nl .nl-btn-ghost {
+  background: transparent;
+  color: var(--nl-ink);
+  border-color: var(--nl-line);
+}
+
+#nl .nl-btn-ghost:hover {
+  border-color: var(--nl-lime);
+}
+
+#nl .nl-btn-sm {
+  padding: 10px 18px;
+  font-size: 14px;
+}
+
+/* Phone mock */
+#nl .nl-phone-wrap {
+  display: flex;
+  justify-content: center;
+  perspective: 1200px;
+}
+
+#nl .nl-phone {
+  position: relative;
+  width: 280px;
+  height: 580px;
+  border-radius: 44px;
+  background: #0B1530;
+  border: 1px solid var(--nl-line);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+#nl .nl-phone-notch {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96px;
+  height: 26px;
+  border-radius: 999px;
+  background: #060C1C;
+  z-index: 2;
+}
+
+#nl .nl-phone-screen {
+  position: absolute;
+  inset: 0;
+  padding-top: 44px;
+}
+
+#nl .nl-phone-screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+/* In-phone mock UI (pure CSS — no image dependency) */
+#nl .nl-mock {
+  height: 100%;
+  padding: 56px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: linear-gradient(160deg, #0E1B3D 0%, #0A1228 60%, #081022 100%);
+}
+
+#nl .nl-mock-eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--nl-lime);
+  margin: 0;
+}
+
+#nl .nl-mock-title {
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+#nl .nl-mock-card {
+  border: 1px solid rgba(143, 232, 248, 0.25);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(143, 232, 248, 0.06);
+}
+
+#nl .nl-mock-card-title {
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 4px 0 10px;
+}
+
+#nl .nl-mock-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#nl .nl-mock-lines i {
+  display: block;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(147, 165, 196, 0.35);
+}
+
+#nl .nl-mock-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#nl .nl-mock-row i {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid rgba(147, 165, 196, 0.4);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+#nl .nl-mock-row span {
+  height: 5px;
+  flex: 1;
+  border-radius: 999px;
+  background: rgba(147, 165, 196, 0.25);
+}
+
+#nl .nl-mock-progress {
+  margin-top: auto;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(147, 165, 196, 0.2);
+  overflow: hidden;
+}
+
+#nl .nl-mock-progress i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--nl-lime);
+}
+
+/* CTA */
+#nl .nl-cta {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 128px 24px;
+}
+
+#nl .nl-cta h2 {
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+#nl .nl-cta-row-center {
+  justify-content: center;
+}
+
+/* Footer */
+#nl .nl-footer {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  padding: 24px;
+  border-top: 1px solid var(--nl-line);
+  color: var(--nl-dim);
+  font-size: 13px;
+}
+
+/* Dashboard exit button (small, out of the way) */
+.nl-dash-exit {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 50;
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(147, 165, 196, 0.3);
+  background: rgba(6, 12, 28, 0.85);
+  color: #93A5C4;
+  cursor: pointer;
+}
+
+@media (max-width: 860px) {
+  #nl .nl-hero {
+    grid-template-columns: 1fr;
+    padding-top: 104px;
+    gap: 40px;
+  }
+  #nl .nl-phone-wrap { order: 2; }
+}
