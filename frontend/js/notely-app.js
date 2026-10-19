@@ -65,6 +65,64 @@
     if (toastEl2) return toast(toastEl2.getAttribute('data-toast'));
     if (e.target.closest('[data-open-reader]')) return openReader();
     if (e.target.closest('[data-close-reader]')) return closeReader();
+
+    /* --- Settings actions (wired to the AI Notebook backend) --- */
+    var actionEl = e.target.closest('[data-settings-action]');
+    if (actionEl) {
+      var action = actionEl.getAttribute('data-settings-action');
+      if (action === 'logout') {
+        if (window.SS && window.SS.isAuthed() && !window.confirm('Sign out of Notely?')) return;
+        toast('Signed out');
+        window.setTimeout(function () { if (window.SS) window.SS.logout(); }, 400);
+        return;
+      }
+      if (action === 'save-profile') {
+        var grid = actionEl.closest('.settings-panel');
+        var nameInput = grid && grid.querySelector('.form-grid label:nth-child(1) input');
+        var name = nameInput ? nameInput.value.trim() : '';
+        if (!name) { toast('Please enter your name'); return; }
+        actionEl.disabled = true;
+        toast('Saving profile…');
+        window.SS.api('/api/auth/profile', { method: 'PUT', body: { name: name } })
+          .then(function () { toast('Profile saved'); })
+          .catch(function (err) { toast(err.message || 'Could not save profile'); })
+          .finally(function () { actionEl.disabled = false; });
+        return;
+      }
+      if (action === 'export') {
+        toast('Preparing export…');
+        window.SS.api('/api/auth/me')
+          .then(function (me) {
+            var payload = JSON.stringify({ exported_at: new Date().toISOString(), user: me.user, source: 'Notely workspace' }, null, 2);
+            var blob = new Blob([payload], { type: 'application/json' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'notely-workspace-export.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            toast('Workspace export downloaded');
+          })
+          .catch(function (err) { toast(err.message || 'Export failed'); });
+        return;
+      }
+    }
+
+    /* --- Settings toggle rows: persist to backend, reflect state --- */
+    var toggleBtn = e.target.closest('.toggle-row > .toggle');
+    if (toggleBtn) {
+      toggleBtn.classList.toggle('on');
+      var isOn = toggleBtn.classList.contains('on');
+      var label = toggleBtn.closest('.toggle-row') && toggleBtn.closest('.toggle-row').querySelector('strong');
+      var category = label && label.textContent.indexOf('AI') === 0 ? 'ai_settings' : 'notifications';
+      var key = (label ? label.textContent : 'preference').toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      var patch = {};
+      patch[key] = isOn;
+      window.SS.api('/api/auth/settings', { method: 'PUT', body: { category: category, data: patch } })
+        .then(function () { toast((label ? label.textContent : 'Preference') + (isOn ? ' on' : ' off')); })
+        .catch(function (err) { toggleBtn.classList.toggle('on'); toast(err.message || 'Could not save preference'); });
+      return;
+    }
   });
 
   /* Sidebar build */

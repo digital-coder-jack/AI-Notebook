@@ -47,7 +47,11 @@
   function applyPreferences() {
     var root = document.documentElement;
 
-    var theme = 'light';
+    var theme = read(PREF_KEYS.theme, 'system');
+    if (theme !== 'light' && theme !== 'dark') {
+      var darkQuery = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+      theme = (darkQuery && darkQuery.matches) ? 'dark' : 'light';
+    }
     root.setAttribute('data-theme', theme);
 
     root.setAttribute('data-accent', read(PREF_KEYS.accent, 'violet'));

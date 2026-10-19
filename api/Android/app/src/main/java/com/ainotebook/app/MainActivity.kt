@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
 
             val dark = when (mode) {
                 ThemeMode.LIGHT -> false
-                ThemeMode.DARK -> false
+                ThemeMode.DARK -> true
                 ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
             }
 
