@@ -1,61 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Notely — Student workspace</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/notely-base.css" />
-<link rel="stylesheet" href="css/notely-workspace.css" />
-<link rel="stylesheet" href="css/notely-screens-a.css" />
-<link rel="stylesheet" href="css/notely-screens-b.css" />
-<link rel="stylesheet" href="css/notely-screens-c.css" />
-<link rel="stylesheet" href="css/notely-screens-d.css" />
-<link rel="stylesheet" href="css/notely-extra.css" />
-<link rel="stylesheet" href="css/notely-theme.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#071120" />
+  <title>Notely — Workspace</title>
   <link rel="icon" type="image/svg+xml" href="/assets/notely-logo.svg" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+  <link rel="stylesheet" href="/css/notely-workspace.css" />
 </head>
 <body>
-<div class="app-shell">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand-row">
-      <div class="brand-mark" id="brandMark"></div>
-      <span>Notely</span>
-      <button class="mobile-close" id="mobileClose" aria-label="Close menu"></button>
-    </div>
-    <button class="search-button" data-nav="Search" id="searchBtn"><span class="search-ico"></span><span>Search anything</span><kbd>⌘ K</kbd></button>
-    <nav class="primary-nav" aria-label="Main navigation" id="primaryNav"></nav>
-    <div class="sidebar-section">
-      <p class="eyebrow">My notebooks</p>
-      <div id="notebookLinks"></div>
-    </div>
-    <div class="calendar-snippet">
-      <strong>On your calendar</strong>
-      <span>Biology study group</span><span>Oct 16 · 3:00 PM</span><span>Library, room 2B</span>
-    </div>
-    <button class="profile-link" data-nav="Settings"><strong>Jamie Lee</strong><span>Student workspace · Settings</span></button>
-  </aside>
-  <button class="sidebar-scrim" id="sidebarScrim" aria-label="Close navigation" style="display:none"></button>
-  <main class="main-area">
-    <header class="topbar">
-      <button class="mobile-menu" id="mobileMenu" aria-label="Open menu"></button>
-      <span>Student workspace <span class="slash">/</span> <span id="crumbView">Overview</span></span>
-      <div class="topbar-user">Fall semester 2026 <span>·</span> Jamie Lee</div>
-    </header>
-    <div class="page-content" id="viewRoot"></div>
-  </main>
-  <div class="toast" id="toast" hidden></div>
-</div>
-<script src="js/notely-icons.js"></script>
-<script src="js/notely-data.js"></script>
-<script src="js/notely-views-a.js"></script>
-<script src="js/notely-views-b.js"></script>
-<script src="js/notely-views-c.js"></script>
-<script src="js/notely-views-d.js"></script>
-<script src="js/notely-views-e.js"></script>
-<script src="js/notely-app.js"></script>
+  <div class="nw-shell">
+    <aside class="nw-sidebar" id="nwSidebar">
+      <div class="nw-brand"><img src="/assets/notely-logo-wordmark.svg" alt="Notely" /><button class="nw-icon nw-collapse" id="nwCollapse" aria-label="Toggle sidebar">‹</button></div>
+      <button class="nw-primary" data-view="notes"><span>＋</span> New note</button>
+      <button class="nw-search" data-view="search"><span>⌕</span> Search anything <kbd>⌘ K</kbd></button>
+      <nav class="nw-nav" aria-label="Workspace navigation">
+        <span>Workspace</span>
+        <button data-view="overview">◈ <b>Overview</b></button>
+        <button data-view="notes">▤ <b>My notes</b></button>
+        <button data-view="assistant">✦ <b>AI assistant</b><em>AI</em></button>
+        <button data-view="documents">▧ <b>Documents</b></button>
+        <span>Library</span>
+        <button data-view="favorites">★ <b>Favorites</b></button>
+        <button data-view="archive">□ <b>Archive</b></button>
+        <button data-view="trash">⌫ <b>Trash</b></button>
+        <span>Study tools</span>
+        <button data-view="tools">✧ <b>Tools hub</b><em>5</em></button>
+        <button data-view="settings">⚙ <b>Settings</b></button>
+      </nav>
+      <div class="nw-sidebar-bottom"><div class="nw-sync">☁ Cloud sync on<small>Data is saved to your workspace</small></div><button class="nw-user" data-view="settings"><i>JL</i><span><b id="nwUserName">Jamie Lee</b><small>Student workspace</small></span>⋯</button></div>
+    </aside>
+    <button class="nw-scrim" id="nwScrim" aria-label="Close navigation"></button>
+    <main class="nw-main">
+      <header class="nw-topbar"><button class="nw-mobile-menu" id="nwMenu">☰</button><div class="nw-crumb">Workspace <b>/</b> <strong id="nwTitle">Overview</strong></div><div class="nw-top-actions"><button class="nw-top-search" data-view="search">⌕ <span>Search</span><kbd>⌘ K</kbd></button><button class="nw-bell">♧<i></i></button><button class="nw-avatar" data-view="settings">JL</button></div></header>
+      <section id="nwContent" class="nw-content"><div class="nw-loading">Preparing your workspace…</div></section>
+    </main>
+  </div>
+  <script src="/js/config.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/notely-workspace.js"></script>
 </body>
 </html>
