@@ -378,7 +378,37 @@ function ToolDetail({ route, setRoute }: { route: Route; setRoute: (r: Route) =>
   </div>;
 }
 
-function SearchScreen({ setRoute }: { setRoute: (r: Route) => void }) { const [q, setQ] = useState(""); return <div className="screen"><PageTitle eyebrow="FIND YOUR THREAD" title="Search" description="Search notes, documents and study tools from one place." /><label className="large-search"><Search /><input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Search anything…" /><kbd>⌘ K</kbd></label><div className="search-results"><span className="eyebrow">{q ? "RESULTS" : "RECENTLY OPENED"}</span>{NOTES.filter(n => !q || `${n.title} ${n.course}`.toLowerCase().includes(q.toLowerCase())).slice(0, 4).map(n => <button className="result-row" key={n.title} onClick={() => setRoute("notes")}><span className="result-icon"><FileText /></span><span><strong>{n.title}</strong><small>{n.course} · {n.time}</small></span><ArrowRight /></button>)}<button className="result-row" onClick={() => setRoute("tools")}><span className="result-icon ai"><Sparkles /></span><span><strong>Study tools</strong><small>Quiz generator, flashcards, roadmap and more</small></span><ArrowRight /></button></div></div>; }
+function SearchScreen({ setRoute }: { setRoute: (r: Route) => void }) {
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<{ topics: any[]; notes: any[]; chats: any[]; quizzes: any[] }>({ topics: [], notes: [], chats: [], quizzes: [] });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    if (!q.trim()) { setResults({ topics: [], notes: [], chats: [], quizzes: [] }); return; }
+    const timer = window.setTimeout(async () => {
+      setLoading(true);
+      try { const data = await apiRequest<typeof results>("/api/search?q=" + encodeURIComponent(q.trim())); setResults(data); setError(""); }
+      catch (e) { setError(e instanceof Error ? e.message : "Search failed."); }
+      finally { setLoading(false); }
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [q]);
+  const groups = [
+    { key: "notes", label: "Notes", rows: results.notes || [], route: "notes" as Route, icon: <FileText /> },
+    { key: "topics", label: "Topics", rows: results.topics || [], route: "roadmap" as Route, icon: <BookOpen /> },
+    { key: "chats", label: "Chats", rows: results.chats || [], route: "assistant" as Route, icon: <MessageCircle /> },
+    { key: "quizzes", label: "Quizzes", rows: results.quizzes || [], route: "quiz" as Route, icon: <CircleHelp /> },
+  ];
+  const count = groups.reduce((total, group) => total + group.rows.length, 0);
+  return <div className="screen"><PageTitle eyebrow="FIND YOUR THREAD" title="Search" description="Search your saved notes, topics, chats and quizzes." />
+    <label className="large-search"><Search /><input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Search your workspace…" /><kbd>⌘ K</kbd></label>
+    {error && <p role="alert" style={{ color: "#bd5f62" }}>{error}</p>}
+    {loading && <p>Searching…</p>}
+    {!q.trim() ? <EmptyState icon={<Search />} title="Search your workspace" copy="Enter a topic, note title, or phrase to find saved content." /> : !loading && count === 0 ? <EmptyState icon={<Search />} title="No results found" copy="Try another keyword or a shorter phrase." /> :
+      <div className="search-results">{groups.filter(group => group.rows.length).map(group => <section key={group.key}><span className="eyebrow">{group.label.toUpperCase()}</span>{group.rows.map(row => <button className="result-row" key={row.id} onClick={() => setRoute(group.route)}><span className="result-icon">{group.icon}</span><span><strong>{row.title || row.topic || "Untitled"}</strong><small>{group.label.slice(0, -1)} · Open in workspace</small></span><ArrowRight /></button>)}</section>)}</div>}
+  </div>;
+}
+
 function SettingsScreen() {
   const sections = [["Profile", Home], ["Appearance", Grid2X2], ["Editor preferences", PenLine], ["Security & sessions", ShieldCheck], ["Privacy & data", Cloud], ["AI providers", Sparkles], ["Notifications", Bell]] as const;
   const [section, setSection] = useState("Profile");
