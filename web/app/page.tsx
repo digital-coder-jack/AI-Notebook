@@ -89,6 +89,23 @@ export default function Page() {
   const [route, setRouteState] = useState<Route>("overview"); const [collapsed, setCollapsed] = useState(false); const [mobileOpen, setMobileOpen] = useState(false);
   useEffect(() => { setRouteState(routeFromPath(window.location.pathname)); const onPop = () => setRouteState(routeFromPath(window.location.pathname)); window.addEventListener("popstate", onPop); return () => window.removeEventListener("popstate", onPop); }, []);
   const setRoute = (next: Route) => { window.history.pushState({}, "", pathFor(next)); setRouteState(next); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  useEffect(() => {
+    try { setCollapsed(localStorage.getItem("notely-sidebar-collapsed") === "true"); } catch { /* Storage can be unavailable in private contexts. */ }
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const typing = !!target && (target.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(target.tagName));
+      if (event.key === "Escape") { setMobileOpen(false); return; }
+      if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if (key === "k") { event.preventDefault(); setRoute("search"); }
+      if (key === "n" && !typing) { event.preventDefault(); setRoute("notes"); }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("notely-sidebar-collapsed", String(collapsed)); } catch { /* Keep the control usable without storage. */ }
+  }, [collapsed]);
   const titles: Partial<Record<Route, string>> = { overview: "Overview", notes: "My Notes", assistant: "AI Assistant", documents: "Documents", favorites: "Favorites", archive: "Archive", trash: "Trash", tools: "Study Tools", quiz: "Quiz Generator", flashcards: "Flashcards", roadmap: "Study Roadmap", mindmap: "Mind Maps", planner: "Revision Planner", search: "Search", settings: "Settings" };
   let content: ReactNode = <Overview setRoute={setRoute} />;
   if (route === "notes") content = <Notes setRoute={setRoute} />; else if (["favorites","archive","trash"].includes(route)) content = <Notes setRoute={setRoute} filter={route as "favorites" | "archive" | "trash"} />; else if (route === "assistant") content = <Assistant setRoute={setRoute} />; else if (route === "documents") content = <Documents setRoute={setRoute} />; else if (route === "tools") content = <Tools setRoute={setRoute} />; else if (["quiz","flashcards","roadmap","mindmap","planner"].includes(route)) content = <ToolDetail route={route} setRoute={setRoute} />; else if (route === "search") content = <SearchScreen setRoute={setRoute} />; else if (route === "settings") content = <SettingsScreen />;
