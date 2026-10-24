@@ -113,6 +113,17 @@ class Repository(private val session: SessionStore) {
     /* ---------- Dashboard ---------- */
     suspend fun stats() = ApiClient.api.stats()
 
+    /* ---------- Saved notes shared with web ---------- */
+    suspend fun listSavedNotes() = ApiClient.api.listSavedNotes().notes.filter { !it.deleted && !it.archived }
+
+    suspend fun createSavedNote(title: String, content: String = "") =
+        ApiClient.api.createSavedNote(NoteSaveRequest(title, content)).note
+
+    suspend fun updateSavedNote(id: Int, title: String, content: String) =
+        ApiClient.api.updateSavedNote(id, NoteSaveRequest(title, content)).note
+
+    suspend fun deleteSavedNote(id: Int) = ApiClient.api.deleteSavedNote(id)
+
     /* ---------- Study tools ---------- */
     suspend fun generateNotes(topic: String) =
         ApiClient.api.generateNotes(TopicRequest(topic))
