@@ -182,7 +182,7 @@ function Notes({ setRoute, filter = "all" }: { setRoute: (r: Route) => void; fil
     try { await apiRequest("/api/tools/notes/" + note.id, { method: "DELETE" }); setNotes(current => current.filter(n => n.id !== note.id)); if (selectedId === note.id) setSelectedId(null); }
     catch (e) { setError(e instanceof Error ? e.message : "Could not delete note."); }
   };
-  const visible = notes.filter(n => filter === "favorites" ? n.favorite : filter === "archive" ? n.archived && !n.deleted : filter === "trash" ? n.deleted : !n.archived && !n.deleted).filter(n => (n.title + " " + (n.content || "")).toLowerCase().includes(query.toLowerCase()));
+  const visible = notes.filter(n => filter === "favorites" ? n.favorite && !n.archived && !n.deleted : filter === "archive" ? n.archived && !n.deleted : filter === "trash" ? n.deleted : !n.archived && !n.deleted).filter(n => (n.title + " " + (n.content || "")).toLowerCase().includes(query.toLowerCase()));
   const selected = notes.find(n => n.id === selectedId);
   const heading = filter === "favorites" ? "Favorites" : filter === "archive" ? "Archive" : filter === "trash" ? "Trash" : "My notes";
 
