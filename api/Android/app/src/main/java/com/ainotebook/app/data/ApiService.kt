@@ -72,6 +72,19 @@ interface ApiService {
     @GET("api/stats")
     suspend fun stats(): Stats
 
+    /* ---------- Saved notes (shared with web workspace) ---------- */
+    @GET("api/tools/notes")
+    suspend fun listSavedNotes(): SavedNotesResponse
+
+    @POST("api/notes")
+    suspend fun createSavedNote(@Body body: NoteSaveRequest): NoteSaveResponse
+
+    @PUT("api/notes/{id}")
+    suspend fun updateSavedNote(@Path("id") id: Int, @Body body: NoteSaveRequest): NoteSaveResponse
+
+    @DELETE("api/tools/notes/{id}")
+    suspend fun deleteSavedNote(@Path("id") id: Int): Map<String, Boolean>
+
     /* ---------- Study tools ---------- */
     @POST("api/tools/notes")
     suspend fun generateNotes(@Body body: TopicRequest): NotesResponse
