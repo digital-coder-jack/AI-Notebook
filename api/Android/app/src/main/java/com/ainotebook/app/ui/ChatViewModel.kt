@@ -6,6 +6,7 @@ import com.ainotebook.app.data.Chat
 import com.ainotebook.app.data.ChatMessage
 import com.ainotebook.app.data.Repository
 import com.ainotebook.app.data.StreamEvent
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -278,6 +279,8 @@ class ChatViewModel(private val repo: Repository) : ViewModel() {
                     }
                 }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             val message = e.message?.takeIf { it.isNotBlank() } ?: "Network error. Check your connection and try again."
             if (sb.isEmpty()) updateLastAssistant("Response failed: " + message)
