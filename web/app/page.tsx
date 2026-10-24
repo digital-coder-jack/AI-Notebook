@@ -61,6 +61,7 @@ const tools = [
   ["homework", "Homework Helper", "Work through a question step by step.", CircleHelp],
 ] as const;
 function routeFromPath(path: string): Route { const hash = typeof window !== "undefined" ? window.location.hash.replace(/^#\/?/, "") : ""; const key = hash || path.replace(/^\/+/, "").replace(/^app\/?/, "") || "overview"; const allowed = ["overview","notes","assistant","documents","favorites","archive","trash","tools","quiz","flashcards","roadmap","mindmap","planner","summarizer","homework","search","settings"]; return allowed.includes(key) ? key as Route : "overview"; }
+function pathFor(route: Route) { return route === "overview" ? "/" : "/#/" + route; }
 function AppLogo({ compact = false }: { compact?: boolean }) { return <div className="app-logo"><img src={compact ? "/logo-symbol.svg" : "/logo-wordmark.svg"} alt="Notely" /></div>; }
 
 function Sidebar({ route, setRoute, collapsed, setCollapsed, mobileOpen, setMobileOpen }: { route: Route; setRoute: (r: Route) => void; collapsed: boolean; setCollapsed: (v: boolean) => void; mobileOpen: boolean; setMobileOpen: (v: boolean) => void }) {
