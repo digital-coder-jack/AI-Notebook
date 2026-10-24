@@ -158,6 +158,9 @@ function Notes({ setRoute, filter = "all" }: { setRoute: (r: Route) => void; fil
   };
   const create = async () => {
     try {
+      if (dirty && selectedId !== null) {
+        await apiRequest("/api/notes/" + selectedId, { method: "PUT", body: JSON.stringify({ topic: title.trim() || "Untitled note", content: body }) });
+      }
       const data = await apiRequest<{ note: any }>("/api/notes", { method: "POST", body: JSON.stringify({ topic: "Untitled note", content: "" }) });
       const note = normalizeNote(data.note);
       setNotes(current => [note, ...current]); choose(note);
@@ -166,6 +169,9 @@ function Notes({ setRoute, filter = "all" }: { setRoute: (r: Route) => void; fil
   const flag = async (note: Note, patch: Record<string, boolean>) => {
     if (!note.id) return;
     try {
+      if (dirty && selectedId === note.id) {
+        await apiRequest("/api/notes/" + note.id, { method: "PUT", body: JSON.stringify({ topic: title.trim() || "Untitled note", content: body }) });
+      }
       await apiRequest("/api/tools/notes/" + note.id, { method: "PATCH", body: JSON.stringify(patch) });
       setNotes(current => current.map(n => n.id === note.id ? { ...n, ...patch, state: patch.deleted ? "deleted" : patch.archived ? "archived" : "active" } : n));
       if (selectedId === note.id && (patch.deleted || patch.archived)) setSelectedId(null);
