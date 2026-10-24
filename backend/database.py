@@ -266,6 +266,8 @@ def init_db() -> None:
         for ddl in (
             "ALTER TABLE notes ADD COLUMN pinned INTEGER DEFAULT 0",
             "ALTER TABLE notes ADD COLUMN favorite INTEGER DEFAULT 0",
+            "ALTER TABLE notes ADD COLUMN archived INTEGER DEFAULT 0",
+            "ALTER TABLE notes ADD COLUMN deleted INTEGER DEFAULT 0",
             # Onboarding wizard answers (education level, goals, interests,
             # study time, learning style, experience, security preferences).
             "ALTER TABLE user_settings ADD COLUMN onboarding TEXT",
@@ -568,10 +570,21 @@ def add_note(user_id: int, topic: str, content: str) -> int:
 def list_notes(user_id: int) -> list[sqlite3.Row]:
     with closing(get_connection()) as conn:
         return conn.execute(
-            "SELECT id, topic, content, created_at FROM notes "
+            "SELECT id, topic, content, created_at, pinned, favorite, archived, deleted FROM notes "
             "WHERE user_id = ? ORDER BY id DESC",
             (user_id,),
         ).fetchall()
+
+
+def update_note(user_id: int, note_id: int, topic: str, content: str) -> bool:
+    """Update a user's note title/topic and content without exposing other users' rows."""
+    with closing(get_connection()) as conn:
+        cur = conn.execute(
+            "UPDATE notes SET topic = ?, content = ? WHERE id = ? AND user_id = ?",
+            (topic.strip(), content, note_id, user_id),
+        )
+        conn.commit()
+        return cur.rowcount > 0
 
 
 def delete_note(user_id: int, note_id: int) -> bool:
@@ -848,12 +861,18 @@ def count_artifacts(user_id: int) -> int:
 # ---- Notes pin / favorite / duplicate ---------------------------------------
 def update_note_flags(user_id: int, note_id: int,
                       pinned: bool | None = None,
-                      favorite: bool | None = None) -> bool:
+                      favorite: bool | None = None,
+                      archived: bool | None = None,
+                      deleted: bool | None = None) -> bool:
     sets, vals = [], []
     if pinned is not None:
         sets.append("pinned = ?"); vals.append(1 if pinned else 0)
     if favorite is not None:
         sets.append("favorite = ?"); vals.append(1 if favorite else 0)
+    if archived is not None:
+        sets.append("archived = ?"); vals.append(1 if archived else 0)
+    if deleted is not None:
+        sets.append("deleted = ?"); vals.append(1 if deleted else 0)
     if not sets:
         return False
     vals += [note_id, user_id]
