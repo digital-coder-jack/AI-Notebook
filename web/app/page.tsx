@@ -290,7 +290,7 @@ function Assistant({ setRoute }: { setRoute: (r: Route) => void }) {
   };
 
   return <div className="screen assistant-screen">
-    <PageTitle eyebrow="AI STUDY PARTNER" title="Ask Notely" description="Chat with your configured AI provider. Your conversation is saved to your workspace." action={<ActionButton secondary onClick={() => setRoute("notes")}><FileText /> Open notes</ActionButton>} />
+    <PageTitle eyebrow="AI STUDY PARTNER" title="Ask Notely" description="Chat with your configured AI provider. Your conversation is saved to your workspace." action={<div className="title-actions"><ActionButton secondary onClick={() => { setChatId(null); setMessages([]); setPrompt(""); setError(""); }}><Plus /> New chat</ActionButton><ActionButton secondary onClick={() => setRoute("notes")}><FileText /> Open notes</ActionButton></div>} />
     <div className="assistant-layout">
       <div className="chat-panel">
         <div className="context-strip"><span><Sparkles /> NOTELY AI</span><span><Cloud /> Saved chat history</span></div>
