@@ -9,7 +9,7 @@ import {
   Upload, Zap, Clock3,
 } from "lucide-react";
 
-type Route = "overview" | "notes" | "assistant" | "documents" | "favorites" | "archive" | "trash" | "tools" | "quiz" | "flashcards" | "roadmap" | "mindmap" | "planner" | "search" | "settings";
+type Route = "overview" | "notes" | "assistant" | "documents" | "favorites" | "archive" | "trash" | "tools" | "quiz" | "flashcards" | "roadmap" | "mindmap" | "planner" | "summarizer" | "homework" | "search" | "settings";
 type Note = { id?: number; title: string; course: string; time: string; tag: string; content?: string; pinned?: boolean; favorite?: boolean; archived?: boolean; deleted?: boolean; state?: "active" | "archived" | "deleted" };
 const NOTES: Note[] = [];
 
@@ -57,8 +57,10 @@ const tools = [
   ["roadmap", "Study Roadmap", "Make a clear path from goal to mastery.", Zap],
   ["mindmap", "Mind Maps", "See the connections between your ideas.", BarChart3],
   ["planner", "Revision Planner", "Give every deadline a calm place.", CalendarDays],
+  ["summarizer", "Text Summarizer", "Turn long material into clear key points.", FileText],
+  ["homework", "Homework Helper", "Work through a question step by step.", CircleHelp],
 ] as const;
-function routeFromPath(path: string): Route { const hash = typeof window !== "undefined" ? window.location.hash.replace(/^#\/?/, "") : ""; const key = hash || path.replace(/^\/+/, "").replace(/^app\/?/, "") || "overview"; const allowed = ["overview","notes","assistant","documents","favorites","archive","trash","tools","quiz","flashcards","roadmap","mindmap","planner","search","settings"]; return allowed.includes(key) ? key as Route : "overview"; }
+function routeFromPath(path: string): Route { const hash = typeof window !== "undefined" ? window.location.hash.replace(/^#\/?/, "") : ""; const key = hash || path.replace(/^\/+/, "").replace(/^app\/?/, "") || "overview"; const allowed = ["overview","notes","assistant","documents","favorites","archive","trash","tools","quiz","flashcards","roadmap","mindmap","planner","summarizer","homework","search","settings"]; return allowed.includes(key) ? key as Route : "overview"; }
 function AppLogo({ compact = false }: { compact?: boolean }) { return <div className="app-logo"><img src={compact ? "/logo-symbol.svg" : "/logo-wordmark.svg"} alt="Notely" /></div>; }
 
 function Sidebar({ route, setRoute, collapsed, setCollapsed, mobileOpen, setMobileOpen }: { route: Route; setRoute: (r: Route) => void; collapsed: boolean; setCollapsed: (v: boolean) => void; mobileOpen: boolean; setMobileOpen: (v: boolean) => void }) {
@@ -363,6 +365,8 @@ function ToolDetail({ route, setRoute }: { route: Route; setRoute: (r: Route) =>
     roadmap: ["Study roadmap", "Generate a sequence of milestones for a topic.", <Zap />],
     mindmap: ["Mind maps", "Generate a structured map of connected ideas.", <BarChart3 />],
     planner: ["Revision planner", "Create a day-by-day study plan.", <CalendarDays />],
+    summarizer: ["Text summarizer", "Paste text and generate a concise summary.", <FileText />],
+    homework: ["Homework helper", "Ask a question and get a worked explanation.", <CircleHelp />],
   };
   const [heading, copy, iconNode] = details[route] || details.quiz;
   const [topic, setTopic] = useState("");
@@ -378,6 +382,8 @@ function ToolDetail({ route, setRoute }: { route: Route; setRoute: (r: Route) =>
     try {
       let data: any;
       if (route === "quiz") data = await apiRequest("/api/tools/quiz", { method: "POST", body: JSON.stringify({ topic: topic.trim(), num_questions: Number(amount) }) });
+      else if (route === "summarizer") data = await apiRequest("/api/tools/summarize", { method: "POST", body: JSON.stringify({ text: topic.trim() }) });
+      else if (route === "homework") data = await apiRequest("/api/tools/homework", { method: "POST", body: JSON.stringify({ question: topic.trim() }) });
       else if (route === "flashcards") data = await apiRequest("/api/tools/flashcards", { method: "POST", body: JSON.stringify({ topic: topic.trim(), num_cards: Number(amount) }) });
       else if (route === "planner") data = await apiRequest("/api/tools/plan", { method: "POST", body: JSON.stringify({ goal: topic.trim(), days: Number(days) }) });
       else {
@@ -395,7 +401,7 @@ function ToolDetail({ route, setRoute }: { route: Route; setRoute: (r: Route) =>
     <div className="detail-workspace">
       <div className="surface-panel">
         <div className="section-heading"><div><span className="eyebrow">GENERATE WITH AI</span><h2>Choose your topic</h2></div><Sparkles /></div>
-        <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>{route === "planner" ? "Study goal" : "Topic"}<input value={topic} onChange={e => setTopic(e.target.value)} placeholder={route === "planner" ? "e.g. Prepare for my biology exam" : "e.g. Cellular respiration"} maxLength={300} /></label>
+        <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>{route === "planner" ? "Study goal" : route === "summarizer" ? "Text to summarize" : route === "homework" ? "Your question" : "Topic"}{route === "summarizer" ? <textarea value={topic} onChange={e => setTopic(e.target.value)} rows={7} placeholder="Paste text here…" maxLength={20000} /> : <input value={topic} onChange={e => setTopic(e.target.value)} placeholder={route === "planner" ? "e.g. Prepare for my biology exam" : route === "homework" ? "e.g. Explain Newton’s second law" : "e.g. Cellular respiration"} maxLength={route === "homework" ? 4000 : 300} />}</label>
         {route === "quiz" && <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>Number of questions<select value={amount} onChange={e => setAmount(e.target.value)}>{["5","10","15"].map(n => <option key={n}>{n}</option>)}</select></label>}
         {route === "flashcards" && <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>Number of cards<select value={amount} onChange={e => setAmount(e.target.value)}>{["5","8","10","15","20"].map(n => <option key={n}>{n}</option>)}</select></label>}
         {route === "planner" && <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>Plan length (days)<select value={days} onChange={e => setDays(e.target.value)}>{["3","7","14","21","30","60"].map(n => <option key={n}>{n}</option>)}</select></label>}
@@ -555,7 +561,7 @@ export default function Page() {
   useEffect(() => {
     try { localStorage.setItem("notely-sidebar-collapsed", String(collapsed)); } catch { /* Keep the control usable without storage. */ }
   }, [collapsed]);
-  const titles: Partial<Record<Route, string>> = { overview: "Overview", notes: "My Notes", assistant: "AI Assistant", documents: "Documents", favorites: "Favorites", archive: "Archive", trash: "Trash", tools: "Study Tools", quiz: "Quiz Generator", flashcards: "Flashcards", roadmap: "Study Roadmap", mindmap: "Mind Maps", planner: "Revision Planner", search: "Search", settings: "Settings" };
+  const titles: Partial<Record<Route, string>> = { overview: "Overview", notes: "My Notes", assistant: "AI Assistant", documents: "Documents", favorites: "Favorites", archive: "Archive", trash: "Trash", tools: "Study Tools", quiz: "Quiz Generator", flashcards: "Flashcards", roadmap: "Study Roadmap", mindmap: "Mind Maps", planner: "Revision Planner", summarizer: "Text Summarizer", homework: "Homework Helper", search: "Search", settings: "Settings" };
   let content: ReactNode = <Overview setRoute={setRoute} />;
   if (route === "notes") content = <Notes setRoute={setRoute} />; else if (["favorites","archive","trash"].includes(route)) content = <Notes setRoute={setRoute} filter={route as "favorites" | "archive" | "trash"} />; else if (route === "assistant") content = <Assistant setRoute={setRoute} />; else if (route === "documents") content = <Documents setRoute={setRoute} />; else if (route === "tools") content = <Tools setRoute={setRoute} />; else if (["quiz","flashcards","roadmap","mindmap","planner"].includes(route)) content = <ToolDetail route={route} setRoute={setRoute} />; else if (route === "search") content = <SearchScreen setRoute={setRoute} />; else if (route === "settings") content = <SettingsScreen />;
   return <div className="workspace"><Sidebar route={route} setRoute={setRoute} collapsed={collapsed} setCollapsed={setCollapsed} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} /><main className="workspace-main"><Header title={titles[route] || "Workspace"} setRoute={setRoute} onMenu={() => setMobileOpen(true)} />{content}</main></div>;
