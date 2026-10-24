@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -64,6 +65,10 @@ fun NotesScreen(vm: NotesViewModel, onOpenTools: () -> Unit) {
                 Text("My Notes", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Text("Saved notes sync with your Notely web workspace.", color = MutedText, style = MaterialTheme.typography.bodySmall)
             }
+            OutlinedButton(onClick = { vm.load() }, enabled = !state.loading) {
+                Icon(Icons.Default.Refresh, contentDescription = "Refresh notes", modifier = Modifier.size(18.dp))
+            }
+            Spacer(Modifier.size(6.dp))
             Button(onClick = { vm.create() }, enabled = !state.saving) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.size(6.dp))
