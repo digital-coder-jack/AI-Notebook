@@ -137,6 +137,28 @@ data class DailyActivity(
     val count: Int = 0
 )
 
+/* ---------- Saved notes shared with the web workspace ---------- */
+@Serializable
+data class SavedNote(
+    val id: Int = 0,
+    val topic: String = "Untitled note",
+    val content: String = "",
+    val created_at: String? = null,
+    val pinned: Int = 0,
+    val favorite: Int = 0,
+    val archived: Int = 0,
+    val deleted: Int = 0
+)
+
+@Serializable
+data class SavedNotesResponse(val notes: List<SavedNote> = emptyList())
+
+@Serializable
+data class NoteSaveRequest(val topic: String, val content: String)
+
+@Serializable
+data class NoteSaveResponse(val note: SavedNote = SavedNote())
+
 /* ---------- Study tools ---------- */
 @Serializable
 data class TopicRequest(val topic: String)
