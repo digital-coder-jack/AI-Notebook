@@ -678,6 +678,15 @@ def list_uploads(user_id: int) -> list[sqlite3.Row]:
         ).fetchall()
 
 
+def delete_upload(user_id: int, upload_id: int) -> bool:
+    with closing(get_connection()) as conn:
+        cur = conn.execute(
+            "DELETE FROM uploads WHERE id = ? AND user_id = ?", (upload_id, user_id)
+        )
+        conn.commit()
+        return cur.rowcount > 0
+
+
 def get_upload(user_id: int, upload_id: int) -> sqlite3.Row | None:
     with closing(get_connection()) as conn:
         return conn.execute(
