@@ -115,6 +115,13 @@ async def list_files(user=Depends(auth.current_user)):
     return {"files": [dict(f) for f in db.list_uploads(user["id"])]}
 
 
+@router.delete("/{upload_id}")
+async def delete_file(upload_id: int, user=Depends(auth.current_user)):
+    if not db.delete_upload(user["id"], upload_id):
+        raise HTTPException(status_code=404, detail="File not found.")
+    return {"deleted": True}
+
+
 @router.post("/{upload_id}/summarize")
 async def summarize_file(upload_id: int, user=Depends(auth.current_user)):
     row = db.get_upload(user["id"], upload_id)
