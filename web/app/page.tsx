@@ -13,7 +13,7 @@ type Route = "overview" | "notes" | "assistant" | "documents" | "favorites" | "a
 type Note = { id?: number; title: string; course: string; time: string; tag: string; content?: string; pinned?: boolean; favorite?: boolean; archived?: boolean; deleted?: boolean; state?: "active" | "archived" | "deleted" };
 const NOTES: Note[] = [];
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://study-sphere-ai-mwlq.vercel.app").replace(/\\/+$/, "");
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://study-sphere-ai-mwlq.vercel.app").replace(/\/+$/, "");
 
 async function workspaceToken(): Promise<string> {
   if (typeof window === "undefined") throw new Error("Workspace requests require a browser.");
@@ -58,8 +58,7 @@ const tools = [
   ["mindmap", "Mind Maps", "See the connections between your ideas.", BarChart3],
   ["planner", "Revision Planner", "Give every deadline a calm place.", CalendarDays],
 ] as const;
-function routeFromPath(path: string): Route { const key = path.replace(/^\/+/, "").replace(/^app\/?/, "") || "overview"; const allowed = ["overview","notes","assistant","documents","favorites","archive","trash","tools","quiz","flashcards","roadmap","mindmap","planner","search","settings"]; return allowed.includes(key) ? key as Route : "overview"; }
-function pathFor(route: Route) { return route === "overview" ? "/" : "/#/" + route; }
+function routeFromPath(path: string): Route { const hash = typeof window !== "undefined" ? window.location.hash.replace(/^#\/?/, "") : ""; const key = hash || path.replace(/^\/+/, "").replace(/^app\/?/, "") || "overview"; const allowed = ["overview","notes","assistant","documents","favorites","archive","trash","tools","quiz","flashcards","roadmap","mindmap","planner","search","settings"]; return allowed.includes(key) ? key as Route : "overview"; }
 function AppLogo({ compact = false }: { compact?: boolean }) { return <div className="app-logo"><img src={compact ? "/logo-symbol.svg" : "/logo-wordmark.svg"} alt="Notely" /></div>; }
 
 function Sidebar({ route, setRoute, collapsed, setCollapsed, mobileOpen, setMobileOpen }: { route: Route; setRoute: (r: Route) => void; collapsed: boolean; setCollapsed: (v: boolean) => void; mobileOpen: boolean; setMobileOpen: (v: boolean) => void }) {
