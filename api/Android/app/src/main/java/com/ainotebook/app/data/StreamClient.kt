@@ -137,7 +137,7 @@ object StreamClient {
                 call.execute().use { response ->
                     when {
                         response.code == 401 || response.code == 403 -> {
-                            emitTerminal(StreamEvent.Error("Notely isn't responding right now. Please try again in a moment.", retryable = false))
+                            emitTerminal(StreamEvent.Error(httpErrorMessage(response.code, response.body?.string().orEmpty()), retryable = false))
                             AttemptResult.DONE
                         }
                         response.code == 429 || response.code in 500..599 -> {
@@ -145,7 +145,9 @@ object StreamClient {
                             AttemptResult.RETRY("Notely is temporarily busy")
                         }
                         !response.isSuccessful -> {
-                            emitTerminal(StreamEvent.Error("Notely isn't responding right now. Please try again in a moment.", retryable = false))
+                            // FastAPI returns useful validation details for 400/422 responses.
+                            // Preserve those details instead of hiding every failure as a generic 400.
+                            emitTerminal(StreamEvent.Error(httpErrorMessage(response.code, response.body?.string().orEmpty()), retryable = false))
                             AttemptResult.DONE
                         }
                         else -> {
@@ -328,6 +330,19 @@ object StreamClient {
         }
 
         return DataResult(parsed = true, token = !text.isNullOrEmpty(), done = false)
+    }
+
+    private fun httpErrorMessage(code: Int, body: String): String {
+        val detail = runCatching {
+            val value = json.parseToJsonElement(body).jsonObject["detail"]
+            value?.jsonPrimitive?.contentOrNull
+        }.getOrNull()?.takeIf { it.isNotBlank() }
+        if (detail != null) return detail
+        return when (code) {
+            401, 403 -> "Your session has expired. Please sign in again."
+            400, 422 -> "The server rejected this request ($code). Check the message and try again."
+            else -> "The request failed ($code). Please try again."
+        }
     }
 
     /** Pulls incremental text from any supported provider payload shape. */

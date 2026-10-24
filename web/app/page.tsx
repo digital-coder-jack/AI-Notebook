@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Archive, ArrowRight, BarChart3, Bell, BookOpen, CalendarDays, Check, CheckCircle2,
   ChevronDown, ChevronRight, CircleHelp, Cloud, FileText, FolderOpen, Grid2X2, Home,
@@ -9,24 +9,59 @@ import {
   Upload, Zap, Clock3,
 } from "lucide-react";
 
-type Route = "overview" | "notes" | "assistant" | "documents" | "favorites" | "archive" | "trash" | "tools" | "quiz" | "flashcards" | "roadmap" | "mindmap" | "planner" | "search" | "settings";
-type Note = { title: string; course: string; time: string; tag: string; pinned?: boolean; state?: "active" | "archived" | "deleted" };
-const NOTES: Note[] = [
-  { title: "Cellular respiration", course: "Biology 101", time: "Edited 18 min ago", tag: "Midterm topic", pinned: true },
-  { title: "Reaction mechanisms", course: "Organic Chemistry", time: "Edited yesterday", tag: "Review", pinned: true },
-  { title: "Industrial revolutions", course: "World History", time: "Edited Oct 14", tag: "Essay notes" },
-  { title: "Photosynthesis", course: "Biology 101", time: "Edited Oct 12", tag: "Lecture 08" },
-  { title: "Yeast respiration lab", course: "Biology 101", time: "Edited Oct 11", tag: "Lab report" },
-];
+type Route = "overview" | "notes" | "assistant" | "documents" | "favorites" | "archive" | "trash" | "tools" | "quiz" | "flashcards" | "roadmap" | "mindmap" | "planner" | "summarizer" | "homework" | "search" | "settings";
+type Note = { id?: number; title: string; course: string; time: string; tag: string; content?: string; pinned?: boolean; favorite?: boolean; archived?: boolean; deleted?: boolean; state?: "active" | "archived" | "deleted" };
+const NOTES: Note[] = [];
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://study-sphere-ai-mwlq.vercel.app").replace(/\/+$/, "");
+
+async function workspaceToken(): Promise<string> {
+  if (typeof window === "undefined") throw new Error("Workspace requests require a browser.");
+  const saved = window.localStorage.getItem("ss_token");
+  if (saved) return saved;
+  const response = await fetch(API_BASE + "/api/auth/guest", { method: "POST" });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload.token) throw new Error(payload.detail || "Could not start a workspace session.");
+  window.localStorage.setItem("ss_token", payload.token);
+  if (payload.user) window.localStorage.setItem("ss_user", JSON.stringify(payload.user));
+  return payload.token as string;
+}
+
+async function apiRequest<T = any>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = await workspaceToken();
+  const headers = new Headers(init.headers || {});
+  headers.set("Authorization", "Bearer " + token);
+  if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  const response = await fetch(API_BASE + path, { ...init, headers });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail = payload && (payload.detail || payload.message);
+    throw new Error(typeof detail === "string" ? detail : "Request failed (" + response.status + ").");
+  }
+  return payload as T;
+}
+
+function normalizeNote(raw: any): Note {
+  const date = raw.created_at ? new Date(raw.created_at) : null;
+  return {
+    id: Number(raw.id), title: String(raw.topic || "Untitled note"), course: "My workspace",
+    time: date && !Number.isNaN(date.getTime()) ? "Created " + date.toLocaleDateString() : "Saved note",
+    tag: raw.pinned ? "Pinned" : raw.favorite ? "Favorite" : "Note", content: String(raw.content || ""),
+    pinned: Boolean(raw.pinned), favorite: Boolean(raw.favorite), archived: Boolean(raw.archived),
+    deleted: Boolean(raw.deleted), state: raw.deleted ? "deleted" : raw.archived ? "archived" : "active",
+  };
+}
 const tools = [
   ["quiz", "Quiz Generator", "Turn notes into a focused practice set.", CircleHelp],
   ["flashcards", "Flashcards", "Recall what matters before the next lecture.", BookOpen],
   ["roadmap", "Study Roadmap", "Make a clear path from goal to mastery.", Zap],
   ["mindmap", "Mind Maps", "See the connections between your ideas.", BarChart3],
   ["planner", "Revision Planner", "Give every deadline a calm place.", CalendarDays],
+  ["summarizer", "Text Summarizer", "Turn long material into clear key points.", FileText],
+  ["homework", "Homework Helper", "Work through a question step by step.", CircleHelp],
 ] as const;
-function routeFromPath(path: string): Route { const key = path.replace(/^\/+/, "").replace(/^app\/?/, "") || "overview"; const allowed = ["overview","notes","assistant","documents","favorites","archive","trash","tools","quiz","flashcards","roadmap","mindmap","planner","search","settings"]; return allowed.includes(key) ? key as Route : "overview"; }
-function pathFor(route: Route) { return route === "overview" ? "/app/overview" : `/app/${route}`; }
+function routeFromPath(path: string): Route { const hash = typeof window !== "undefined" ? window.location.hash.replace(/^#\/?/, "") : ""; const key = hash || path.replace(/^\/+/, "").replace(/^app\/?/, "") || "overview"; const allowed = ["overview","notes","assistant","documents","favorites","archive","trash","tools","quiz","flashcards","roadmap","mindmap","planner","summarizer","homework","search","settings"]; return allowed.includes(key) ? key as Route : "overview"; }
+function pathFor(route: Route) { return route === "overview" ? "/" : "/#/" + route; }
 function AppLogo({ compact = false }: { compact?: boolean }) { return <div className="app-logo"><img src={compact ? "/logo-symbol.svg" : "/logo-wordmark.svg"} alt="Notely" /></div>; }
 
 function Sidebar({ route, setRoute, collapsed, setCollapsed, mobileOpen, setMobileOpen }: { route: Route; setRoute: (r: Route) => void; collapsed: boolean; setCollapsed: (v: boolean) => void; mobileOpen: boolean; setMobileOpen: (v: boolean) => void }) {
@@ -37,7 +72,7 @@ function Sidebar({ route, setRoute, collapsed, setCollapsed, mobileOpen, setMobi
     <div className="sidebar-top"><AppLogo compact={collapsed} /> {!collapsed && <div className="brand-copy"><strong>Notely</strong><span>My workspace</span></div>}<button className="icon-button collapse-button" onClick={() => setCollapsed(!collapsed)} aria-label="Toggle sidebar">{collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}</button></div>
     <button className="new-note" onClick={() => go("notes")}><PenLine /><span>New note</span><kbd>⌘ N</kbd></button>
     <button className="sidebar-search" onClick={() => go("search")}><Search /><span>Search anything</span><kbd>⌘ K</kbd></button>
-    <nav className="side-nav" aria-label="Workspace navigation"><span className="nav-label">Workspace</span>{primary.map(([id, label, Icon]) => <NavButton key={id} active={route === id} icon={<Icon />} label={label} collapsed={collapsed} onClick={() => go(id)} />)}<span className="nav-label">Library</span>{library.map(([id, label, Icon]) => <NavButton key={id} active={route === id} icon={<Icon />} label={label} collapsed={collapsed} onClick={() => go(id)} />)}<span className="nav-label">Study tools</span><NavButton active={route === "tools" || ["quiz","flashcards","roadmap","mindmap","planner"].includes(route)} icon={<Zap />} label="Tools hub" collapsed={collapsed} onClick={() => go("tools")} badge="5" /><NavButton active={route === "settings"} icon={<Settings />} label="Settings" collapsed={collapsed} onClick={() => go("settings")} /></nav>
+    <nav className="side-nav" aria-label="Workspace navigation"><span className="nav-label">Workspace</span>{primary.map(([id, label, Icon]) => <NavButton key={id} active={route === id} icon={<Icon />} label={label} collapsed={collapsed} onClick={() => go(id)} />)}<span className="nav-label">Library</span>{library.map(([id, label, Icon]) => <NavButton key={id} active={route === id} icon={<Icon />} label={label} collapsed={collapsed} onClick={() => go(id)} />)}<span className="nav-label">Study tools</span><NavButton active={route === "tools" || ["quiz","flashcards","roadmap","mindmap","planner","summarizer","homework"].includes(route)} icon={<Zap />} label="Tools hub" collapsed={collapsed} onClick={() => go("tools")} badge="5" /><NavButton active={route === "settings"} icon={<Settings />} label="Settings" collapsed={collapsed} onClick={() => go("settings")} /></nav>
     <div className="sidebar-bottom">{!collapsed && <div className="sync-card"><div><Cloud /><span>Cloud sync on</span></div><small>All changes saved</small></div>}<button className="profile-card" onClick={() => go("settings")}><span className="avatar">JL</span>{!collapsed && <span><strong>Jamie Lee</strong><small>Student workspace</small></span>}<MoreHorizontal /></button></div>
   </aside></>;
 }
@@ -47,41 +82,501 @@ function PageTitle({ eyebrow, title, description, action }: { eyebrow?: string; 
 function ActionButton({ children, secondary = false, onClick }: { children: ReactNode; secondary?: boolean; onClick?: () => void }) { return <button className={`action-button ${secondary ? "secondary" : ""}`} onClick={onClick}>{children}</button>; }
 function NoteCard({ note, onClick }: { note: Note; onClick: () => void }) { return <button className="note-card" onClick={onClick}><div className="note-card-top"><span className="course-dot" /><small>{note.course}</small>{note.pinned && <Star className="star-fill" />}</div><h3>{note.title}</h3><p>{note.time}</p><div className="note-tag">{note.tag}</div></button>; }
 
-function Overview({ setRoute }: { setRoute: (r: Route) => void }) { return <div className="screen overview-screen"><PageTitle eyebrow="FRIDAY, OCTOBER 16" title="Good morning, Jamie" description="A calmer place to pick up where you left off." action={<div className="title-actions"><ActionButton secondary onClick={() => setRoute("documents")}><Upload /> Import</ActionButton><ActionButton onClick={() => setRoute("notes")}><Plus /> New note</ActionButton></div>} /><section className="hero-grid"><div className="continue-panel"><div className="panel-kicker"><span className="sparkle-dot"><Sparkles /></span><span>CONTINUE WHERE YOU LEFT OFF</span><span className="saved-status"><CheckCircle2 /> Saved</span></div><h2>Cellular respiration</h2><p>Pick up your Biology 101 note before today&apos;s study group. Your last section was <strong>Why the proton gradient matters</strong>.</p><div className="continue-meta"><span>Biology 101</span><span>8 note pages</span><span>Last opened 18 min ago</span></div><ActionButton onClick={() => setRoute("notes")}><PenLine /> Continue writing <ArrowRight /></ActionButton></div><div className="focus-panel"><div className="panel-kicker"><Clock3 /> TODAY&apos;S FOCUS</div><div className="focus-time">20 <small>/ 30 min</small></div><div className="progress"><i style={{ width: "67%" }} /></div><p>10 minutes left to hit your study goal.</p><button onClick={() => setRoute("planner")}>Open revision planner <ArrowRight /></button></div></section><section className="section-block"><div className="section-heading"><div><span className="eyebrow">YOUR SPACE</span><h2>Recent notes</h2></div><button onClick={() => setRoute("notes")}>View all <ArrowRight /></button></div><div className="note-grid">{NOTES.slice(0, 3).map(note => <NoteCard key={note.title} note={note} onClick={() => setRoute("notes")} />)}</div></section><section className="dashboard-grid"><div className="surface-panel"><div className="section-heading"><div><span className="eyebrow">STUDY TOOLS</span><h2>Make it stick</h2></div><button onClick={() => setRoute("tools")}>See all <ArrowRight /></button></div><div className="tool-list">{tools.slice(0, 3).map(([id, label, copy, Icon]) => <button key={id} onClick={() => setRoute(id)}><span className="tool-icon"><Icon /></span><span><strong>{label}</strong><small>{copy}</small></span><ChevronRight /></button>)}</div></div><div className="surface-panel upcoming"><div className="section-heading"><div><span className="eyebrow">UP NEXT</span><h2>Revision plan</h2></div><CalendarDays /></div><div className="upcoming-item"><span className="date-box"><b>17</b><small>OCT</small></span><span><strong>Lab report: yeast respiration</strong><small>Biology 101 · Due tomorrow</small></span><MoreHorizontal /></div><div className="upcoming-item"><span className="check-box"><Check /></span><span><strong>Mechanisms problem set</strong><small>Organic Chemistry · Due Oct 19</small></span><MoreHorizontal /></div><button className="full-link" onClick={() => setRoute("planner")}>View calendar and tasks <ArrowRight /></button></div></section></div>; }
+function Overview({ setRoute }: { setRoute: (r: Route) => void }) {
+  const [stats, setStats] = useState<any>(null);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([apiRequest<any>("/api/stats"), apiRequest<{ notes: any[] }>("/api/tools/notes")])
+      .then(([dashboard, saved]) => {
+        if (cancelled) return;
+        setStats(dashboard);
+        setNotes((saved.notes || []).map(normalizeNote).filter(n => !n.deleted && !n.archived).slice(0, 3));
+      })
+      .catch(e => { if (!cancelled) setError(e instanceof Error ? e.message : "Could not load your workspace."); });
+    return () => { cancelled = true; };
+  }, []);
+  return <div className="screen overview-screen">
+    <PageTitle eyebrow="YOUR WORKSPACE" title="Welcome to Notely" description="Your notes, AI conversations and study tools in one place." action={<div className="title-actions"><ActionButton secondary onClick={() => setRoute("documents")}><Upload /> Import</ActionButton><ActionButton onClick={() => setRoute("notes")}><Plus /> New note</ActionButton></div>} />
+    {error && <div role="alert" className="surface-panel" style={{ marginBottom: 16, color: "#bd5f62" }}>{error}</div>}
+    <section className="hero-grid">
+      <div className="continue-panel"><div className="panel-kicker"><span className="sparkle-dot"><Sparkles /></span><span>YOUR STUDY WORKSPACE</span></div><h2>Pick up where you left off</h2><p>Open a saved note, ask Notely a question, or generate study material from a topic.</p><div className="continue-meta"><span>{stats ? stats.notes + " saved notes" : "Loading notes…"}</span><span>{stats ? stats.total_chats + " chats" : "Loading chats…"}</span><span>{stats ? stats.quizzes + " quizzes" : "Loading quizzes…"}</span></div><ActionButton onClick={() => setRoute("assistant")}><Sparkles /> Ask Notely <ArrowRight /></ActionButton></div>
+      <div className="focus-panel"><div className="panel-kicker"><Clock3 /> WORKSPACE ACTIVITY</div><div className="focus-time">{stats ? stats.total_messages : "—"} <small>messages</small></div><div className="progress"><i style={{ width: stats ? Math.min(100, Number(stats.ai_generations || 0) * 5) + "%" : "0%" }} /></div><p>{stats ? stats.ai_generations + " AI generations and study artifacts" : "Activity appears here when the backend is connected."}</p><button onClick={() => setRoute("tools")}>Open study tools <ArrowRight /></button></div>
+    </section>
+    <section className="section-block"><div className="section-heading"><div><span className="eyebrow">YOUR SPACE</span><h2>Recent notes</h2></div><button onClick={() => setRoute("notes")}>View all <ArrowRight /></button></div>
+      {notes.length ? <div className="note-grid">{notes.map(note => <NoteCard key={note.id} note={note} onClick={() => setRoute("notes")} />)}</div> : <EmptyState icon={<FileText />} title="No saved notes yet" copy="Create a note or generate notes from one of the study tools." action={<ActionButton onClick={() => setRoute("notes")}><Plus /> Create a note</ActionButton>} />}
+    </section>
+    <section className="dashboard-grid">
+      <div className="surface-panel"><div className="section-heading"><div><span className="eyebrow">STUDY TOOLS</span><h2>Make it stick</h2></div><button onClick={() => setRoute("tools")}>See all <ArrowRight /></button></div><div className="tool-list">{tools.slice(0, 3).map(([id, label, copy, Icon]) => <button key={id} onClick={() => setRoute(id)}><span className="tool-icon"><Icon /></span><span><strong>{label}</strong><small>{copy}</small></span><ChevronRight /></button>)}</div></div>
+      <div className="surface-panel upcoming"><div className="section-heading"><div><span className="eyebrow">NEXT STEP</span><h2>Keep learning</h2></div><CalendarDays /></div><div className="upcoming-item"><span className="date-box"><BookOpen /></span><span><strong>Review your saved notes</strong><small>Use search, favorites and archive to stay organized.</small></span></div><div className="upcoming-item"><span className="check-box"><Sparkles /></span><span><strong>Generate practice material</strong><small>Create quizzes, flashcards or a study roadmap.</small></span></div><button className="full-link" onClick={() => setRoute("planner")}>Create a revision plan <ArrowRight /></button></div>
+    </section>
+  </div>;
+}
 
-function Notes({ setRoute, filter = "all" }: { setRoute: (r: Route) => void; filter?: "all" | "favorites" | "archive" | "trash" }) { const [query, setQuery] = useState(""); const [view, setView] = useState<"grid" | "list">("grid"); const visible = useMemo(() => NOTES.filter(n => filter === "favorites" ? n.pinned : filter === "archive" ? n.state === "archived" : filter === "trash" ? n.state === "deleted" : n.state !== "archived" && n.state !== "deleted").filter(n => `${n.title} ${n.course} ${n.tag}`.toLowerCase().includes(query.toLowerCase())), [filter, query]); const title = filter === "favorites" ? "Favorites" : filter === "archive" ? "Archive" : filter === "trash" ? "Trash" : "My notes"; return <div className="screen"><PageTitle eyebrow="YOUR KNOWLEDGE" title={title} description={filter === "trash" ? "Deleted items stay here until you restore or remove them." : "Keep every idea, class and useful connection close."} action={<ActionButton onClick={() => setRoute("notes")}><Plus /> New note</ActionButton>} /><div className="toolbar"><label className="inline-search"><Search /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search notes and tags" /></label><div className="toolbar-right"><button className="select-button">All courses <ChevronDown /></button><button className="select-button">Recently updated <ChevronDown /></button><button className={`view-toggle ${view === "grid" ? "selected" : ""}`} onClick={() => setView("grid")}><Grid2X2 /></button><button className={`view-toggle ${view === "list" ? "selected" : ""}`} onClick={() => setView("list")}><LayoutList /></button></div></div>{visible.length ? <div className={`note-grid ${view === "list" ? "list-view" : ""}`}>{visible.map(note => <NoteCard key={note.title} note={note} onClick={() => setRoute("assistant")} />)}</div> : <EmptyState icon={<FileText />} title="Nothing here yet" copy="When you save notes to this view, they will appear here." action={<ActionButton onClick={() => setRoute("notes")}><Plus /> Create a note</ActionButton>} />}</div>; }
+function Notes({ setRoute, filter = "all" }: { setRoute: (r: Route) => void; filter?: "all" | "favorites" | "archive" | "trash" }) {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const version = useRef(0);
 
-function Assistant({ setRoute }: { setRoute: (r: Route) => void }) { const [prompt, setPrompt] = useState(""); const [sent, setSent] = useState(false); return <div className="screen assistant-screen"><PageTitle eyebrow="AI STUDY PARTNER" title="Ask about your notes" description="Grounded in your selected course materials, not a shortcut." action={<ActionButton secondary onClick={() => setRoute("notes")}><FileText /> Choose context</ActionButton>} /><div className="assistant-layout"><div className="chat-panel"><div className="context-strip"><span><Sparkles /> BIOLOGY 101</span><span><FileText /> Current note</span><span><Paperclip /> 2 materials</span></div><div className="chat-scroll"><div className="chat-date">TODAY · 10:42 AM</div><div className="user-message">Why does ATP production stop without oxygen?</div><div className="ai-message"><div className="ai-label"><span className="ai-mark"><Sparkles /></span> NOTELY <small>Answer with sources</small></div><p>Almost! It&apos;s oxidative phosphorylation that stops, not all ATP production. Here&apos;s the chain reaction:</p>{[["01", "The electron chain backs up", "Without O₂ to accept electrons at the end of the chain, electron transfer cannot keep running."], ["02", "The H⁺ gradient fades", "Proton pumping stops, so ATP synthase loses the gradient that powers ATP synthesis."], ["03", "Glycolysis can still make ATP", "Fermentation regenerates NAD⁺, allowing glycolysis to yield a net 2 ATP per glucose."]].map(([n, h, p]) => <div className="answer-step" key={n}><b>{n}</b><span><strong>{h}</strong><small>{p}</small></span></div>)}<div className="citation-row"><span>[1] Ch. 9 · p. 7</span><span>[2] Lecture 07 · 12:34</span></div><div className="answer-actions"><ActionButton secondary><Check /> Insert into note</ActionButton><button>Copy answer</button></div></div>{sent && <div className="queued-message"><CheckCircle2 /> Question added to your study queue.</div>}</div><div className="composer"><div className="suggestion-row"><button onClick={() => setPrompt("Explain this simply")}>Explain simply</button><button onClick={() => setPrompt("Quiz me on this note")}>Quiz me on this</button></div><div className="composer-box"><textarea value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="Ask about your notes or materials…" rows={2} /><div><button className="icon-button"><Paperclip /></button><button className="send-button" onClick={() => setSent(true)} aria-label="Send"><ArrowRight /></button></div></div><small>A study partner, not a shortcut. Always check your sources.</small></div></div><aside className="source-panel"><div className="section-heading"><div><span className="eyebrow">GROUNDED IN</span><h2>Study context</h2></div><MoreHorizontal /></div><div className="source-card selected"><FileText /><span><strong>Cellular respiration</strong><small>Current note · 8 pages</small></span><Check /></div><div className="source-card"><FileText /><span><strong>Ch. 9 — Cellular respiration</strong><small>PDF · 18 pages</small></span></div><div className="source-card"><MessageCircle /><span><strong>Lecture 07 transcript</strong><small>42 min · Ready</small></span></div><div className="ai-note"><Sparkles /><p><strong>Tip</strong> Select a note or document to make answers more specific and cite the exact passage.</p></div></aside></div></div>; }
+  const reload = async () => {
+    setLoading(true);
+    try {
+      const data = await apiRequest<{ notes: any[] }>("/api/tools/notes");
+      setNotes((data.notes || []).map(normalizeNote));
+      setError("");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not load notes."); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { void reload(); }, []);
+
+  useEffect(() => {
+    if (!dirty || selectedId === null) return;
+    const editVersion = version.current;
+    const timer = window.setTimeout(async () => {
+      setSaving(true);
+      try {
+        await apiRequest("/api/notes/" + selectedId, { method: "PUT", body: JSON.stringify({ topic: title.trim() || "Untitled note", content: body }) });
+        if (editVersion === version.current) { setDirty(false); setError(""); setNotes(current => current.map(n => n.id === selectedId ? { ...n, title: title.trim() || "Untitled note", content: body } : n)); }
+      } catch (e) { setError(e instanceof Error ? e.message : "Autosave failed."); }
+      finally { setSaving(false); }
+    }, 800);
+    return () => window.clearTimeout(timer);
+  }, [selectedId, title, body, dirty]);
+
+  const choose = (note: Note) => {
+    if (dirty && selectedId !== null) void apiRequest("/api/notes/" + selectedId, { method: "PUT", body: JSON.stringify({ topic: title.trim() || "Untitled note", content: body }) }).catch(e => setError(e instanceof Error ? e.message : "Could not save the previous note."));
+    setSelectedId(note.id || null); setTitle(note.title); setBody(note.content || "");
+    setDirty(false); setError("");
+  };
+  const create = async () => {
+    try {
+      if (dirty && selectedId !== null) {
+        await apiRequest("/api/notes/" + selectedId, { method: "PUT", body: JSON.stringify({ topic: title.trim() || "Untitled note", content: body }) });
+      }
+      const data = await apiRequest<{ note: any }>("/api/notes", { method: "POST", body: JSON.stringify({ topic: "Untitled note", content: "" }) });
+      const note = normalizeNote(data.note);
+      setNotes(current => [note, ...current]); choose(note);
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not create a note."); }
+  };
+  const flag = async (note: Note, patch: Record<string, boolean>) => {
+    if (!note.id) return;
+    try {
+      if (dirty && selectedId === note.id) {
+        await apiRequest("/api/notes/" + note.id, { method: "PUT", body: JSON.stringify({ topic: title.trim() || "Untitled note", content: body }) });
+      }
+      await apiRequest("/api/tools/notes/" + note.id, { method: "PATCH", body: JSON.stringify(patch) });
+      setNotes(current => current.map(n => n.id === note.id ? { ...n, ...patch, state: patch.deleted ? "deleted" : patch.archived ? "archived" : "active" } : n));
+      if (selectedId === note.id && (patch.deleted || patch.archived)) setSelectedId(null);
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not update note."); }
+  };
+  const remove = async (note: Note) => {
+    if (!note.id) return;
+    try { await apiRequest("/api/tools/notes/" + note.id, { method: "DELETE" }); setNotes(current => current.filter(n => n.id !== note.id)); if (selectedId === note.id) setSelectedId(null); }
+    catch (e) { setError(e instanceof Error ? e.message : "Could not delete note."); }
+  };
+  const visible = notes.filter(n => filter === "favorites" ? n.favorite && !n.archived && !n.deleted : filter === "archive" ? n.archived && !n.deleted : filter === "trash" ? n.deleted : !n.archived && !n.deleted).filter(n => (n.title + " " + (n.content || "")).toLowerCase().includes(query.toLowerCase()));
+  const selected = notes.find(n => n.id === selectedId);
+  const heading = filter === "favorites" ? "Favorites" : filter === "archive" ? "Archive" : filter === "trash" ? "Trash" : "My notes";
+
+  return <div className="screen">
+    <PageTitle eyebrow="YOUR KNOWLEDGE" title={heading} description="Create, edit and organize your notes. Edits autosave to your workspace." action={<ActionButton onClick={create}><Plus /> New note</ActionButton>} />
+    <div className="toolbar"><label className="inline-search"><Search /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search notes and content" /></label></div>
+    {error && <div role="alert" className="surface-panel" style={{ marginBottom: 16, color: "#bd5f62" }}>{error}</div>}
+    {loading ? <div className="surface-panel">Loading notes…</div> : visible.length ? <div className="note-grid">{visible.map(note => <div key={note.id} className="note-entry">
+      <NoteCard note={note} onClick={() => choose(note)} />
+      <div className="note-entry-actions">
+        <button onClick={() => void flag(note, { favorite: !note.favorite })}>{note.favorite ? "★ Favorite" : "☆ Favorite"}</button>
+        {filter === "trash" ? <><button onClick={() => void flag(note, { deleted: false, archived: false })}>Restore</button><button onClick={() => void remove(note)}>Delete permanently</button></> : <><button onClick={() => void flag(note, { archived: !note.archived })}>{note.archived ? "Unarchive" : "Archive"}</button><button onClick={() => void flag(note, { deleted: true, archived: false })}>Move to trash</button></>}
+      </div>
+    </div>)}</div> : <EmptyState icon={<FileText />} title={heading === "Trash" ? "Trash is empty" : heading === "Archive" ? "No archived notes" : heading === "Favorites" ? "No favorites yet" : "No notes yet"} copy="Your notes will appear here when you create or generate them." action={filter === "all" ? <ActionButton onClick={create}><Plus /> Create a note</ActionButton> : undefined} />}
+    {selected && <section className="surface-panel" style={{ marginTop: 20 }}>
+      <div className="section-heading"><div><span className="eyebrow">NOTE EDITOR</span><h2>{title || "Untitled note"}</h2></div><span role="status">{saving ? "Saving…" : dirty ? "Unsaved changes" : "Saved"}</span></div>
+      <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>Title<input value={title} maxLength={200} onChange={e => { version.current++; setTitle(e.target.value); setDirty(true); }} /></label>
+      <label style={{ display: "grid", gap: 8 }}>Content<textarea value={body} rows={12} placeholder="Start writing…" onChange={e => { version.current++; setBody(e.target.value); setDirty(true); }} /></label>
+      <div className="title-actions" style={{ marginTop: 14 }}><ActionButton secondary onClick={() => setRoute("assistant")}><Sparkles /> Ask AI</ActionButton><ActionButton onClick={() => setSelectedId(null)}>Close editor</ActionButton></div>
+    </section>}
+  </div>;
+}
+
+function Assistant({ setRoute }: { setRoute: (r: Route) => void }) {
+  const [prompt, setPrompt] = useState("");
+  const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [chatId, setChatId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await apiRequest<{ chats: any[] }>("/api/chats");
+        const latest = (data.chats || [])[0];
+        if (!latest || cancelled) return;
+        const detail = await apiRequest<{ messages: any[] }>("/api/chats/" + latest.id);
+        if (cancelled) return;
+        setChatId(Number(latest.id));
+        setMessages((detail.messages || []).map(m => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "") })));
+      } catch (e) { if (!cancelled) setError(e instanceof Error ? e.message : "Could not load chat history."); }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [messages]);
+
+  const send = async (value = prompt) => {
+    const question = value.trim();
+    if (!question || loading) return;
+    setPrompt(""); setError(""); setLoading(true);
+    setMessages(current => [...current, { role: "user", content: question }, { role: "assistant", content: "" }]);
+    try {
+      let id = chatId;
+      if (!id) {
+        const created = await apiRequest<{ chat: { id: number } }>("/api/chats", { method: "POST", body: JSON.stringify({ title: question.slice(0, 60) }) });
+        id = Number(created.chat.id); setChatId(id);
+      }
+      const token = await workspaceToken();
+      const response = await fetch(API_BASE + "/api/chats/" + id + "/stream", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+        body: JSON.stringify({ content: question, model: "auto" }),
+      });
+      if (!response.ok || !response.body) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.detail || "AI request failed (" + response.status + ").");
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let answer = "";
+      let done = false;
+      while (!done) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        buffer += decoder.decode(chunk.value, { stream: true });
+        const frames = buffer.split("\n\n");
+        buffer = frames.pop() || "";
+        for (const frame of frames) {
+          const line = frame.split("\n").find(row => row.startsWith("data:"));
+          if (!line) continue;
+          let event: any;
+          try { event = JSON.parse(line.slice(5).trim()); } catch { continue; }
+          if (event.event === "token") {
+            answer += String(event.token || "");
+            setMessages(current => current.map((m, index) => index === current.length - 1 ? { ...m, content: answer } : m));
+          } else if (event.event === "error") {
+            throw new Error(event.error?.message || "AI response failed. Please try again.");
+          } else if (event.event === "done") done = true;
+        }
+      }
+      if (!answer.trim()) {
+        const detail = await apiRequest<{ messages: any[] }>("/api/chats/" + id);
+        const last = (detail.messages || []).filter(m => m.role === "assistant").slice(-1)[0];
+        if (last) setMessages(current => current.map((m, index) => index === current.length - 1 ? { ...m, content: String(last.content || "") } : m));
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Something went wrong.";
+      setError(message);
+      setMessages(current => current.map((m, index) => index === current.length - 1 && m.role === "assistant" && !m.content ? { ...m, content: "I couldn't complete that response. Please try again." } : m));
+    } finally { setLoading(false); }
+  };
+
+  return <div className="screen assistant-screen">
+    <PageTitle eyebrow="AI STUDY PARTNER" title="Ask Notely" description="Chat with your configured AI provider. Your conversation is saved to your workspace." action={<div className="title-actions"><ActionButton secondary onClick={() => { setChatId(null); setMessages([]); setPrompt(""); setError(""); }}><Plus /> New chat</ActionButton><ActionButton secondary onClick={() => setRoute("notes")}><FileText /> Open notes</ActionButton></div>} />
+    <div className="assistant-layout">
+      <div className="chat-panel">
+        <div className="context-strip"><span><Sparkles /> NOTELY AI</span><span><Cloud /> Saved chat history</span></div>
+        <div className="chat-scroll">
+          {!messages.length && <div className="empty-tool-state"><Sparkles /><h2>What are you studying today?</h2><p>Ask for an explanation, summary, quiz, or step-by-step help.</p><div className="suggestion-row"><button onClick={() => setPrompt("Explain a difficult topic in simple words")}>Explain simply</button><button onClick={() => setPrompt("Quiz me on my current topic")}>Quiz me</button><button onClick={() => setPrompt("Summarize the key points")}>Summarize</button></div></div>}
+          {messages.map((message, index) => <div key={index} className={message.role === "user" ? "user-message" : "ai-message"}><div className="ai-label">{message.role === "assistant" ? <><span className="ai-mark"><Sparkles /></span> NOTELY</> : "YOU"}</div><p style={{ whiteSpace: "pre-wrap" }}>{message.content || (loading && index === messages.length - 1 ? "Thinking…" : "")}</p></div>)}
+          <div ref={bottomRef} />
+        </div>
+        {error && <div role="alert" style={{ padding: "8px 16px", color: "#bd5f62" }}>{error}</div>}
+        <div className="composer"><div className="composer-box"><textarea value={prompt} onChange={e => setPrompt(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); } }} placeholder="Ask Notely anything…" rows={2} /><div><button className="send-button" disabled={loading || !prompt.trim()} onClick={() => void send()} aria-label="Send message">{loading ? <Clock3 /> : <ArrowRight />}</button></div></div><small>Enter to send · Shift+Enter for a new line</small></div>
+      </div>
+      <aside className="source-panel"><div className="section-heading"><div><span className="eyebrow">WORKSPACE</span><h2>Quick actions</h2></div><Sparkles /></div><button className="source-card" onClick={() => setRoute("notes")}><FileText /><span><strong>My notes</strong><small>Create and edit notes</small></span><ArrowRight /></button><button className="source-card" onClick={() => setRoute("documents")}><FolderOpen /><span><strong>Documents</strong><small>Upload and summarize files</small></span><ArrowRight /></button><button className="source-card" onClick={() => setRoute("tools")}><Zap /><span><strong>Study tools</strong><small>Generate practice material</small></span><ArrowRight /></button></aside>
+    </div>
+  </div>;
+}
 
 function Documents({ setRoute }: { setRoute: (r: Route) => void }) {
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [files, setFiles] = useState<any[]>([]);
   const [filter, setFilter] = useState("All materials");
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const [summaries, setSummaries] = useState<Record<number, string>>({});
   const browse = () => document.getElementById("notely-document-input")?.click();
-  return <div className="screen"><PageTitle eyebrow="YOUR MATERIALS" title="Documents" description="Readings, slides and references close to your notes." action={<ActionButton onClick={browse}><Upload /> Import document</ActionButton>} /><input id="notely-document-input" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" multiple hidden onChange={e => { const files = Array.from(e.target.files || []).map(f => f.name); setSelectedFiles(current => [...current, ...files.filter(name => !current.includes(name))]); e.target.value = ""; }} /><div className="dropzone" onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); const files = Array.from(e.dataTransfer.files).map(f => f.name); setSelectedFiles(current => [...current, ...files.filter(name => !current.includes(name))]); }}><Upload /><div><strong>Drop files here, or browse your device</strong><p>PDF, DOCX, PPTX and TXT. Selected files stay in this browser until document upload is connected.</p></div><ActionButton secondary onClick={browse}>Browse files</ActionButton></div>{selectedFiles.length > 0 && <div className="surface-panel"><div className="section-heading"><div><span className="eyebrow">LOCAL SELECTION</span><h2>Files ready to import ({selectedFiles.length})</h2></div><button type="button" onClick={() => setSelectedFiles([])}>Clear</button></div>{selectedFiles.map(name => <div className="source-card" key={name}><FileText /><span><strong>{name}</strong><small>Selected locally · not uploaded</small></span><button type="button" aria-label={`Remove ${name}`} onClick={() => setSelectedFiles(current => current.filter(item => item !== name))}>×</button></div>)}</div>}<div className="toolbar"><div className="filter-pills">{["All materials", "PDFs", "Recently added"].map(item => <button type="button" key={item} className={`pill ${filter === item ? "active" : ""}`} onClick={() => setFilter(item)}>{item}{item === "All materials" && <small>12</small>}</button>)}</div><button type="button" className="select-button" onClick={() => setRoute("notes")}>Biology 101 <ChevronDown /></button></div><div className="document-grid">{[["Ch. 9 — Cellular respiration", "PDF · 18 pages", "Processed"], ["Lecture 07 — Energy & metabolism", "Transcript · 42 min", "Ready"], ["Yeast respiration — lab guide", "PDF · 6 pages", "Processing"], ["Ch. 10 — Photosynthesis", "PDF · 22 pages", "Ready"]].filter(([title, meta]) => filter !== "PDFs" || meta.startsWith("PDF")).map(([title, meta, status]) => <button className="document-card" key={title} onClick={() => setRoute("assistant")}><div className="doc-icon"><FileText /></div><div><strong>{title}</strong><small>{meta}</small></div><span className={status === "Processing" ? "processing" : "ready"}>{status === "Processing" ? <Clock3 /> : <CheckCircle2 />}{status}</span><MoreHorizontal /></button>)}</div></div>;
+
+  const reload = async () => {
+    setLoading(true);
+    try { const data = await apiRequest<{ files: any[] }>("/api/files"); setFiles(data.files || []); setError(""); }
+    catch (e) { setError(e instanceof Error ? e.message : "Could not load documents."); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { void reload(); }, []);
+
+  const uploadFiles = async (incoming: File[]) => {
+    if (!incoming.length) return;
+    setUploading(true); setError("");
+    try {
+      for (const file of incoming) {
+        const form = new FormData();
+        form.append("file", file);
+        await apiRequest("/api/files/upload", { method: "POST", body: form });
+      }
+      await reload();
+    } catch (e) { setError(e instanceof Error ? e.message : "Upload failed."); }
+    finally { setUploading(false); }
+  };
+
+  const summarize = async (file: any) => {
+    setError("");
+    try {
+      const data = await apiRequest<{ summary: string }>("/api/files/" + file.id + "/summarize", { method: "POST" });
+      setSummaries(current => ({ ...current, [Number(file.id)]: data.summary }));
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not summarize this file."); }
+  };
+
+  const visible = files.filter(file => filter !== "PDFs" || String(file.content_type || "").includes("pdf") || String(file.filename || "").toLowerCase().endsWith(".pdf"));
+  return <div className="screen">
+    <PageTitle eyebrow="YOUR MATERIALS" title="Documents" description="Upload files to your account, extract supported text and ask Notely to summarize it." action={<ActionButton onClick={browse}><Upload /> Import document</ActionButton>} />
+    <input id="notely-document-input" type="file" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.webp" multiple hidden onChange={e => { void uploadFiles(Array.from(e.target.files || [])); e.target.value = ""; }} />
+    <div className="dropzone" onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); void uploadFiles(Array.from(e.dataTransfer.files || [])); }}>
+      <Upload /><div><strong>{uploading ? "Uploading documents…" : "Drop files here, or browse your device"}</strong><p>PDF, DOCX, TXT and image files · up to 8 MB per file</p></div>
+      <ActionButton secondary onClick={browse}>{uploading ? "Uploading…" : "Browse files"}</ActionButton>
+    </div>
+    {error && <div role="alert" className="surface-panel" style={{ marginTop: 16, color: "#bd5f62" }}>{error}</div>}
+    <div className="toolbar"><div className="filter-pills">{["All materials", "PDFs"].map(item => <button type="button" key={item} className={"pill " + (filter === item ? "active" : "")} onClick={() => setFilter(item)}>{item}{item === "All materials" && <small>{files.length}</small>}</button>)}</div><button type="button" className="select-button" onClick={() => setRoute("assistant")}>Ask AI about a file <ArrowRight /></button></div>
+    {loading ? <div className="surface-panel">Loading your documents…</div> : visible.length ? <div className="document-grid">{visible.map(file => <div className="document-card" key={file.id}>
+      <div className="doc-icon"><FileText /></div><div><strong>{file.filename}</strong><small>{String(file.kind || file.content_type || "File").toUpperCase()} · {Math.max(1, Math.round(Number(file.size_bytes || 0) / 1024))} KB</small></div>
+      <span className="ready"><CheckCircle2 /> {file.has_text === false ? "Stored" : "Uploaded"}</span>
+      <button type="button" className="select-button" onClick={() => void summarize(file)}>Summarize</button>
+      {summaries[Number(file.id)] && <div className="document-summary"><strong>Summary</strong><p style={{ whiteSpace: "pre-wrap" }}>{summaries[Number(file.id)]}</p></div>}
+    </div>)}</div> : <EmptyState icon={<FolderOpen />} title="No documents uploaded" copy="Upload a PDF, DOCX, TXT or image file. Supported text is stored with your account." action={<ActionButton onClick={browse}><Upload /> Upload a document</ActionButton>} />}
+  </div>;
 }
 function Tools({ setRoute }: { setRoute: (r: Route) => void }) { return <div className="screen"><PageTitle eyebrow="LEARN BY DOING" title="Study tools" description="Small tools that turn understanding into momentum." /><div className="tools-grid">{tools.map(([id, label, copy, Icon], index) => <button className="big-tool-card" key={id} onClick={() => setRoute(id)}><span className="big-tool-icon"><Icon /></span><span className="eyebrow">0{index + 1} / STUDY</span><h2>{label}</h2><p>{copy}</p><span className="tool-link">Open tool <ArrowRight /></span></button>)}</div></div>; }
-function ToolDetail({ route, setRoute }: { route: Route; setRoute: (r: Route) => void }) { const details: Record<string, [string, string, ReactNode]> = { quiz: ["Quiz generator", "Choose a note, set the challenge, and test what you know.", <CircleHelp />], flashcards: ["Flashcards", "A quick recall session built from your Biology 101 notes.", <BookOpen />], roadmap: ["Study roadmap", "Map the topics, goals and next steps for this semester.", <Zap />], mindmap: ["Mind maps", "Connect concepts visually and expand the ideas worth revisiting.", <BarChart3 />], planner: ["Revision planner", "Give every deadline and study session a clear place.", <CalendarDays />] }; const [title, copy, iconNode] = details[route] || details.quiz; return <div className="screen detail-screen"><button className="back-link" onClick={() => setRoute("tools")}>← Back to study tools</button><div className="detail-hero"><span className="big-tool-icon">{iconNode}</span><span className="eyebrow">STUDY TOOL</span><h1>{title}</h1><p>{copy}</p><ActionButton onClick={() => setRoute(route === "quiz" ? "assistant" : "notes")}><Sparkles /> Start with my notes</ActionButton></div><div className="detail-workspace"><div className="surface-panel"><div className="section-heading"><div><span className="eyebrow">READY WHEN YOU ARE</span><h2>Build from your workspace</h2></div><CheckCircle2 /></div><div className="form-row"><label>Source notebook<select><option>Biology 101</option><option>Organic Chemistry</option></select></label><label>Focus<select><option>Cellular respiration</option><option>All recent notes</option></select></label></div><div className="empty-tool-state">{iconNode}<p>Choose a source to begin. Your generated study material will stay linked to the original note.</p></div></div><div className="surface-panel tool-side-note"><Sparkles /><h3>Designed for your flow</h3><p>Move from a note to practice without losing context. This workspace keeps the source visible as you study.</p></div></div></div>; }
-function SearchScreen({ setRoute }: { setRoute: (r: Route) => void }) { const [q, setQ] = useState(""); return <div className="screen"><PageTitle eyebrow="FIND YOUR THREAD" title="Search" description="Search notes, documents and study tools from one place." /><label className="large-search"><Search /><input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Search anything…" /><kbd>⌘ K</kbd></label><div className="search-results"><span className="eyebrow">{q ? "RESULTS" : "RECENTLY OPENED"}</span>{NOTES.filter(n => !q || `${n.title} ${n.course}`.toLowerCase().includes(q.toLowerCase())).slice(0, 4).map(n => <button className="result-row" key={n.title} onClick={() => setRoute("notes")}><span className="result-icon"><FileText /></span><span><strong>{n.title}</strong><small>{n.course} · {n.time}</small></span><ArrowRight /></button>)}<button className="result-row" onClick={() => setRoute("tools")}><span className="result-icon ai"><Sparkles /></span><span><strong>Study tools</strong><small>Quiz generator, flashcards, roadmap and more</small></span><ArrowRight /></button></div></div>; }
+function ToolDetail({ route, setRoute }: { route: Route; setRoute: (r: Route) => void }) {
+  const details: Record<string, [string, string, ReactNode]> = {
+    quiz: ["Quiz generator", "Generate practice questions from a topic.", <CircleHelp />],
+    flashcards: ["Flashcards", "Generate recall cards for focused practice.", <BookOpen />],
+    roadmap: ["Study roadmap", "Generate a sequence of milestones for a topic.", <Zap />],
+    mindmap: ["Mind maps", "Generate a structured map of connected ideas.", <BarChart3 />],
+    planner: ["Revision planner", "Create a day-by-day study plan.", <CalendarDays />],
+    summarizer: ["Text summarizer", "Paste text and generate a concise summary.", <FileText />],
+    homework: ["Homework helper", "Ask a question and get a worked explanation.", <CircleHelp />],
+  };
+  const [heading, copy, iconNode] = details[route] || details.quiz;
+  const [topic, setTopic] = useState("");
+  const [amount, setAmount] = useState("5");
+  const [days, setDays] = useState("7");
+  const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const run = async () => {
+    if (!topic.trim()) { setError("Enter a topic or goal first."); return; }
+    setLoading(true); setError(""); setResult(null);
+    try {
+      let data: any;
+      if (route === "quiz") data = await apiRequest("/api/tools/quiz", { method: "POST", body: JSON.stringify({ topic: topic.trim(), num_questions: Number(amount) }) });
+      else if (route === "summarizer") data = await apiRequest("/api/tools/summarize", { method: "POST", body: JSON.stringify({ text: topic.trim() }) });
+      else if (route === "homework") data = await apiRequest("/api/tools/homework", { method: "POST", body: JSON.stringify({ question: topic.trim() }) });
+      else if (route === "flashcards") data = await apiRequest("/api/tools/flashcards", { method: "POST", body: JSON.stringify({ topic: topic.trim(), num_cards: Number(amount) }) });
+      else if (route === "planner") data = await apiRequest("/api/tools/plan", { method: "POST", body: JSON.stringify({ goal: topic.trim(), days: Number(days) }) });
+      else {
+        const created = await apiRequest<{ topic: { id: number } }>("/api/topics", { method: "POST", body: JSON.stringify({ title: topic.trim() }) });
+        data = await apiRequest("/api/topics/" + created.topic.id + "/generate/" + (route === "mindmap" ? "mindmap" : "roadmap"), { method: "POST", body: JSON.stringify({}) });
+      }
+      setResult(data);
+    } catch (e) { setError(e instanceof Error ? e.message : "The tool could not complete the request."); }
+    finally { setLoading(false); }
+  };
+
+  return <div className="screen detail-screen">
+    <button className="back-link" onClick={() => setRoute("tools")}>← Back to study tools</button>
+    <div className="detail-hero"><span className="big-tool-icon">{iconNode}</span><span className="eyebrow">STUDY TOOL</span><h1>{heading}</h1><p>{copy}</p></div>
+    <div className="detail-workspace">
+      <div className="surface-panel">
+        <div className="section-heading"><div><span className="eyebrow">GENERATE WITH AI</span><h2>Choose your topic</h2></div><Sparkles /></div>
+        <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>{route === "planner" ? "Study goal" : route === "summarizer" ? "Text to summarize" : route === "homework" ? "Your question" : "Topic"}{route === "summarizer" ? <textarea value={topic} onChange={e => setTopic(e.target.value)} rows={7} placeholder="Paste text here…" maxLength={20000} /> : <input value={topic} onChange={e => setTopic(e.target.value)} placeholder={route === "planner" ? "e.g. Prepare for my biology exam" : route === "homework" ? "e.g. Explain Newton’s second law" : "e.g. Cellular respiration"} maxLength={route === "homework" ? 4000 : 300} />}</label>
+        {route === "quiz" && <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>Number of questions<select value={amount} onChange={e => setAmount(e.target.value)}>{["5","10","15"].map(n => <option key={n}>{n}</option>)}</select></label>}
+        {route === "flashcards" && <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>Number of cards<select value={amount} onChange={e => setAmount(e.target.value)}>{["5","8","10","15","20"].map(n => <option key={n}>{n}</option>)}</select></label>}
+        {route === "planner" && <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>Plan length (days)<select value={days} onChange={e => setDays(e.target.value)}>{["3","7","14","21","30","60"].map(n => <option key={n}>{n}</option>)}</select></label>}
+        <ActionButton onClick={() => void run()}>{loading ? <><Clock3 /> Generating…</> : <><Sparkles /> Generate {heading.toLowerCase()}</>}</ActionButton>
+        {error && <p role="alert" style={{ color: "#bd5f62", marginTop: 12 }}>{error}</p>}
+        {result && <div className="tool-result" style={{ marginTop: 20, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}><h3>Generated result</h3><pre style={{ whiteSpace: "pre-wrap", font: "inherit" }}>{typeof result.content === "string" ? result.content : JSON.stringify(result.content ?? result, null, 2)}</pre><button type="button" className="select-button" onClick={() => { const text = typeof result.content === "string" ? result.content : JSON.stringify(result.content ?? result, null, 2); void navigator.clipboard.writeText(text); }}>Copy result</button></div>}
+      </div>
+      <div className="surface-panel tool-side-note"><Sparkles /><h3>Built from your prompt</h3><p>Generated content comes from the configured Notely backend and can be copied for your notes.</p></div>
+    </div>
+  </div>;
+}
+
+function SearchScreen({ setRoute }: { setRoute: (r: Route) => void }) {
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<{ topics: any[]; notes: any[]; chats: any[]; quizzes: any[] }>({ topics: [], notes: [], chats: [], quizzes: [] });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    if (!q.trim()) { setResults({ topics: [], notes: [], chats: [], quizzes: [] }); return; }
+    const timer = window.setTimeout(async () => {
+      setLoading(true);
+      try { const data = await apiRequest<typeof results>("/api/search?q=" + encodeURIComponent(q.trim())); setResults(data); setError(""); }
+      catch (e) { setError(e instanceof Error ? e.message : "Search failed."); }
+      finally { setLoading(false); }
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [q]);
+  const groups = [
+    { key: "notes", label: "Notes", rows: results.notes || [], route: "notes" as Route, icon: <FileText /> },
+    { key: "topics", label: "Topics", rows: results.topics || [], route: "roadmap" as Route, icon: <BookOpen /> },
+    { key: "chats", label: "Chats", rows: results.chats || [], route: "assistant" as Route, icon: <MessageCircle /> },
+    { key: "quizzes", label: "Quizzes", rows: results.quizzes || [], route: "quiz" as Route, icon: <CircleHelp /> },
+  ];
+  const count = groups.reduce((total, group) => total + group.rows.length, 0);
+  return <div className="screen"><PageTitle eyebrow="FIND YOUR THREAD" title="Search" description="Search your saved notes, topics, chats and quizzes." />
+    <label className="large-search"><Search /><input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Search your workspace…" /><kbd>⌘ K</kbd></label>
+    {error && <p role="alert" style={{ color: "#bd5f62" }}>{error}</p>}
+    {loading && <p>Searching…</p>}
+    {!q.trim() ? <EmptyState icon={<Search />} title="Search your workspace" copy="Enter a topic, note title, or phrase to find saved content." /> : !loading && count === 0 ? <EmptyState icon={<Search />} title="No results found" copy="Try another keyword or a shorter phrase." /> :
+      <div className="search-results">{groups.filter(group => group.rows.length).map(group => <section key={group.key}><span className="eyebrow">{group.label.toUpperCase()}</span>{group.rows.map(row => <button className="result-row" key={row.id} onClick={() => setRoute(group.route)}><span className="result-icon">{group.icon}</span><span><strong>{row.title || row.topic || "Untitled"}</strong><small>{group.label.slice(0, -1)} · Open in workspace</small></span><ArrowRight /></button>)}</section>)}</div>}
+  </div>;
+}
+
 function SettingsScreen() {
   const sections = [["Profile", Home], ["Appearance", Grid2X2], ["Editor preferences", PenLine], ["Security & sessions", ShieldCheck], ["Privacy & data", Cloud], ["AI providers", Sparkles], ["Notifications", Bell]] as const;
   const [section, setSection] = useState("Profile");
-  const [prefs, setPrefs] = useState<Record<string, boolean>>({ "Appearance preferences": true, "Use across this workspace": false, "Show helpful reminders": true });
-  const [displayName, setDisplayName] = useState("Jamie Lee");
-  const [email, setEmail] = useState("jamie@example.com");
-  const [editing, setEditing] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [profile, setProfile] = useState<any>({});
+  const [settings, setSettings] = useState<any>({ appearance: { theme: "system", accentColor: "#3b82f6" }, dashboard: { compactSidebar: false, showWelcome: true, showStreak: true, defaultPage: "dashboard" }, notifications: { email: true, reminders: true, dailyGoal: true }, ai_settings: { model: "auto", length: "medium", difficulty: "intermediate" } });
+  const [models, setModels] = useState<any>(null);
+  const [displayName, setDisplayName] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [authMode, setAuthMode] = useState<"login" | "signup" | null>(null);
+  const [identifier, setIdentifier] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authName, setAuthName] = useState("");
+  const [authUsername, setAuthUsername] = useState("");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authConfirm, setAuthConfirm] = useState("");
+
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("notely-workspace-settings");
-      if (stored) { const data = JSON.parse(stored); if (data.prefs) setPrefs(data.prefs); if (data.displayName) setDisplayName(data.displayName); if (data.email) setEmail(data.email); }
-    } catch { /* Ignore unavailable or malformed local preferences. */ }
+    let cancelled = false;
+    Promise.all([apiRequest<{ user: any }>("/api/auth/me"), apiRequest<any>("/api/settings"), apiRequest<any>("/api/ai/models")])
+      .then(([me, prefs, available]) => {
+        if (cancelled) return;
+        setProfile(me.user || {}); setDisplayName(String(me.user?.name || ""));
+        setSettings((current: any) => ({ ...current, ...prefs })); setModels(available);
+      })
+      .catch(e => { if (!cancelled) setError(e instanceof Error ? e.message : "Could not load settings."); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
-  const saveSettings = (nextPrefs = prefs, nextName = displayName, nextEmail = email) => {
-    try { localStorage.setItem("notely-workspace-settings", JSON.stringify({ prefs: nextPrefs, displayName: nextName, email: nextEmail })); setSaved(true); window.setTimeout(() => setSaved(false), 2200); }
-    catch { setSaved(false); }
+
+  const saveCategory = async (category: string, data: any) => {
+    setSaving(true); setError(""); setMessage("");
+    try {
+      await apiRequest("/api/settings", { method: "PUT", body: JSON.stringify({ category, data }) });
+      setSettings((current: any) => ({ ...current, [category]: data }));
+      setMessage("Settings saved to your account.");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not save settings."); }
+    finally { setSaving(false); }
   };
-  const togglePref = (key: string) => setPrefs(current => { const next = { ...current, [key]: !(current[key] ?? false) }; saveSettings(next); return next; });
-  return <div className="screen settings-screen"><PageTitle eyebrow="YOUR WORKSPACE" title="Settings" description="Keep your workspace personal, clear and in sync." /><div className="settings-layout"><aside className="settings-nav">{sections.map(([name, Icon]) => <button type="button" className={section === name ? "active" : ""} key={name} onClick={() => setSection(name)}><Icon />{name}</button>)}<div className="settings-danger"><button type="button" onClick={() => { const blob = new Blob([JSON.stringify({ displayName, email, prefs }, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "notely-settings.json"; a.click(); URL.revokeObjectURL(url); }}><Trash2 /> Export settings</button></div></aside><div className="settings-content"><span className="eyebrow">{section.toUpperCase()}</span><h2>{section}</h2>{section === "Profile" ? <><div className="profile-large"><span className="avatar big">{(displayName.trim()[0] || "J").toUpperCase()}</span><div><h3>{displayName || "Your profile"}</h3><p>Student workspace · {email || "No email added"}</p></div><ActionButton secondary onClick={() => editing ? (saveSettings(prefs, displayName, email), setEditing(false)) : setEditing(true)}>{editing ? "Save profile" : "Edit profile"}</ActionButton></div><div className="settings-fields"><label>Display name<input value={displayName} readOnly={!editing} onChange={e => setDisplayName(e.target.value)} /></label><label>Email address<input type="email" value={email} readOnly={!editing} onChange={e => setEmail(e.target.value)} /></label></div>{saved && <p role="status" className="settings-saved">Changes saved on this device.</p>}</> : <div className="preference-list">{[[section + " preferences", "Enable this preference for your workspace."], ["Use across this workspace", "Keep this preference consistent on this device."], ["Show helpful reminders", "Receive prompts when something needs your attention."]].map(([label, description]) => <div key={label}><span><strong>{label}</strong><small>{description}</small></span><button type="button" role="switch" aria-checked={!!prefs[label]} aria-label={label} className={`toggle ${prefs[label] ? "on" : ""}`} onClick={() => togglePref(label)}><i /></button></div>)}{saved && <p role="status" className="settings-saved">Preferences saved on this device.</p>}<p className="settings-note">These preferences are stored locally in this browser. Account-wide sync is not connected yet.</p></div>}</div></div></div>;
+
+  const updateProfile = async () => {
+    if (!displayName.trim()) { setError("Enter a display name."); return; }
+    setSaving(true); setError(""); setMessage("");
+    try {
+      const data = await apiRequest<{ user: any }>("/api/auth/profile", { method: "PUT", body: JSON.stringify({ name: displayName.trim() }) });
+      setProfile(data.user || { ...profile, name: displayName.trim() });
+      if (typeof window !== "undefined") window.localStorage.setItem("ss_user", JSON.stringify(data.user || { ...profile, name: displayName.trim() }));
+      setMessage("Profile saved to your account.");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not update your profile."); }
+    finally { setSaving(false); }
+  };
+
+  const changePassword = async () => {
+    if (!currentPassword || newPassword.length < 8) { setError("Enter your current password and a new password of at least 8 characters."); return; }
+    setSaving(true); setError(""); setMessage("");
+    try {
+      const data = await apiRequest<{ message: string }>("/api/auth/change-password", { method: "PUT", body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }) });
+      setMessage(data.message || "Password changed."); setCurrentPassword(""); setNewPassword("");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not change password."); }
+    finally { setSaving(false); }
+  };
+
+  const exportWorkspace = async () => {
+    setError("");
+    try {
+      const [notes, chats, files] = await Promise.all([apiRequest<any>("/api/tools/notes"), apiRequest<any>("/api/chats"), apiRequest<any>("/api/files")]);
+      const blob = new Blob([JSON.stringify({ exported_at: new Date().toISOString(), profile, settings, notes: notes.notes || [], chats: chats.chats || [], files: files.files || [] }, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "notely-workspace-export.json"; a.click(); URL.revokeObjectURL(url);
+      setMessage("Workspace export downloaded.");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not export workspace data."); }
+  };
+
+  const submitAuth = async () => {
+    setSaving(true); setError(""); setMessage("");
+    try {
+      const path = authMode === "signup" ? "/api/auth/signup" : "/api/auth/login";
+      const payload = authMode === "signup"
+        ? { name: authName.trim(), username: authUsername.trim(), email: authEmail.trim(), password: authPassword, confirm_password: authConfirm }
+        : { identifier: identifier.trim(), password: authPassword };
+      const response = await fetch(API_BASE + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.token) throw new Error(data.detail || "Authentication failed.");
+      window.localStorage.setItem("ss_token", data.token);
+      window.localStorage.setItem("ss_user", JSON.stringify(data.user || {}));
+      window.location.reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not sign in.");
+    } finally { setSaving(false); }
+  };
+
+  const toggle = (category: string, key: string) => {
+    const current = settings[category] || {};
+    void saveCategory(category, { ...current, [key]: !current[key] });
+  };
+
+  return <div className="screen settings-screen">
+    <PageTitle eyebrow="YOUR WORKSPACE" title="Settings" description="These preferences are saved to your Notely account." />
+    {loading && <div className="surface-panel">Loading account settings…</div>}
+    {error && <div role="alert" className="surface-panel" style={{ marginBottom: 12, color: "#bd5f62" }}>{error}</div>}
+    {message && <p role="status" className="settings-saved">{message}</p>}
+    <div className="settings-layout">
+      <aside className="settings-nav">{sections.map(([name, Icon]) => <button type="button" className={section === name ? "active" : ""} key={name} onClick={() => setSection(name)}><Icon />{name}</button>)}<div className="settings-danger"><button type="button" onClick={() => void exportWorkspace()}><Upload /> Export workspace data</button></div></aside>
+      <div className="settings-content"><span className="eyebrow">{section.toUpperCase()}</span><h2>{section}</h2>
+        {section === "Profile" && <><div className="profile-large"><span className="avatar big">{(displayName.trim()[0] || "N").toUpperCase()}</span><div><h3>{displayName || "Your profile"}</h3><p>{profile.email || "No email on account"}</p></div><ActionButton onClick={() => void updateProfile()}>{saving ? "Saving…" : "Save profile"}</ActionButton></div><div className="settings-fields"><label>Display name<input value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={80} /></label><label>Email address<input type="email" value={profile.email || ""} readOnly /></label></div><p className="settings-note">Email changes are managed through account verification and are not editable here.</p>
+          {(profile.is_guest || String(profile.email || "").endsWith("@guest.ainotebook")) ? <div className="surface-panel" style={{ marginTop: 18 }}><h3>Save your workspace to an account</h3><p>Your current session is a guest account. Sign in or create an account to access that account's notes on other devices. Export guest data before switching if you need a copy.</p><div className="title-actions"><ActionButton secondary onClick={() => setAuthMode(authMode === "login" ? null : "login")}>Sign in</ActionButton><ActionButton onClick={() => setAuthMode(authMode === "signup" ? null : "signup")}>Create account</ActionButton></div>
+          {authMode && <form onSubmit={e => { e.preventDefault(); void submitAuth(); }} className="settings-fields" style={{ marginTop: 14 }}>
+            {authMode === "signup" ? <><label>Full name<input required value={authName} onChange={e => setAuthName(e.target.value)} /></label><label>Username<input required value={authUsername} onChange={e => setAuthUsername(e.target.value)} /></label><label>Email<input required type="email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} /></label></> : <label>Email or username<input required value={identifier} onChange={e => setIdentifier(e.target.value)} /></label>}
+            <label>Password<input required type="password" minLength={8} value={authPassword} onChange={e => setAuthPassword(e.target.value)} /></label>
+            {authMode === "signup" && <label>Confirm password<input required type="password" minLength={8} value={authConfirm} onChange={e => setAuthConfirm(e.target.value)} /></label>}
+            <ActionButton>{saving ? "Please wait…" : authMode === "signup" ? "Create account" : "Sign in"}</ActionButton>
+          </form>}</div> : <p className="settings-note">Your account is connected. Notes and chat history are saved to this account.</p>}
+        </>}
+        {section === "Appearance" && <div className="preference-list"><div><span><strong>Theme</strong><small>Choose light, dark or system appearance.</small></span><select value={settings.appearance?.theme || "system"} onChange={e => void saveCategory("appearance", { ...settings.appearance, theme: e.target.value })}><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div><div><span><strong>Accent color</strong><small>Set the preferred workspace accent.</small></span><input type="color" value={settings.appearance?.accentColor || "#3b82f6"} onChange={e => void saveCategory("appearance", { ...settings.appearance, accentColor: e.target.value })} /></div></div>}
+        {section === "Editor preferences" && <div className="preference-list">{[["compactSidebar","Compact sidebar"],["showWelcome","Show welcome panel"],["showStreak","Show study activity"]].map(([key,label]) => <div key={key}><span><strong>{label}</strong><small>Save this preference to your account.</small></span><button type="button" role="switch" aria-checked={Boolean(settings.dashboard?.[key])} className={"toggle " + (settings.dashboard?.[key] ? "on" : "")} onClick={() => toggle("dashboard", key)}><i /></button></div>)}</div>}
+        {section === "Security & sessions" && <div className="settings-fields"><label>Current password<input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} autoComplete="current-password" /></label><label>New password<input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} autoComplete="new-password" /></label><ActionButton onClick={() => void changePassword()}>{saving ? "Updating…" : "Change password"}</ActionButton><p className="settings-note">Guest accounts do not have a password. Create an account to use password management.</p></div>}
+        {section === "Privacy & data" && <div className="preference-list"><div><span><strong>Export workspace data</strong><small>Download your notes, chat list, documents metadata and settings as JSON.</small></span><ActionButton secondary onClick={() => void exportWorkspace()}>Export</ActionButton></div><p className="settings-note">The export contains saved text and metadata returned by the API. Uploaded file binaries are not included.</p></div>}
+        {section === "AI providers" && <div className="preference-list"><div><span><strong>Default AI tier</strong><small>Provider availability depends on the server configuration.</small></span><select value={settings.ai_settings?.model || models?.selected || "auto"} onChange={async e => { const model = e.target.value; try { await apiRequest("/api/ai/model", { method: "PUT", body: JSON.stringify({ model }) }); await saveCategory("ai_settings", { ...settings.ai_settings, model }); } catch (err) { setError(err instanceof Error ? err.message : "Could not update AI provider."); } }}><option value="auto">Auto</option><option value="default">Default</option><option value="pro">Pro</option><option value="pro_max">Pro Max</option></select></div>{models?.providers?.map((provider: any) => <div key={provider.id}><span><strong>{provider.label || provider.name || provider.id}</strong><small>{provider.configured ? "Configured on server" : "Not configured on server"}</small></span><span>{provider.configured ? "Available" : "Unavailable"}</span></div>)}</div>}
+        {section === "Notifications" && <div className="preference-list">{[["email","Email notifications"],["reminders","Study reminders"],["dailyGoal","Daily goal reminders"]].map(([key,label]) => <div key={key}><span><strong>{label}</strong><small>Manage this notification preference.</small></span><button type="button" role="switch" aria-checked={Boolean(settings.notifications?.[key])} className={"toggle " + (settings.notifications?.[key] ? "on" : "")} onClick={() => toggle("notifications", key)}><i /></button></div>)}</div>}
+      </div>
+    </div>
+  </div>;
 }
 function EmptyState({ icon, title, copy, action }: { icon: ReactNode; title: string; copy: string; action?: ReactNode }) { return <div className="empty-state"><span>{icon}</span><h2>{title}</h2><p>{copy}</p>{action}</div>; }
 
@@ -106,7 +601,7 @@ export default function Page() {
   useEffect(() => {
     try { localStorage.setItem("notely-sidebar-collapsed", String(collapsed)); } catch { /* Keep the control usable without storage. */ }
   }, [collapsed]);
-  const titles: Partial<Record<Route, string>> = { overview: "Overview", notes: "My Notes", assistant: "AI Assistant", documents: "Documents", favorites: "Favorites", archive: "Archive", trash: "Trash", tools: "Study Tools", quiz: "Quiz Generator", flashcards: "Flashcards", roadmap: "Study Roadmap", mindmap: "Mind Maps", planner: "Revision Planner", search: "Search", settings: "Settings" };
+  const titles: Partial<Record<Route, string>> = { overview: "Overview", notes: "My Notes", assistant: "AI Assistant", documents: "Documents", favorites: "Favorites", archive: "Archive", trash: "Trash", tools: "Study Tools", quiz: "Quiz Generator", flashcards: "Flashcards", roadmap: "Study Roadmap", mindmap: "Mind Maps", planner: "Revision Planner", summarizer: "Text Summarizer", homework: "Homework Helper", search: "Search", settings: "Settings" };
   let content: ReactNode = <Overview setRoute={setRoute} />;
   if (route === "notes") content = <Notes setRoute={setRoute} />; else if (["favorites","archive","trash"].includes(route)) content = <Notes setRoute={setRoute} filter={route as "favorites" | "archive" | "trash"} />; else if (route === "assistant") content = <Assistant setRoute={setRoute} />; else if (route === "documents") content = <Documents setRoute={setRoute} />; else if (route === "tools") content = <Tools setRoute={setRoute} />; else if (["quiz","flashcards","roadmap","mindmap","planner"].includes(route)) content = <ToolDetail route={route} setRoute={setRoute} />; else if (route === "search") content = <SearchScreen setRoute={setRoute} />; else if (route === "settings") content = <SettingsScreen />;
   return <div className="workspace"><Sidebar route={route} setRoute={setRoute} collapsed={collapsed} setCollapsed={setCollapsed} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} /><main className="workspace-main"><Header title={titles[route] || "Workspace"} setRoute={setRoute} onMenu={() => setMobileOpen(true)} />{content}</main></div>;

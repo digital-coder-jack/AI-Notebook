@@ -17,6 +17,7 @@ class VMFactory(private val repo: Repository) : ViewModelProvider.Factory {
             modelClass.isAssignableFrom(ChatViewModel::class.java) -> ChatViewModel(repo) as T
             modelClass.isAssignableFrom(ToolsViewModel::class.java) -> ToolsViewModel(repo) as T
             modelClass.isAssignableFrom(ProfileViewModel::class.java) -> ProfileViewModel(repo) as T
+            modelClass.isAssignableFrom(NotesViewModel::class.java) -> NotesViewModel(repo) as T
             else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }
     }

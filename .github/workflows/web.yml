@@ -1,0 +1,28 @@
+name: Build web workspace
+
+on:
+  pull_request:
+    paths:
+      - 'web/**'
+      - 'backend/**'
+      - '.github/workflows/web.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+        working-directory: web
+      - name: Build Next.js workspace
+        run: npm run build
+        working-directory: web
