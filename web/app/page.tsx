@@ -346,6 +346,15 @@ function Documents({ setRoute }: { setRoute: (r: Route) => void }) {
     } catch (e) { setError(e instanceof Error ? e.message : "Could not summarize this file."); }
   };
 
+  const removeFile = async (file: any) => {
+    setError("");
+    try {
+      await apiRequest("/api/files/" + file.id, { method: "DELETE" });
+      setFiles(current => current.filter(item => item.id !== file.id));
+      setSummaries(current => { const next = { ...current }; delete next[Number(file.id)]; return next; });
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not remove this file."); }
+  };
+
   const visible = files.filter(file => filter !== "PDFs" || String(file.content_type || "").includes("pdf") || String(file.filename || "").toLowerCase().endsWith(".pdf"));
   return <div className="screen">
     <PageTitle eyebrow="YOUR MATERIALS" title="Documents" description="Upload files to your account, extract supported text and ask Notely to summarize it." action={<ActionButton onClick={browse}><Upload /> Import document</ActionButton>} />
@@ -359,7 +368,7 @@ function Documents({ setRoute }: { setRoute: (r: Route) => void }) {
     {loading ? <div className="surface-panel">Loading your documents…</div> : visible.length ? <div className="document-grid">{visible.map(file => <div className="document-card" key={file.id}>
       <div className="doc-icon"><FileText /></div><div><strong>{file.filename}</strong><small>{String(file.kind || file.content_type || "File").toUpperCase()} · {Math.max(1, Math.round(Number(file.size_bytes || 0) / 1024))} KB</small></div>
       <span className="ready"><CheckCircle2 /> {file.has_text === false ? "Stored" : "Uploaded"}</span>
-      <button type="button" className="select-button" onClick={() => void summarize(file)}>Summarize</button>
+      <div className="title-actions"><button type="button" className="select-button" onClick={() => void summarize(file)}>Summarize</button><button type="button" className="select-button" onClick={() => void removeFile(file)}>Remove</button></div>
       {summaries[Number(file.id)] && <div className="document-summary"><strong>Summary</strong><p style={{ whiteSpace: "pre-wrap" }}>{summaries[Number(file.id)]}</p></div>}
     </div>)}</div> : <EmptyState icon={<FolderOpen />} title="No documents uploaded" copy="Upload a PDF, DOCX, TXT or image file. Supported text is stored with your account." action={<ActionButton onClick={browse}><Upload /> Upload a document</ActionButton>} />}
   </div>;
