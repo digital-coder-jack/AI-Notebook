@@ -269,10 +269,61 @@ function Assistant({ setRoute }: { setRoute: (r: Route) => void }) {
 }
 
 function Documents({ setRoute }: { setRoute: (r: Route) => void }) {
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [files, setFiles] = useState<any[]>([]);
   const [filter, setFilter] = useState("All materials");
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const [summaries, setSummaries] = useState<Record<number, string>>({});
   const browse = () => document.getElementById("notely-document-input")?.click();
-  return <div className="screen"><PageTitle eyebrow="YOUR MATERIALS" title="Documents" description="Readings, slides and references close to your notes." action={<ActionButton onClick={browse}><Upload /> Import document</ActionButton>} /><input id="notely-document-input" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" multiple hidden onChange={e => { const files = Array.from(e.target.files || []).map(f => f.name); setSelectedFiles(current => [...current, ...files.filter(name => !current.includes(name))]); e.target.value = ""; }} /><div className="dropzone" onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); const files = Array.from(e.dataTransfer.files).map(f => f.name); setSelectedFiles(current => [...current, ...files.filter(name => !current.includes(name))]); }}><Upload /><div><strong>Drop files here, or browse your device</strong><p>PDF, DOCX, PPTX and TXT. Selected files stay in this browser until document upload is connected.</p></div><ActionButton secondary onClick={browse}>Browse files</ActionButton></div>{selectedFiles.length > 0 && <div className="surface-panel"><div className="section-heading"><div><span className="eyebrow">LOCAL SELECTION</span><h2>Files ready to import ({selectedFiles.length})</h2></div><button type="button" onClick={() => setSelectedFiles([])}>Clear</button></div>{selectedFiles.map(name => <div className="source-card" key={name}><FileText /><span><strong>{name}</strong><small>Selected locally · not uploaded</small></span><button type="button" aria-label={`Remove ${name}`} onClick={() => setSelectedFiles(current => current.filter(item => item !== name))}>×</button></div>)}</div>}<div className="toolbar"><div className="filter-pills">{["All materials", "PDFs", "Recently added"].map(item => <button type="button" key={item} className={`pill ${filter === item ? "active" : ""}`} onClick={() => setFilter(item)}>{item}{item === "All materials" && <small>12</small>}</button>)}</div><button type="button" className="select-button" onClick={() => setRoute("notes")}>Biology 101 <ChevronDown /></button></div><div className="document-grid">{[["Ch. 9 — Cellular respiration", "PDF · 18 pages", "Processed"], ["Lecture 07 — Energy & metabolism", "Transcript · 42 min", "Ready"], ["Yeast respiration — lab guide", "PDF · 6 pages", "Processing"], ["Ch. 10 — Photosynthesis", "PDF · 22 pages", "Ready"]].filter(([title, meta]) => filter !== "PDFs" || meta.startsWith("PDF")).map(([title, meta, status]) => <button className="document-card" key={title} onClick={() => setRoute("assistant")}><div className="doc-icon"><FileText /></div><div><strong>{title}</strong><small>{meta}</small></div><span className={status === "Processing" ? "processing" : "ready"}>{status === "Processing" ? <Clock3 /> : <CheckCircle2 />}{status}</span><MoreHorizontal /></button>)}</div></div>;
+
+  const reload = async () => {
+    setLoading(true);
+    try { const data = await apiRequest<{ files: any[] }>("/api/files"); setFiles(data.files || []); setError(""); }
+    catch (e) { setError(e instanceof Error ? e.message : "Could not load documents."); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { void reload(); }, []);
+
+  const uploadFiles = async (incoming: File[]) => {
+    if (!incoming.length) return;
+    setUploading(true); setError("");
+    try {
+      for (const file of incoming) {
+        const form = new FormData();
+        form.append("file", file);
+        await apiRequest("/api/files/upload", { method: "POST", body: form });
+      }
+      await reload();
+    } catch (e) { setError(e instanceof Error ? e.message : "Upload failed."); }
+    finally { setUploading(false); }
+  };
+
+  const summarize = async (file: any) => {
+    setError("");
+    try {
+      const data = await apiRequest<{ summary: string }>("/api/files/" + file.id + "/summarize", { method: "POST" });
+      setSummaries(current => ({ ...current, [Number(file.id)]: data.summary }));
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not summarize this file."); }
+  };
+
+  const visible = files.filter(file => filter !== "PDFs" || String(file.content_type || "").includes("pdf") || String(file.filename || "").toLowerCase().endsWith(".pdf"));
+  return <div className="screen">
+    <PageTitle eyebrow="YOUR MATERIALS" title="Documents" description="Upload files to your account, extract supported text and ask Notely to summarize it." action={<ActionButton onClick={browse}><Upload /> Import document</ActionButton>} />
+    <input id="notely-document-input" type="file" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.webp" multiple hidden onChange={e => { void uploadFiles(Array.from(e.target.files || [])); e.target.value = ""; }} />
+    <div className="dropzone" onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); void uploadFiles(Array.from(e.dataTransfer.files || [])); }}>
+      <Upload /><div><strong>{uploading ? "Uploading documents…" : "Drop files here, or browse your device"}</strong><p>PDF, DOCX, TXT and image files · up to 8 MB per file</p></div>
+      <ActionButton secondary onClick={browse}>{uploading ? "Uploading…" : "Browse files"}</ActionButton>
+    </div>
+    {error && <div role="alert" className="surface-panel" style={{ marginTop: 16, color: "#bd5f62" }}>{error}</div>}
+    <div className="toolbar"><div className="filter-pills">{["All materials", "PDFs"].map(item => <button type="button" key={item} className={"pill " + (filter === item ? "active" : "")} onClick={() => setFilter(item)}>{item}{item === "All materials" && <small>{files.length}</small>}</button>)}</div><button type="button" className="select-button" onClick={() => setRoute("assistant")}>Ask AI about a file <ArrowRight /></button></div>
+    {loading ? <div className="surface-panel">Loading your documents…</div> : visible.length ? <div className="document-grid">{visible.map(file => <div className="document-card" key={file.id}>
+      <div className="doc-icon"><FileText /></div><div><strong>{file.filename}</strong><small>{String(file.kind || file.content_type || "File").toUpperCase()} · {Math.max(1, Math.round(Number(file.size_bytes || 0) / 1024))} KB</small></div>
+      <span className="ready"><CheckCircle2 /> {file.has_text === false ? "Stored" : "Uploaded"}</span>
+      <button type="button" className="select-button" onClick={() => void summarize(file)}>Summarize</button>
+      {summaries[Number(file.id)] && <div className="document-summary"><strong>Summary</strong><p style={{ whiteSpace: "pre-wrap" }}>{summaries[Number(file.id)]}</p></div>}
+    </div>)}</div> : <EmptyState icon={<FolderOpen />} title="No documents uploaded" copy="Upload a PDF, DOCX, TXT or image file. Supported text is stored with your account." action={<ActionButton onClick={browse}><Upload /> Upload a document</ActionButton>} />}
+  </div>;
 }
 function Tools({ setRoute }: { setRoute: (r: Route) => void }) { return <div className="screen"><PageTitle eyebrow="LEARN BY DOING" title="Study tools" description="Small tools that turn understanding into momentum." /><div className="tools-grid">{tools.map(([id, label, copy, Icon], index) => <button className="big-tool-card" key={id} onClick={() => setRoute(id)}><span className="big-tool-icon"><Icon /></span><span className="eyebrow">0{index + 1} / STUDY</span><h2>{label}</h2><p>{copy}</p><span className="tool-link">Open tool <ArrowRight /></span></button>)}</div></div>; }
 function ToolDetail({ route, setRoute }: { route: Route; setRoute: (r: Route) => void }) { const details: Record<string, [string, string, ReactNode]> = { quiz: ["Quiz generator", "Choose a note, set the challenge, and test what you know.", <CircleHelp />], flashcards: ["Flashcards", "A quick recall session built from your Biology 101 notes.", <BookOpen />], roadmap: ["Study roadmap", "Map the topics, goals and next steps for this semester.", <Zap />], mindmap: ["Mind maps", "Connect concepts visually and expand the ideas worth revisiting.", <BarChart3 />], planner: ["Revision planner", "Give every deadline and study session a clear place.", <CalendarDays />] }; const [title, copy, iconNode] = details[route] || details.quiz; return <div className="screen detail-screen"><button className="back-link" onClick={() => setRoute("tools")}>← Back to study tools</button><div className="detail-hero"><span className="big-tool-icon">{iconNode}</span><span className="eyebrow">STUDY TOOL</span><h1>{title}</h1><p>{copy}</p><ActionButton onClick={() => setRoute(route === "quiz" ? "assistant" : "notes")}><Sparkles /> Start with my notes</ActionButton></div><div className="detail-workspace"><div className="surface-panel"><div className="section-heading"><div><span className="eyebrow">READY WHEN YOU ARE</span><h2>Build from your workspace</h2></div><CheckCircle2 /></div><div className="form-row"><label>Source notebook<select><option>Biology 101</option><option>Organic Chemistry</option></select></label><label>Focus<select><option>Cellular respiration</option><option>All recent notes</option></select></label></div><div className="empty-tool-state">{iconNode}<p>Choose a source to begin. Your generated study material will stay linked to the original note.</p></div></div><div className="surface-panel tool-side-note"><Sparkles /><h3>Designed for your flow</h3><p>Move from a note to practice without losing context. This workspace keeps the source visible as you study.</p></div></div></div>; }
