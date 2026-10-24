@@ -465,7 +465,7 @@ function SettingsScreen() {
       .then(([me, prefs, available]) => {
         if (cancelled) return;
         setProfile(me.user || {}); setDisplayName(String(me.user?.name || ""));
-        setSettings(current => ({ ...current, ...prefs })); setModels(available);
+        setSettings((current: any) => ({ ...current, ...prefs })); setModels(available);
       })
       .catch(e => { if (!cancelled) setError(e instanceof Error ? e.message : "Could not load settings."); })
       .finally(() => { if (!cancelled) setLoading(false); });
