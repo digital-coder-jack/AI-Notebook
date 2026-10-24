@@ -268,19 +268,22 @@ class ChatViewModel(private val repo: Repository) : ViewModel() {
                         updateLastAssistant(sb.toString())
                     }
                     is StreamEvent.Done -> {
-                        _state.update { it.copy(streaming = false) }
+                        _state.update { it.copy(streaming = false, error = null) }
                         loadChats()
                     }
                     is StreamEvent.Error -> {
-                        if (sb.isEmpty()) updateLastAssistant("Notely isn't responding right now.\n\nPlease try again in a moment.")
-                        _state.update { it.copy(streaming = false) }
+                        val message = event.message.ifBlank { "Notely could not finish this response. Please try again." }
+                        if (sb.isEmpty()) updateLastAssistant("Response failed: " + message)
+                        _state.update { it.copy(streaming = false, error = message) }
                     }
                 }
             }
+        } catch (e: Exception) {
+            val message = e.message?.takeIf { it.isNotBlank() } ?: "Network error. Check your connection and try again."
+            if (sb.isEmpty()) updateLastAssistant("Response failed: " + message)
+            _state.update { it.copy(streaming = false, error = message) }
         } finally {
-            // FIX: conditional update avoids emitting a spurious state change when
-            // Done/Error already cleared the flag. Coroutine cancellation is also
-            // covered — streaming will always be false when this scope exits.
+            // Keep the UI out of a stuck streaming state even if the request is cancelled.
             _state.update { if (it.streaming) it.copy(streaming = false) else it }
         }
     }
