@@ -138,6 +138,26 @@ fun ChatScreen(
                 onModel = { haptic(); showModels = true }
             )
 
+            state.error?.let { errorMessage ->
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        errorMessage,
+                        modifier = Modifier.weight(1f),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        "Dismiss",
+                        modifier = Modifier.clickable { vm.clearError() }.padding(start = 12.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+
             // FIX (Bug 2 + Bug 3): EmptyChat and LazyColumn both occupy the
             // same weight(1f) slot so the Column can always resolve heights.
             // ChatInputBar is now OUTSIDE the if/else so it is always present —
