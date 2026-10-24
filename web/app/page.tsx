@@ -458,6 +458,13 @@ function SettingsScreen() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [authMode, setAuthMode] = useState<"login" | "signup" | null>(null);
+  const [identifier, setIdentifier] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authName, setAuthName] = useState("");
+  const [authUsername, setAuthUsername] = useState("");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authConfirm, setAuthConfirm] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -514,6 +521,24 @@ function SettingsScreen() {
     } catch (e) { setError(e instanceof Error ? e.message : "Could not export workspace data."); }
   };
 
+  const submitAuth = async () => {
+    setSaving(true); setError(""); setMessage("");
+    try {
+      const path = authMode === "signup" ? "/api/auth/signup" : "/api/auth/login";
+      const payload = authMode === "signup"
+        ? { name: authName.trim(), username: authUsername.trim(), email: authEmail.trim(), password: authPassword, confirm_password: authConfirm }
+        : { identifier: identifier.trim(), password: authPassword };
+      const response = await fetch(API_BASE + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.token) throw new Error(data.detail || "Authentication failed.");
+      window.localStorage.setItem("ss_token", data.token);
+      window.localStorage.setItem("ss_user", JSON.stringify(data.user || {}));
+      window.location.reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not sign in.");
+    } finally { setSaving(false); }
+  };
+
   const toggle = (category: string, key: string) => {
     const current = settings[category] || {};
     void saveCategory(category, { ...current, [key]: !current[key] });
@@ -527,7 +552,15 @@ function SettingsScreen() {
     <div className="settings-layout">
       <aside className="settings-nav">{sections.map(([name, Icon]) => <button type="button" className={section === name ? "active" : ""} key={name} onClick={() => setSection(name)}><Icon />{name}</button>)}<div className="settings-danger"><button type="button" onClick={() => void exportWorkspace()}><Upload /> Export workspace data</button></div></aside>
       <div className="settings-content"><span className="eyebrow">{section.toUpperCase()}</span><h2>{section}</h2>
-        {section === "Profile" && <><div className="profile-large"><span className="avatar big">{(displayName.trim()[0] || "N").toUpperCase()}</span><div><h3>{displayName || "Your profile"}</h3><p>{profile.email || "No email on account"}</p></div><ActionButton onClick={() => void updateProfile()}>{saving ? "Saving…" : "Save profile"}</ActionButton></div><div className="settings-fields"><label>Display name<input value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={80} /></label><label>Email address<input type="email" value={profile.email || ""} readOnly /></label></div><p className="settings-note">Email changes are managed through account verification and are not editable here.</p></>}
+        {section === "Profile" && <><div className="profile-large"><span className="avatar big">{(displayName.trim()[0] || "N").toUpperCase()}</span><div><h3>{displayName || "Your profile"}</h3><p>{profile.email || "No email on account"}</p></div><ActionButton onClick={() => void updateProfile()}>{saving ? "Saving…" : "Save profile"}</ActionButton></div><div className="settings-fields"><label>Display name<input value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={80} /></label><label>Email address<input type="email" value={profile.email || ""} readOnly /></label></div><p className="settings-note">Email changes are managed through account verification and are not editable here.</p>
+          {profile.is_guest ? <div className="surface-panel" style={{ marginTop: 18 }}><h3>Save your workspace to an account</h3><p>Your current session is a guest account. Sign in or create an account to access that account's notes on other devices. Export guest data before switching if you need a copy.</p><div className="title-actions"><ActionButton secondary onClick={() => setAuthMode(authMode === "login" ? null : "login")}>Sign in</ActionButton><ActionButton onClick={() => setAuthMode(authMode === "signup" ? null : "signup")}>Create account</ActionButton></div>
+          {authMode && <form onSubmit={e => { e.preventDefault(); void submitAuth(); }} className="settings-fields" style={{ marginTop: 14 }}>
+            {authMode === "signup" ? <><label>Full name<input required value={authName} onChange={e => setAuthName(e.target.value)} /></label><label>Username<input required value={authUsername} onChange={e => setAuthUsername(e.target.value)} /></label><label>Email<input required type="email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} /></label></> : <label>Email or username<input required value={identifier} onChange={e => setIdentifier(e.target.value)} /></label>}
+            <label>Password<input required type="password" minLength={8} value={authPassword} onChange={e => setAuthPassword(e.target.value)} /></label>
+            {authMode === "signup" && <label>Confirm password<input required type="password" minLength={8} value={authConfirm} onChange={e => setAuthConfirm(e.target.value)} /></label>}
+            <ActionButton>{saving ? "Please wait…" : authMode === "signup" ? "Create account" : "Sign in"}</ActionButton>
+          </form>}</div> : <p className="settings-note">Your account is connected. Notes and chat history are saved to this account.</p>}
+        </>}
         {section === "Appearance" && <div className="preference-list"><div><span><strong>Theme</strong><small>Choose light, dark or system appearance.</small></span><select value={settings.appearance?.theme || "system"} onChange={e => void saveCategory("appearance", { ...settings.appearance, theme: e.target.value })}><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div><div><span><strong>Accent color</strong><small>Set the preferred workspace accent.</small></span><input type="color" value={settings.appearance?.accentColor || "#3b82f6"} onChange={e => void saveCategory("appearance", { ...settings.appearance, accentColor: e.target.value })} /></div></div>}
         {section === "Editor preferences" && <div className="preference-list">{[["compactSidebar","Compact sidebar"],["showWelcome","Show welcome panel"],["showStreak","Show study activity"]].map(([key,label]) => <div key={key}><span><strong>{label}</strong><small>Save this preference to your account.</small></span><button type="button" role="switch" aria-checked={Boolean(settings.dashboard?.[key])} className={"toggle " + (settings.dashboard?.[key] ? "on" : "")} onClick={() => toggle("dashboard", key)}><i /></button></div>)}</div>}
         {section === "Security & sessions" && <div className="settings-fields"><label>Current password<input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} autoComplete="current-password" /></label><label>New password<input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} autoComplete="new-password" /></label><ActionButton onClick={() => void changePassword()}>{saving ? "Updating…" : "Change password"}</ActionButton><p className="settings-note">Guest accounts do not have a password. Create an account to use password management.</p></div>}
