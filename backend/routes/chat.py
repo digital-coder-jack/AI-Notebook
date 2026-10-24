@@ -85,6 +85,11 @@ class TopicIn(BaseModel):
     topic: str = Field(min_length=1, max_length=300)
 
 
+class NoteSaveIn(BaseModel):
+    topic: str = Field(min_length=1, max_length=200)
+    content: str = Field(default="", max_length=100000)
+
+
 class QuizIn(BaseModel):
     topic: str = Field(min_length=1, max_length=300)
     num_questions: int = Field(default=5, ge=1, le=15)
@@ -320,6 +325,23 @@ async def make_notes(body: TopicIn, user=Depends(auth.current_user)):
 @router.get("/tools/notes")
 async def get_notes(user=Depends(auth.current_user)):
     return {"notes": [dict(n) for n in db.list_notes(user["id"])]}
+
+
+@router.post("/notes")
+async def create_note(body: NoteSaveIn, user=Depends(auth.current_user)):
+    """Create an editable note for the signed-in user."""
+    note_id = db.add_note(user["id"], body.topic, body.content)
+    note = db.get_note(user["id"], note_id)
+    return {"note": dict(note) if note else {"id": note_id, "topic": body.topic, "content": body.content}}
+
+
+@router.put("/notes/{note_id}")
+async def save_note(note_id: int, body: NoteSaveIn, user=Depends(auth.current_user)):
+    """Save note title and content, scoped to the authenticated owner."""
+    if not db.update_note(user["id"], note_id, body.topic, body.content):
+        raise HTTPException(status_code=404, detail="Note not found.")
+    note = db.get_note(user["id"], note_id)
+    return {"note": dict(note) if note else {"id": note_id, "topic": body.topic, "content": body.content}}
 
 
 @router.delete("/tools/notes/{note_id}")
