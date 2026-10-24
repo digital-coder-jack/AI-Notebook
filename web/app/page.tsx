@@ -442,23 +442,95 @@ function SearchScreen({ setRoute }: { setRoute: (r: Route) => void }) {
 function SettingsScreen() {
   const sections = [["Profile", Home], ["Appearance", Grid2X2], ["Editor preferences", PenLine], ["Security & sessions", ShieldCheck], ["Privacy & data", Cloud], ["AI providers", Sparkles], ["Notifications", Bell]] as const;
   const [section, setSection] = useState("Profile");
-  const [prefs, setPrefs] = useState<Record<string, boolean>>({ "Appearance preferences": true, "Use across this workspace": false, "Show helpful reminders": true });
-  const [displayName, setDisplayName] = useState("Jamie Lee");
-  const [email, setEmail] = useState("jamie@example.com");
-  const [editing, setEditing] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [profile, setProfile] = useState<any>({});
+  const [settings, setSettings] = useState<any>({ appearance: { theme: "system", accentColor: "#3b82f6" }, dashboard: { compactSidebar: false, showWelcome: true, showStreak: true, defaultPage: "dashboard" }, notifications: { email: true, reminders: true, dailyGoal: true }, ai_settings: { model: "auto", length: "medium", difficulty: "intermediate" } });
+  const [models, setModels] = useState<any>(null);
+  const [displayName, setDisplayName] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("notely-workspace-settings");
-      if (stored) { const data = JSON.parse(stored); if (data.prefs) setPrefs(data.prefs); if (data.displayName) setDisplayName(data.displayName); if (data.email) setEmail(data.email); }
-    } catch { /* Ignore unavailable or malformed local preferences. */ }
+    let cancelled = false;
+    Promise.all([apiRequest<{ user: any }>("/api/auth/me"), apiRequest<any>("/api/settings"), apiRequest<any>("/api/ai/models")])
+      .then(([me, prefs, available]) => {
+        if (cancelled) return;
+        setProfile(me.user || {}); setDisplayName(String(me.user?.name || ""));
+        setSettings(current => ({ ...current, ...prefs })); setModels(available);
+      })
+      .catch(e => { if (!cancelled) setError(e instanceof Error ? e.message : "Could not load settings."); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
-  const saveSettings = (nextPrefs = prefs, nextName = displayName, nextEmail = email) => {
-    try { localStorage.setItem("notely-workspace-settings", JSON.stringify({ prefs: nextPrefs, displayName: nextName, email: nextEmail })); setSaved(true); window.setTimeout(() => setSaved(false), 2200); }
-    catch { setSaved(false); }
+
+  const saveCategory = async (category: string, data: any) => {
+    setSaving(true); setError(""); setMessage("");
+    try {
+      await apiRequest("/api/settings", { method: "PUT", body: JSON.stringify({ category, data }) });
+      setSettings((current: any) => ({ ...current, [category]: data }));
+      setMessage("Settings saved to your account.");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not save settings."); }
+    finally { setSaving(false); }
   };
-  const togglePref = (key: string) => setPrefs(current => { const next = { ...current, [key]: !(current[key] ?? false) }; saveSettings(next); return next; });
-  return <div className="screen settings-screen"><PageTitle eyebrow="YOUR WORKSPACE" title="Settings" description="Keep your workspace personal, clear and in sync." /><div className="settings-layout"><aside className="settings-nav">{sections.map(([name, Icon]) => <button type="button" className={section === name ? "active" : ""} key={name} onClick={() => setSection(name)}><Icon />{name}</button>)}<div className="settings-danger"><button type="button" onClick={() => { const blob = new Blob([JSON.stringify({ displayName, email, prefs }, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "notely-settings.json"; a.click(); URL.revokeObjectURL(url); }}><Trash2 /> Export settings</button></div></aside><div className="settings-content"><span className="eyebrow">{section.toUpperCase()}</span><h2>{section}</h2>{section === "Profile" ? <><div className="profile-large"><span className="avatar big">{(displayName.trim()[0] || "J").toUpperCase()}</span><div><h3>{displayName || "Your profile"}</h3><p>Student workspace · {email || "No email added"}</p></div><ActionButton secondary onClick={() => editing ? (saveSettings(prefs, displayName, email), setEditing(false)) : setEditing(true)}>{editing ? "Save profile" : "Edit profile"}</ActionButton></div><div className="settings-fields"><label>Display name<input value={displayName} readOnly={!editing} onChange={e => setDisplayName(e.target.value)} /></label><label>Email address<input type="email" value={email} readOnly={!editing} onChange={e => setEmail(e.target.value)} /></label></div>{saved && <p role="status" className="settings-saved">Changes saved on this device.</p>}</> : <div className="preference-list">{[[section + " preferences", "Enable this preference for your workspace."], ["Use across this workspace", "Keep this preference consistent on this device."], ["Show helpful reminders", "Receive prompts when something needs your attention."]].map(([label, description]) => <div key={label}><span><strong>{label}</strong><small>{description}</small></span><button type="button" role="switch" aria-checked={!!prefs[label]} aria-label={label} className={`toggle ${prefs[label] ? "on" : ""}`} onClick={() => togglePref(label)}><i /></button></div>)}{saved && <p role="status" className="settings-saved">Preferences saved on this device.</p>}<p className="settings-note">These preferences are stored locally in this browser. Account-wide sync is not connected yet.</p></div>}</div></div></div>;
+
+  const updateProfile = async () => {
+    if (!displayName.trim()) { setError("Enter a display name."); return; }
+    setSaving(true); setError(""); setMessage("");
+    try {
+      const data = await apiRequest<{ user: any }>("/api/auth/profile", { method: "PUT", body: JSON.stringify({ name: displayName.trim() }) });
+      setProfile(data.user || { ...profile, name: displayName.trim() });
+      if (typeof window !== "undefined") window.localStorage.setItem("ss_user", JSON.stringify(data.user || { ...profile, name: displayName.trim() }));
+      setMessage("Profile saved to your account.");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not update your profile."); }
+    finally { setSaving(false); }
+  };
+
+  const changePassword = async () => {
+    if (!currentPassword || newPassword.length < 8) { setError("Enter your current password and a new password of at least 8 characters."); return; }
+    setSaving(true); setError(""); setMessage("");
+    try {
+      const data = await apiRequest<{ message: string }>("/api/auth/change-password", { method: "PUT", body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }) });
+      setMessage(data.message || "Password changed."); setCurrentPassword(""); setNewPassword("");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not change password."); }
+    finally { setSaving(false); }
+  };
+
+  const exportWorkspace = async () => {
+    setError("");
+    try {
+      const [notes, chats, files] = await Promise.all([apiRequest<any>("/api/tools/notes"), apiRequest<any>("/api/chats"), apiRequest<any>("/api/files")]);
+      const blob = new Blob([JSON.stringify({ exported_at: new Date().toISOString(), profile, settings, notes: notes.notes || [], chats: chats.chats || [], files: files.files || [] }, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "notely-workspace-export.json"; a.click(); URL.revokeObjectURL(url);
+      setMessage("Workspace export downloaded.");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not export workspace data."); }
+  };
+
+  const toggle = (category: string, key: string) => {
+    const current = settings[category] || {};
+    void saveCategory(category, { ...current, [key]: !current[key] });
+  };
+
+  return <div className="screen settings-screen">
+    <PageTitle eyebrow="YOUR WORKSPACE" title="Settings" description="These preferences are saved to your Notely account." />
+    {loading && <div className="surface-panel">Loading account settings…</div>}
+    {error && <div role="alert" className="surface-panel" style={{ marginBottom: 12, color: "#bd5f62" }}>{error}</div>}
+    {message && <p role="status" className="settings-saved">{message}</p>}
+    <div className="settings-layout">
+      <aside className="settings-nav">{sections.map(([name, Icon]) => <button type="button" className={section === name ? "active" : ""} key={name} onClick={() => setSection(name)}><Icon />{name}</button>)}<div className="settings-danger"><button type="button" onClick={() => void exportWorkspace()}><Upload /> Export workspace data</button></div></aside>
+      <div className="settings-content"><span className="eyebrow">{section.toUpperCase()}</span><h2>{section}</h2>
+        {section === "Profile" && <><div className="profile-large"><span className="avatar big">{(displayName.trim()[0] || "N").toUpperCase()}</span><div><h3>{displayName || "Your profile"}</h3><p>{profile.email || "No email on account"}</p></div><ActionButton onClick={() => void updateProfile()}>{saving ? "Saving…" : "Save profile"}</ActionButton></div><div className="settings-fields"><label>Display name<input value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={80} /></label><label>Email address<input type="email" value={profile.email || ""} readOnly /></label></div><p className="settings-note">Email changes are managed through account verification and are not editable here.</p></>}
+        {section === "Appearance" && <div className="preference-list"><div><span><strong>Theme</strong><small>Choose light, dark or system appearance.</small></span><select value={settings.appearance?.theme || "system"} onChange={e => void saveCategory("appearance", { ...settings.appearance, theme: e.target.value })}><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div><div><span><strong>Accent color</strong><small>Set the preferred workspace accent.</small></span><input type="color" value={settings.appearance?.accentColor || "#3b82f6"} onChange={e => void saveCategory("appearance", { ...settings.appearance, accentColor: e.target.value })} /></div></div>}
+        {section === "Editor preferences" && <div className="preference-list">{[["compactSidebar","Compact sidebar"],["showWelcome","Show welcome panel"],["showStreak","Show study activity"]].map(([key,label]) => <div key={key}><span><strong>{label}</strong><small>Save this preference to your account.</small></span><button type="button" role="switch" aria-checked={Boolean(settings.dashboard?.[key])} className={"toggle " + (settings.dashboard?.[key] ? "on" : "")} onClick={() => toggle("dashboard", key)}><i /></button></div>)}</div>}
+        {section === "Security & sessions" && <div className="settings-fields"><label>Current password<input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} autoComplete="current-password" /></label><label>New password<input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} autoComplete="new-password" /></label><ActionButton onClick={() => void changePassword()}>{saving ? "Updating…" : "Change password"}</ActionButton><p className="settings-note">Guest accounts do not have a password. Create an account to use password management.</p></div>}
+        {section === "Privacy & data" && <div className="preference-list"><div><span><strong>Export workspace data</strong><small>Download your notes, chat list, documents metadata and settings as JSON.</small></span><ActionButton secondary onClick={() => void exportWorkspace()}>Export</ActionButton></div><p className="settings-note">The export contains saved text and metadata returned by the API. Uploaded file binaries are not included.</p></div>}
+        {section === "AI providers" && <div className="preference-list"><div><span><strong>Default AI tier</strong><small>Provider availability depends on the server configuration.</small></span><select value={settings.ai_settings?.model || models?.selected || "auto"} onChange={async e => { const model = e.target.value; try { await apiRequest("/api/ai/model", { method: "PUT", body: JSON.stringify({ model }) }); await saveCategory("ai_settings", { ...settings.ai_settings, model }); } catch (err) { setError(err instanceof Error ? err.message : "Could not update AI provider."); } }}><option value="auto">Auto</option><option value="default">Default</option><option value="pro">Pro</option><option value="pro_max">Pro Max</option></select></div>{models?.providers?.map((provider: any) => <div key={provider.id}><span><strong>{provider.label || provider.name || provider.id}</strong><small>{provider.configured ? "Configured on server" : "Not configured on server"}</small></span><span>{provider.configured ? "Available" : "Unavailable"}</span></div>)}</div>}
+        {section === "Notifications" && <div className="preference-list">{[["email","Email notifications"],["reminders","Study reminders"],["dailyGoal","Daily goal reminders"]].map(([key,label]) => <div key={key}><span><strong>{label}</strong><small>Manage this notification preference.</small></span><button type="button" role="switch" aria-checked={Boolean(settings.notifications?.[key])} className={"toggle " + (settings.notifications?.[key] ? "on" : "")} onClick={() => toggle("notifications", key)}><i /></button></div>)}</div>}
+      </div>
+    </div>
+  </div>;
 }
 function EmptyState({ icon, title, copy, action }: { icon: ReactNode; title: string; copy: string; action?: ReactNode }) { return <div className="empty-state"><span>{icon}</span><h2>{title}</h2><p>{copy}</p>{action}</div>; }
 
