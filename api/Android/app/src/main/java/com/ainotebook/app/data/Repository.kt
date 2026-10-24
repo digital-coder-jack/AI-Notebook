@@ -114,7 +114,7 @@ class Repository(private val session: SessionStore) {
     suspend fun stats() = ApiClient.api.stats()
 
     /* ---------- Saved notes shared with web ---------- */
-    suspend fun listSavedNotes() = ApiClient.api.listSavedNotes().notes.filter { !it.deleted && !it.archived }
+    suspend fun listSavedNotes() = ApiClient.api.listSavedNotes().notes.filter { it.deleted == 0 && it.archived == 0 }
 
     suspend fun createSavedNote(title: String, content: String = "") =
         ApiClient.api.createSavedNote(NoteSaveRequest(title, content)).note
