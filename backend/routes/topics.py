@@ -289,11 +289,15 @@ async def search(q: str = Query(default="", max_length=200), user=Depends(auth.c
 class NoteFlagsIn(BaseModel):
     pinned: bool | None = None
     favorite: bool | None = None
+    archived: bool | None = None
+    deleted: bool | None = None
 
 
 @router.patch("/tools/notes/{note_id}")
 async def patch_note(note_id: int, body: NoteFlagsIn, user=Depends(auth.current_user)):
-    if not db.update_note_flags(user["id"], note_id, body.pinned, body.favorite):
+    if not db.update_note_flags(
+        user["id"], note_id, body.pinned, body.favorite, body.archived, body.deleted
+    ):
         raise HTTPException(status_code=404, detail="Note not found.")
     return {"updated": True}
 
