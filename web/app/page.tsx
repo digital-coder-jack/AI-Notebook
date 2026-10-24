@@ -326,7 +326,58 @@ function Documents({ setRoute }: { setRoute: (r: Route) => void }) {
   </div>;
 }
 function Tools({ setRoute }: { setRoute: (r: Route) => void }) { return <div className="screen"><PageTitle eyebrow="LEARN BY DOING" title="Study tools" description="Small tools that turn understanding into momentum." /><div className="tools-grid">{tools.map(([id, label, copy, Icon], index) => <button className="big-tool-card" key={id} onClick={() => setRoute(id)}><span className="big-tool-icon"><Icon /></span><span className="eyebrow">0{index + 1} / STUDY</span><h2>{label}</h2><p>{copy}</p><span className="tool-link">Open tool <ArrowRight /></span></button>)}</div></div>; }
-function ToolDetail({ route, setRoute }: { route: Route; setRoute: (r: Route) => void }) { const details: Record<string, [string, string, ReactNode]> = { quiz: ["Quiz generator", "Choose a note, set the challenge, and test what you know.", <CircleHelp />], flashcards: ["Flashcards", "A quick recall session built from your Biology 101 notes.", <BookOpen />], roadmap: ["Study roadmap", "Map the topics, goals and next steps for this semester.", <Zap />], mindmap: ["Mind maps", "Connect concepts visually and expand the ideas worth revisiting.", <BarChart3 />], planner: ["Revision planner", "Give every deadline and study session a clear place.", <CalendarDays />] }; const [title, copy, iconNode] = details[route] || details.quiz; return <div className="screen detail-screen"><button className="back-link" onClick={() => setRoute("tools")}>← Back to study tools</button><div className="detail-hero"><span className="big-tool-icon">{iconNode}</span><span className="eyebrow">STUDY TOOL</span><h1>{title}</h1><p>{copy}</p><ActionButton onClick={() => setRoute(route === "quiz" ? "assistant" : "notes")}><Sparkles /> Start with my notes</ActionButton></div><div className="detail-workspace"><div className="surface-panel"><div className="section-heading"><div><span className="eyebrow">READY WHEN YOU ARE</span><h2>Build from your workspace</h2></div><CheckCircle2 /></div><div className="form-row"><label>Source notebook<select><option>Biology 101</option><option>Organic Chemistry</option></select></label><label>Focus<select><option>Cellular respiration</option><option>All recent notes</option></select></label></div><div className="empty-tool-state">{iconNode}<p>Choose a source to begin. Your generated study material will stay linked to the original note.</p></div></div><div className="surface-panel tool-side-note"><Sparkles /><h3>Designed for your flow</h3><p>Move from a note to practice without losing context. This workspace keeps the source visible as you study.</p></div></div></div>; }
+function ToolDetail({ route, setRoute }: { route: Route; setRoute: (r: Route) => void }) {
+  const details: Record<string, [string, string, ReactNode]> = {
+    quiz: ["Quiz generator", "Generate practice questions from a topic.", <CircleHelp />],
+    flashcards: ["Flashcards", "Generate recall cards for focused practice.", <BookOpen />],
+    roadmap: ["Study roadmap", "Generate a sequence of milestones for a topic.", <Zap />],
+    mindmap: ["Mind maps", "Generate a structured map of connected ideas.", <BarChart3 />],
+    planner: ["Revision planner", "Create a day-by-day study plan.", <CalendarDays />],
+  };
+  const [heading, copy, iconNode] = details[route] || details.quiz;
+  const [topic, setTopic] = useState("");
+  const [amount, setAmount] = useState("5");
+  const [days, setDays] = useState("7");
+  const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const run = async () => {
+    if (!topic.trim()) { setError("Enter a topic or goal first."); return; }
+    setLoading(true); setError(""); setResult(null);
+    try {
+      let data: any;
+      if (route === "quiz") data = await apiRequest("/api/tools/quiz", { method: "POST", body: JSON.stringify({ topic: topic.trim(), num_questions: Number(amount) }) });
+      else if (route === "flashcards") data = await apiRequest("/api/tools/flashcards", { method: "POST", body: JSON.stringify({ topic: topic.trim(), num_cards: Number(amount) }) });
+      else if (route === "planner") data = await apiRequest("/api/tools/plan", { method: "POST", body: JSON.stringify({ goal: topic.trim(), days: Number(days) }) });
+      else {
+        const created = await apiRequest<{ topic: { id: number } }>("/api/topics", { method: "POST", body: JSON.stringify({ title: topic.trim() }) });
+        data = await apiRequest("/api/topics/" + created.topic.id + "/generate/" + (route === "mindmap" ? "mindmap" : "roadmap"), { method: "POST", body: JSON.stringify({}) });
+      }
+      setResult(data);
+    } catch (e) { setError(e instanceof Error ? e.message : "The tool could not complete the request."); }
+    finally { setLoading(false); }
+  };
+
+  return <div className="screen detail-screen">
+    <button className="back-link" onClick={() => setRoute("tools")}>← Back to study tools</button>
+    <div className="detail-hero"><span className="big-tool-icon">{iconNode}</span><span className="eyebrow">STUDY TOOL</span><h1>{heading}</h1><p>{copy}</p></div>
+    <div className="detail-workspace">
+      <div className="surface-panel">
+        <div className="section-heading"><div><span className="eyebrow">GENERATE WITH AI</span><h2>Choose your topic</h2></div><Sparkles /></div>
+        <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>{route === "planner" ? "Study goal" : "Topic"}<input value={topic} onChange={e => setTopic(e.target.value)} placeholder={route === "planner" ? "e.g. Prepare for my biology exam" : "e.g. Cellular respiration"} maxLength={300} /></label>
+        {route === "quiz" && <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>Number of questions<select value={amount} onChange={e => setAmount(e.target.value)}>{["5","10","15"].map(n => <option key={n}>{n}</option>)}</select></label>}
+        {route === "flashcards" && <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>Number of cards<select value={amount} onChange={e => setAmount(e.target.value)}>{["5","8","10","15","20"].map(n => <option key={n}>{n}</option>)}</select></label>}
+        {route === "planner" && <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>Plan length (days)<select value={days} onChange={e => setDays(e.target.value)}>{["3","7","14","21","30","60"].map(n => <option key={n}>{n}</option>)}</select></label>}
+        <ActionButton onClick={() => void run()}>{loading ? <><Clock3 /> Generating…</> : <><Sparkles /> Generate {heading.toLowerCase()}</>}</ActionButton>
+        {error && <p role="alert" style={{ color: "#bd5f62", marginTop: 12 }}>{error}</p>}
+        {result && <div className="tool-result" style={{ marginTop: 20, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}><h3>Generated result</h3><pre style={{ whiteSpace: "pre-wrap", font: "inherit" }}>{typeof result.content === "string" ? result.content : JSON.stringify(result.content ?? result, null, 2)}</pre><button type="button" className="select-button" onClick={() => { const text = typeof result.content === "string" ? result.content : JSON.stringify(result.content ?? result, null, 2); void navigator.clipboard.writeText(text); }}>Copy result</button></div>}
+      </div>
+      <div className="surface-panel tool-side-note"><Sparkles /><h3>Built from your prompt</h3><p>Generated content comes from the configured Notely backend and can be copied for your notes.</p></div>
+    </div>
+  </div>;
+}
+
 function SearchScreen({ setRoute }: { setRoute: (r: Route) => void }) { const [q, setQ] = useState(""); return <div className="screen"><PageTitle eyebrow="FIND YOUR THREAD" title="Search" description="Search notes, documents and study tools from one place." /><label className="large-search"><Search /><input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Search anything…" /><kbd>⌘ K</kbd></label><div className="search-results"><span className="eyebrow">{q ? "RESULTS" : "RECENTLY OPENED"}</span>{NOTES.filter(n => !q || `${n.title} ${n.course}`.toLowerCase().includes(q.toLowerCase())).slice(0, 4).map(n => <button className="result-row" key={n.title} onClick={() => setRoute("notes")}><span className="result-icon"><FileText /></span><span><strong>{n.title}</strong><small>{n.course} · {n.time}</small></span><ArrowRight /></button>)}<button className="result-row" onClick={() => setRoute("tools")}><span className="result-icon ai"><Sparkles /></span><span><strong>Study tools</strong><small>Quiz generator, flashcards, roadmap and more</small></span><ArrowRight /></button></div></div>; }
 function SettingsScreen() {
   const sections = [["Profile", Home], ["Appearance", Grid2X2], ["Editor preferences", PenLine], ["Security & sessions", ShieldCheck], ["Privacy & data", Cloud], ["AI providers", Sparkles], ["Notifications", Bell]] as const;
