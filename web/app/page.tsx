@@ -167,7 +167,106 @@ function Notes({ setRoute, filter = "all" }: { setRoute: (r: Route) => void; fil
   </div>;
 }
 
-function Assistant({ setRoute }: { setRoute: (r: Route) => void }) { const [prompt, setPrompt] = useState(""); const [sent, setSent] = useState(false); return <div className="screen assistant-screen"><PageTitle eyebrow="AI STUDY PARTNER" title="Ask about your notes" description="Grounded in your selected course materials, not a shortcut." action={<ActionButton secondary onClick={() => setRoute("notes")}><FileText /> Choose context</ActionButton>} /><div className="assistant-layout"><div className="chat-panel"><div className="context-strip"><span><Sparkles /> BIOLOGY 101</span><span><FileText /> Current note</span><span><Paperclip /> 2 materials</span></div><div className="chat-scroll"><div className="chat-date">TODAY · 10:42 AM</div><div className="user-message">Why does ATP production stop without oxygen?</div><div className="ai-message"><div className="ai-label"><span className="ai-mark"><Sparkles /></span> NOTELY <small>Answer with sources</small></div><p>Almost! It&apos;s oxidative phosphorylation that stops, not all ATP production. Here&apos;s the chain reaction:</p>{[["01", "The electron chain backs up", "Without O₂ to accept electrons at the end of the chain, electron transfer cannot keep running."], ["02", "The H⁺ gradient fades", "Proton pumping stops, so ATP synthase loses the gradient that powers ATP synthesis."], ["03", "Glycolysis can still make ATP", "Fermentation regenerates NAD⁺, allowing glycolysis to yield a net 2 ATP per glucose."]].map(([n, h, p]) => <div className="answer-step" key={n}><b>{n}</b><span><strong>{h}</strong><small>{p}</small></span></div>)}<div className="citation-row"><span>[1] Ch. 9 · p. 7</span><span>[2] Lecture 07 · 12:34</span></div><div className="answer-actions"><ActionButton secondary><Check /> Insert into note</ActionButton><button>Copy answer</button></div></div>{sent && <div className="queued-message"><CheckCircle2 /> Question added to your study queue.</div>}</div><div className="composer"><div className="suggestion-row"><button onClick={() => setPrompt("Explain this simply")}>Explain simply</button><button onClick={() => setPrompt("Quiz me on this note")}>Quiz me on this</button></div><div className="composer-box"><textarea value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="Ask about your notes or materials…" rows={2} /><div><button className="icon-button"><Paperclip /></button><button className="send-button" onClick={() => setSent(true)} aria-label="Send"><ArrowRight /></button></div></div><small>A study partner, not a shortcut. Always check your sources.</small></div></div><aside className="source-panel"><div className="section-heading"><div><span className="eyebrow">GROUNDED IN</span><h2>Study context</h2></div><MoreHorizontal /></div><div className="source-card selected"><FileText /><span><strong>Cellular respiration</strong><small>Current note · 8 pages</small></span><Check /></div><div className="source-card"><FileText /><span><strong>Ch. 9 — Cellular respiration</strong><small>PDF · 18 pages</small></span></div><div className="source-card"><MessageCircle /><span><strong>Lecture 07 transcript</strong><small>42 min · Ready</small></span></div><div className="ai-note"><Sparkles /><p><strong>Tip</strong> Select a note or document to make answers more specific and cite the exact passage.</p></div></aside></div></div>; }
+function Assistant({ setRoute }: { setRoute: (r: Route) => void }) {
+  const [prompt, setPrompt] = useState("");
+  const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [chatId, setChatId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await apiRequest<{ chats: any[] }>("/api/chats");
+        const latest = (data.chats || [])[0];
+        if (!latest || cancelled) return;
+        const detail = await apiRequest<{ messages: any[] }>("/api/chats/" + latest.id);
+        if (cancelled) return;
+        setChatId(Number(latest.id));
+        setMessages((detail.messages || []).map(m => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "") })));
+      } catch (e) { if (!cancelled) setError(e instanceof Error ? e.message : "Could not load chat history."); }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [messages]);
+
+  const send = async (value = prompt) => {
+    const question = value.trim();
+    if (!question || loading) return;
+    setPrompt(""); setError(""); setLoading(true);
+    setMessages(current => [...current, { role: "user", content: question }, { role: "assistant", content: "" }]);
+    try {
+      let id = chatId;
+      if (!id) {
+        const created = await apiRequest<{ chat: { id: number } }>("/api/chats", { method: "POST", body: JSON.stringify({ title: question.slice(0, 60) }) });
+        id = Number(created.chat.id); setChatId(id);
+      }
+      const token = await workspaceToken();
+      const response = await fetch(API_BASE + "/api/chats/" + id + "/stream", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+        body: JSON.stringify({ content: question, model: "auto" }),
+      });
+      if (!response.ok || !response.body) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.detail || "AI request failed (" + response.status + ").");
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let answer = "";
+      let done = false;
+      while (!done) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        buffer += decoder.decode(chunk.value, { stream: true });
+        const frames = buffer.split("\n\n");
+        buffer = frames.pop() || "";
+        for (const frame of frames) {
+          const line = frame.split("\n").find(row => row.startsWith("data:"));
+          if (!line) continue;
+          let event: any;
+          try { event = JSON.parse(line.slice(5).trim()); } catch { continue; }
+          if (event.event === "token") {
+            answer += String(event.token || "");
+            setMessages(current => current.map((m, index) => index === current.length - 1 ? { ...m, content: answer } : m));
+          } else if (event.event === "error") {
+            throw new Error(event.error?.message || "AI response failed. Please try again.");
+          } else if (event.event === "done") done = true;
+        }
+      }
+      if (!answer.trim()) {
+        const detail = await apiRequest<{ messages: any[] }>("/api/chats/" + id);
+        const last = (detail.messages || []).filter(m => m.role === "assistant").slice(-1)[0];
+        if (last) setMessages(current => current.map((m, index) => index === current.length - 1 ? { ...m, content: String(last.content || "") } : m));
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Something went wrong.";
+      setError(message);
+      setMessages(current => current.map((m, index) => index === current.length - 1 && m.role === "assistant" && !m.content ? { ...m, content: "I couldn't complete that response. Please try again." } : m));
+    } finally { setLoading(false); }
+  };
+
+  return <div className="screen assistant-screen">
+    <PageTitle eyebrow="AI STUDY PARTNER" title="Ask Notely" description="Chat with your configured AI provider. Your conversation is saved to your workspace." action={<ActionButton secondary onClick={() => setRoute("notes")}><FileText /> Open notes</ActionButton>} />
+    <div className="assistant-layout">
+      <div className="chat-panel">
+        <div className="context-strip"><span><Sparkles /> NOTELY AI</span><span><Cloud /> Saved chat history</span></div>
+        <div className="chat-scroll">
+          {!messages.length && <div className="empty-tool-state"><Sparkles /><h2>What are you studying today?</h2><p>Ask for an explanation, summary, quiz, or step-by-step help.</p><div className="suggestion-row"><button onClick={() => setPrompt("Explain a difficult topic in simple words")}>Explain simply</button><button onClick={() => setPrompt("Quiz me on my current topic")}>Quiz me</button><button onClick={() => setPrompt("Summarize the key points")}>Summarize</button></div></div>}
+          {messages.map((message, index) => <div key={index} className={message.role === "user" ? "user-message" : "ai-message"}><div className="ai-label">{message.role === "assistant" ? <><span className="ai-mark"><Sparkles /></span> NOTELY</> : "YOU"}</div><p style={{ whiteSpace: "pre-wrap" }}>{message.content || (loading && index === messages.length - 1 ? "Thinking…" : "")}</p></div>)}
+          <div ref={bottomRef} />
+        </div>
+        {error && <div role="alert" style={{ padding: "8px 16px", color: "#bd5f62" }}>{error}</div>}
+        <div className="composer"><div className="composer-box"><textarea value={prompt} onChange={e => setPrompt(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); } }} placeholder="Ask Notely anything…" rows={2} /><div><button className="send-button" disabled={loading || !prompt.trim()} onClick={() => void send()} aria-label="Send message">{loading ? <Clock3 /> : <ArrowRight />}</button></div></div><small>Enter to send · Shift+Enter for a new line</small></div>
+      </div>
+      <aside className="source-panel"><div className="section-heading"><div><span className="eyebrow">WORKSPACE</span><h2>Quick actions</h2></div><Sparkles /></div><button className="source-card" onClick={() => setRoute("notes")}><FileText /><span><strong>My notes</strong><small>Create and edit notes</small></span><ArrowRight /></button><button className="source-card" onClick={() => setRoute("documents")}><FolderOpen /><span><strong>Documents</strong><small>Upload and summarize files</small></span><ArrowRight /></button><button className="source-card" onClick={() => setRoute("tools")}><Zap /><span><strong>Study tools</strong><small>Generate practice material</small></span><ArrowRight /></button></aside>
+    </div>
+  </div>;
+}
 
 function Documents({ setRoute }: { setRoute: (r: Route) => void }) {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
