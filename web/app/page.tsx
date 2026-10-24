@@ -82,7 +82,90 @@ function NoteCard({ note, onClick }: { note: Note; onClick: () => void }) { retu
 
 function Overview({ setRoute }: { setRoute: (r: Route) => void }) { return <div className="screen overview-screen"><PageTitle eyebrow="FRIDAY, OCTOBER 16" title="Good morning, Jamie" description="A calmer place to pick up where you left off." action={<div className="title-actions"><ActionButton secondary onClick={() => setRoute("documents")}><Upload /> Import</ActionButton><ActionButton onClick={() => setRoute("notes")}><Plus /> New note</ActionButton></div>} /><section className="hero-grid"><div className="continue-panel"><div className="panel-kicker"><span className="sparkle-dot"><Sparkles /></span><span>CONTINUE WHERE YOU LEFT OFF</span><span className="saved-status"><CheckCircle2 /> Saved</span></div><h2>Cellular respiration</h2><p>Pick up your Biology 101 note before today&apos;s study group. Your last section was <strong>Why the proton gradient matters</strong>.</p><div className="continue-meta"><span>Biology 101</span><span>8 note pages</span><span>Last opened 18 min ago</span></div><ActionButton onClick={() => setRoute("notes")}><PenLine /> Continue writing <ArrowRight /></ActionButton></div><div className="focus-panel"><div className="panel-kicker"><Clock3 /> TODAY&apos;S FOCUS</div><div className="focus-time">20 <small>/ 30 min</small></div><div className="progress"><i style={{ width: "67%" }} /></div><p>10 minutes left to hit your study goal.</p><button onClick={() => setRoute("planner")}>Open revision planner <ArrowRight /></button></div></section><section className="section-block"><div className="section-heading"><div><span className="eyebrow">YOUR SPACE</span><h2>Recent notes</h2></div><button onClick={() => setRoute("notes")}>View all <ArrowRight /></button></div><div className="note-grid">{NOTES.slice(0, 3).map(note => <NoteCard key={note.title} note={note} onClick={() => setRoute("notes")} />)}</div></section><section className="dashboard-grid"><div className="surface-panel"><div className="section-heading"><div><span className="eyebrow">STUDY TOOLS</span><h2>Make it stick</h2></div><button onClick={() => setRoute("tools")}>See all <ArrowRight /></button></div><div className="tool-list">{tools.slice(0, 3).map(([id, label, copy, Icon]) => <button key={id} onClick={() => setRoute(id)}><span className="tool-icon"><Icon /></span><span><strong>{label}</strong><small>{copy}</small></span><ChevronRight /></button>)}</div></div><div className="surface-panel upcoming"><div className="section-heading"><div><span className="eyebrow">UP NEXT</span><h2>Revision plan</h2></div><CalendarDays /></div><div className="upcoming-item"><span className="date-box"><b>17</b><small>OCT</small></span><span><strong>Lab report: yeast respiration</strong><small>Biology 101 · Due tomorrow</small></span><MoreHorizontal /></div><div className="upcoming-item"><span className="check-box"><Check /></span><span><strong>Mechanisms problem set</strong><small>Organic Chemistry · Due Oct 19</small></span><MoreHorizontal /></div><button className="full-link" onClick={() => setRoute("planner")}>View calendar and tasks <ArrowRight /></button></div></section></div>; }
 
-function Notes({ setRoute, filter = "all" }: { setRoute: (r: Route) => void; filter?: "all" | "favorites" | "archive" | "trash" }) { const [query, setQuery] = useState(""); const [view, setView] = useState<"grid" | "list">("grid"); const visible = useMemo(() => NOTES.filter(n => filter === "favorites" ? n.pinned : filter === "archive" ? n.state === "archived" : filter === "trash" ? n.state === "deleted" : n.state !== "archived" && n.state !== "deleted").filter(n => `${n.title} ${n.course} ${n.tag}`.toLowerCase().includes(query.toLowerCase())), [filter, query]); const title = filter === "favorites" ? "Favorites" : filter === "archive" ? "Archive" : filter === "trash" ? "Trash" : "My notes"; return <div className="screen"><PageTitle eyebrow="YOUR KNOWLEDGE" title={title} description={filter === "trash" ? "Deleted items stay here until you restore or remove them." : "Keep every idea, class and useful connection close."} action={<ActionButton onClick={() => setRoute("notes")}><Plus /> New note</ActionButton>} /><div className="toolbar"><label className="inline-search"><Search /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search notes and tags" /></label><div className="toolbar-right"><button className="select-button">All courses <ChevronDown /></button><button className="select-button">Recently updated <ChevronDown /></button><button className={`view-toggle ${view === "grid" ? "selected" : ""}`} onClick={() => setView("grid")}><Grid2X2 /></button><button className={`view-toggle ${view === "list" ? "selected" : ""}`} onClick={() => setView("list")}><LayoutList /></button></div></div>{visible.length ? <div className={`note-grid ${view === "list" ? "list-view" : ""}`}>{visible.map(note => <NoteCard key={note.title} note={note} onClick={() => setRoute("assistant")} />)}</div> : <EmptyState icon={<FileText />} title="Nothing here yet" copy="When you save notes to this view, they will appear here." action={<ActionButton onClick={() => setRoute("notes")}><Plus /> Create a note</ActionButton>} />}</div>; }
+function Notes({ setRoute, filter = "all" }: { setRoute: (r: Route) => void; filter?: "all" | "favorites" | "archive" | "trash" }) {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const version = useRef(0);
+
+  const reload = async () => {
+    setLoading(true);
+    try {
+      const data = await apiRequest<{ notes: any[] }>("/api/tools/notes");
+      setNotes((data.notes || []).map(normalizeNote));
+      setError("");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not load notes."); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { void reload(); }, []);
+
+  useEffect(() => {
+    if (!dirty || selectedId === null) return;
+    const editVersion = version.current;
+    const timer = window.setTimeout(async () => {
+      setSaving(true);
+      try {
+        await apiRequest("/api/notes/" + selectedId, { method: "PUT", body: JSON.stringify({ topic: title.trim() || "Untitled note", content: body }) });
+        if (editVersion === version.current) { setDirty(false); setError(""); }
+      } catch (e) { setError(e instanceof Error ? e.message : "Autosave failed."); }
+      finally { setSaving(false); }
+    }, 800);
+    return () => window.clearTimeout(timer);
+  }, [selectedId, title, body, dirty]);
+
+  const choose = (note: Note) => {
+    setSelectedId(note.id || null); setTitle(note.title); setBody(note.content || "");
+    setDirty(false); setError("");
+  };
+  const create = async () => {
+    try {
+      const data = await apiRequest<{ note: any }>("/api/notes", { method: "POST", body: JSON.stringify({ topic: "Untitled note", content: "" }) });
+      const note = normalizeNote(data.note);
+      setNotes(current => [note, ...current]); choose(note);
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not create a note."); }
+  };
+  const flag = async (note: Note, patch: Record<string, boolean>) => {
+    if (!note.id) return;
+    try {
+      await apiRequest("/api/tools/notes/" + note.id, { method: "PATCH", body: JSON.stringify(patch) });
+      setNotes(current => current.map(n => n.id === note.id ? { ...n, ...patch, state: patch.deleted ? "deleted" : patch.archived ? "archived" : "active" } : n));
+      if (selectedId === note.id && (patch.deleted || patch.archived)) setSelectedId(null);
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not update note."); }
+  };
+  const remove = async (note: Note) => {
+    if (!note.id) return;
+    try { await apiRequest("/api/tools/notes/" + note.id, { method: "DELETE" }); setNotes(current => current.filter(n => n.id !== note.id)); if (selectedId === note.id) setSelectedId(null); }
+    catch (e) { setError(e instanceof Error ? e.message : "Could not delete note."); }
+  };
+  const visible = notes.filter(n => filter === "favorites" ? n.favorite : filter === "archive" ? n.archived && !n.deleted : filter === "trash" ? n.deleted : !n.archived && !n.deleted).filter(n => (n.title + " " + (n.content || "")).toLowerCase().includes(query.toLowerCase()));
+  const selected = notes.find(n => n.id === selectedId);
+  const heading = filter === "favorites" ? "Favorites" : filter === "archive" ? "Archive" : filter === "trash" ? "Trash" : "My notes";
+
+  return <div className="screen">
+    <PageTitle eyebrow="YOUR KNOWLEDGE" title={heading} description="Create, edit and organize your notes. Edits autosave to your workspace." action={<ActionButton onClick={create}><Plus /> New note</ActionButton>} />
+    <div className="toolbar"><label className="inline-search"><Search /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search notes and content" /></label></div>
+    {error && <div role="alert" className="surface-panel" style={{ marginBottom: 16, color: "#bd5f62" }}>{error}</div>}
+    {loading ? <div className="surface-panel">Loading notes…</div> : visible.length ? <div className="note-grid">{visible.map(note => <div key={note.id} className="note-entry">
+      <NoteCard note={note} onClick={() => choose(note)} />
+      <div className="note-entry-actions">
+        <button onClick={() => void flag(note, { favorite: !note.favorite })}>{note.favorite ? "★ Favorite" : "☆ Favorite"}</button>
+        {filter === "trash" ? <><button onClick={() => void flag(note, { deleted: false, archived: false })}>Restore</button><button onClick={() => void remove(note)}>Delete permanently</button></> : <><button onClick={() => void flag(note, { archived: !note.archived })}>{note.archived ? "Unarchive" : "Archive"}</button><button onClick={() => void flag(note, { deleted: true, archived: false })}>Move to trash</button></>}
+      </div>
+    </div>)}</div> : <EmptyState icon={<FileText />} title={heading === "Trash" ? "Trash is empty" : heading === "Archive" ? "No archived notes" : heading === "Favorites" ? "No favorites yet" : "No notes yet"} copy="Your notes will appear here when you create or generate them." action={filter === "all" ? <ActionButton onClick={create}><Plus /> Create a note</ActionButton> : undefined} />}
+    {selected && <section className="surface-panel" style={{ marginTop: 20 }}>
+      <div className="section-heading"><div><span className="eyebrow">NOTE EDITOR</span><h2>{title || "Untitled note"}</h2></div><span role="status">{saving ? "Saving…" : dirty ? "Unsaved changes" : "Saved"}</span></div>
+      <label style={{ display: "grid", gap: 8, marginBottom: 14 }}>Title<input value={title} maxLength={200} onChange={e => { version.current++; setTitle(e.target.value); setDirty(true); }} /></label>
+      <label style={{ display: "grid", gap: 8 }}>Content<textarea value={body} rows={12} placeholder="Start writing…" onChange={e => { version.current++; setBody(e.target.value); setDirty(true); }} /></label>
+      <div className="title-actions" style={{ marginTop: 14 }}><ActionButton secondary onClick={() => setRoute("assistant")}><Sparkles /> Ask AI</ActionButton><ActionButton onClick={() => setSelectedId(null)}>Close editor</ActionButton></div>
+    </section>}
+  </div>;
+}
 
 function Assistant({ setRoute }: { setRoute: (r: Route) => void }) { const [prompt, setPrompt] = useState(""); const [sent, setSent] = useState(false); return <div className="screen assistant-screen"><PageTitle eyebrow="AI STUDY PARTNER" title="Ask about your notes" description="Grounded in your selected course materials, not a shortcut." action={<ActionButton secondary onClick={() => setRoute("notes")}><FileText /> Choose context</ActionButton>} /><div className="assistant-layout"><div className="chat-panel"><div className="context-strip"><span><Sparkles /> BIOLOGY 101</span><span><FileText /> Current note</span><span><Paperclip /> 2 materials</span></div><div className="chat-scroll"><div className="chat-date">TODAY · 10:42 AM</div><div className="user-message">Why does ATP production stop without oxygen?</div><div className="ai-message"><div className="ai-label"><span className="ai-mark"><Sparkles /></span> NOTELY <small>Answer with sources</small></div><p>Almost! It&apos;s oxidative phosphorylation that stops, not all ATP production. Here&apos;s the chain reaction:</p>{[["01", "The electron chain backs up", "Without O₂ to accept electrons at the end of the chain, electron transfer cannot keep running."], ["02", "The H⁺ gradient fades", "Proton pumping stops, so ATP synthase loses the gradient that powers ATP synthesis."], ["03", "Glycolysis can still make ATP", "Fermentation regenerates NAD⁺, allowing glycolysis to yield a net 2 ATP per glucose."]].map(([n, h, p]) => <div className="answer-step" key={n}><b>{n}</b><span><strong>{h}</strong><small>{p}</small></span></div>)}<div className="citation-row"><span>[1] Ch. 9 · p. 7</span><span>[2] Lecture 07 · 12:34</span></div><div className="answer-actions"><ActionButton secondary><Check /> Insert into note</ActionButton><button>Copy answer</button></div></div>{sent && <div className="queued-message"><CheckCircle2 /> Question added to your study queue.</div>}</div><div className="composer"><div className="suggestion-row"><button onClick={() => setPrompt("Explain this simply")}>Explain simply</button><button onClick={() => setPrompt("Quiz me on this note")}>Quiz me on this</button></div><div className="composer-box"><textarea value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="Ask about your notes or materials…" rows={2} /><div><button className="icon-button"><Paperclip /></button><button className="send-button" onClick={() => setSent(true)} aria-label="Send"><ArrowRight /></button></div></div><small>A study partner, not a shortcut. Always check your sources.</small></div></div><aside className="source-panel"><div className="section-heading"><div><span className="eyebrow">GROUNDED IN</span><h2>Study context</h2></div><MoreHorizontal /></div><div className="source-card selected"><FileText /><span><strong>Cellular respiration</strong><small>Current note · 8 pages</small></span><Check /></div><div className="source-card"><FileText /><span><strong>Ch. 9 — Cellular respiration</strong><small>PDF · 18 pages</small></span></div><div className="source-card"><MessageCircle /><span><strong>Lecture 07 transcript</strong><small>42 min · Ready</small></span></div><div className="ai-note"><Sparkles /><p><strong>Tip</strong> Select a note or document to make answers more specific and cite the exact passage.</p></div></aside></div></div>; }
 
