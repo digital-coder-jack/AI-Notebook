@@ -141,7 +141,7 @@ function Notes({ setRoute, filter = "all" }: { setRoute: (r: Route) => void; fil
       setSaving(true);
       try {
         await apiRequest("/api/notes/" + selectedId, { method: "PUT", body: JSON.stringify({ topic: title.trim() || "Untitled note", content: body }) });
-        if (editVersion === version.current) { setDirty(false); setError(""); }
+        if (editVersion === version.current) { setDirty(false); setError(""); setNotes(current => current.map(n => n.id === selectedId ? { ...n, title: title.trim() || "Untitled note", content: body } : n)); }
       } catch (e) { setError(e instanceof Error ? e.message : "Autosave failed."); }
       finally { setSaving(false); }
     }, 800);
@@ -149,6 +149,7 @@ function Notes({ setRoute, filter = "all" }: { setRoute: (r: Route) => void; fil
   }, [selectedId, title, body, dirty]);
 
   const choose = (note: Note) => {
+    if (dirty && selectedId !== null) void apiRequest("/api/notes/" + selectedId, { method: "PUT", body: JSON.stringify({ topic: title.trim() || "Untitled note", content: body }) }).catch(e => setError(e instanceof Error ? e.message : "Could not save the previous note."));
     setSelectedId(note.id || null); setTitle(note.title); setBody(note.content || "");
     setDirty(false); setError("");
   };
