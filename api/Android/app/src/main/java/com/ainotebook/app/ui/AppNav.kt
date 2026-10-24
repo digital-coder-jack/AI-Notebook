@@ -43,6 +43,7 @@ import com.ainotebook.app.ui.components.SpaceBackground
 import com.ainotebook.app.ui.components.rememberHaptics
 import com.ainotebook.app.ui.screens.ChatScreen
 import com.ainotebook.app.ui.screens.DashboardScreen
+import com.ainotebook.app.ui.screens.NotesScreen
 import com.ainotebook.app.ui.screens.LoginScreen
 import com.ainotebook.app.ui.screens.ProfileScreen
 import com.ainotebook.app.ui.screens.SignupScreen
@@ -56,6 +57,7 @@ object Routes {
     const val DASHBOARD = "dashboard"
     const val CHAT = "chat"
     const val TOOLS = "tools"
+    const val NOTES = "notes"
     const val PROFILE = "profile"
 }
 
@@ -64,7 +66,7 @@ private data class NavItem(val route: String, val label: String, val icon: Image
 private val BOTTOM_ITEMS = listOf(
     NavItem(Routes.DASHBOARD, "Home", Icons.Default.Dashboard),
     NavItem(Routes.CHAT, "Chat", Icons.AutoMirrored.Filled.Chat),
-    NavItem(Routes.TOOLS, "Library", Icons.Default.AutoStories),
+    NavItem(Routes.NOTES, "Notes", Icons.Default.AutoStories),
     NavItem(Routes.PROFILE, "More", Icons.Default.Person),
 )
 
@@ -121,6 +123,7 @@ private fun MainShell(factory: VMFactory) {
     val dashboardVm: DashboardViewModel = viewModel(factory = factory)
     val chatVm: ChatViewModel = viewModel(factory = factory)
     val toolsVm: ToolsViewModel = viewModel(factory = factory)
+    val notesVm: NotesViewModel = viewModel(factory = factory)
     val profileVm: ProfileViewModel = viewModel(factory = factory)
 
     val userState by profileVm.state.collectAsState()
@@ -212,6 +215,9 @@ private fun MainShell(factory: VMFactory) {
                     }
                     composable(Routes.TOOLS) {
                         ToolsScreen(vm = toolsVm)
+                    }
+                    composable(Routes.NOTES) {
+                        NotesScreen(vm = notesVm, onOpenTools = { nav.navigate(Routes.TOOLS) { launchSingleTop = true } })
                     }
                     composable(Routes.PROFILE) {
                         ProfileScreen(
