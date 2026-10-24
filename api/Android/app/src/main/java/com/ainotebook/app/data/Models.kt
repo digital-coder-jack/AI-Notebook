@@ -144,10 +144,10 @@ data class SavedNote(
     val topic: String = "Untitled note",
     val content: String = "",
     val created_at: String? = null,
-    val pinned: Boolean = false,
-    val favorite: Boolean = false,
-    val archived: Boolean = false,
-    val deleted: Boolean = false
+    val pinned: Int = 0,
+    val favorite: Int = 0,
+    val archived: Int = 0,
+    val deleted: Int = 0
 )
 
 @Serializable
