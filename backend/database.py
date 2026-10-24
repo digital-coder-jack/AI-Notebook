@@ -574,6 +574,17 @@ def list_notes(user_id: int) -> list[sqlite3.Row]:
         ).fetchall()
 
 
+def update_note(user_id: int, note_id: int, topic: str, content: str) -> bool:
+    """Update a user's note title/topic and content without exposing other users' rows."""
+    with closing(get_connection()) as conn:
+        cur = conn.execute(
+            "UPDATE notes SET topic = ?, content = ? WHERE id = ? AND user_id = ?",
+            (topic.strip(), content, note_id, user_id),
+        )
+        conn.commit()
+        return cur.rowcount > 0
+
+
 def delete_note(user_id: int, note_id: int) -> bool:
     with closing(get_connection()) as conn:
         cur = conn.execute(
