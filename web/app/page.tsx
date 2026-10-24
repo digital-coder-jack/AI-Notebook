@@ -10,14 +10,47 @@ import {
 } from "lucide-react";
 
 type Route = "overview" | "notes" | "assistant" | "documents" | "favorites" | "archive" | "trash" | "tools" | "quiz" | "flashcards" | "roadmap" | "mindmap" | "planner" | "search" | "settings";
-type Note = { title: string; course: string; time: string; tag: string; pinned?: boolean; state?: "active" | "archived" | "deleted" };
-const NOTES: Note[] = [
-  { title: "Cellular respiration", course: "Biology 101", time: "Edited 18 min ago", tag: "Midterm topic", pinned: true },
-  { title: "Reaction mechanisms", course: "Organic Chemistry", time: "Edited yesterday", tag: "Review", pinned: true },
-  { title: "Industrial revolutions", course: "World History", time: "Edited Oct 14", tag: "Essay notes" },
-  { title: "Photosynthesis", course: "Biology 101", time: "Edited Oct 12", tag: "Lecture 08" },
-  { title: "Yeast respiration lab", course: "Biology 101", time: "Edited Oct 11", tag: "Lab report" },
-];
+type Note = { id?: number; title: string; course: string; time: string; tag: string; content?: string; pinned?: boolean; favorite?: boolean; archived?: boolean; deleted?: boolean; state?: "active" | "archived" | "deleted" };
+const NOTES: Note[] = [];
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://study-sphere-ai-mwlq.vercel.app").replace(/\\/+$/, "");
+
+async function workspaceToken(): Promise<string> {
+  if (typeof window === "undefined") throw new Error("Workspace requests require a browser.");
+  const saved = window.localStorage.getItem("ss_token");
+  if (saved) return saved;
+  const response = await fetch(API_BASE + "/api/auth/guest", { method: "POST" });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload.token) throw new Error(payload.detail || "Could not start a workspace session.");
+  window.localStorage.setItem("ss_token", payload.token);
+  if (payload.user) window.localStorage.setItem("ss_user", JSON.stringify(payload.user));
+  return payload.token as string;
+}
+
+async function apiRequest<T = any>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = await workspaceToken();
+  const headers = new Headers(init.headers || {});
+  headers.set("Authorization", "Bearer " + token);
+  if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  const response = await fetch(API_BASE + path, { ...init, headers });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail = payload && (payload.detail || payload.message);
+    throw new Error(typeof detail === "string" ? detail : "Request failed (" + response.status + ").");
+  }
+  return payload as T;
+}
+
+function normalizeNote(raw: any): Note {
+  const date = raw.created_at ? new Date(raw.created_at) : null;
+  return {
+    id: Number(raw.id), title: String(raw.topic || "Untitled note"), course: "My workspace",
+    time: date && !Number.isNaN(date.getTime()) ? "Created " + date.toLocaleDateString() : "Saved note",
+    tag: raw.pinned ? "Pinned" : raw.favorite ? "Favorite" : "Note", content: String(raw.content || ""),
+    pinned: Boolean(raw.pinned), favorite: Boolean(raw.favorite), archived: Boolean(raw.archived),
+    deleted: Boolean(raw.deleted), state: raw.deleted ? "deleted" : raw.archived ? "archived" : "active",
+  };
+}
 const tools = [
   ["quiz", "Quiz Generator", "Turn notes into a focused practice set.", CircleHelp],
   ["flashcards", "Flashcards", "Recall what matters before the next lecture.", BookOpen],
